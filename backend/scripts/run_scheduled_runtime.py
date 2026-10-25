@@ -16,6 +16,7 @@ sys.path.insert(
 )
 
 from app.database import SessionLocal
+from app.bootstrap import ensure_paper_database
 from app.runtime import activity, run_cycle
 from app.scheduler_guard import session_guard
 
@@ -76,6 +77,17 @@ def main():
         )
 
         return
+
+    bootstrap = ensure_paper_database()
+
+    print()
+    print(
+        "Database bootstrap:",
+        json.dumps(
+            bootstrap,
+            indent=2,
+        ),
+    )
 
     db = SessionLocal()
 

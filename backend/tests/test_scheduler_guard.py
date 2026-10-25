@@ -61,3 +61,28 @@ def test_weekend_skips():
         result.reason
         == "WEEKEND"
     )
+
+
+def test_nse_holiday_skips():
+    now = datetime(
+        2026,
+        10,
+        20,
+        10,
+        15,
+        tzinfo=IST,
+    )
+
+    result = session_guard(
+        now
+    )
+
+    assert (
+        result.should_run
+        is False
+    )
+
+    assert (
+        result.reason
+        == "NSE_HOLIDAY"
+    )

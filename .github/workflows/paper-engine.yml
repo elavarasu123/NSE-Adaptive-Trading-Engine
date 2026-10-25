@@ -4,9 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       force:
-        description: "Run even outside market window"
+        description: Run outside the NSE market window
         required: false
         default: true
+        type: boolean
+
+      refresh_history:
+        description: Refresh market history before this manual run
+        required: false
+        default: false
         type: boolean
 
   schedule:
@@ -28,7 +34,7 @@ concurrency:
 jobs:
   paper-cycle:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
 
     env:
       PYTHONUNBUFFERED: "1"
@@ -51,18 +57,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Restore paper state
+      - name: Restore persistent paper state
         uses: actions/cache/restore@v4
         with:
           path: |
             backend/data/runtime
+            backend/data/forward
             backend/*.db
             backend/data/*.db
-            backend/data/backtests
-            backend/data/cache
           key: paper-state-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
             paper-state-${{ github.ref_name }}-
+
+      # Daily EOD refresh.
+      #
+      # 09:45 UTC = 15:15 IST.
+      # Manual runs only refresh when explicitly selected.
+      - name: Refresh EOD market history
+        if: ${{ (github.event_name == 'schedule' && github.event.schedule == '45 9 * * 1-5') || (github.event_name == 'workflow_dispatch' && inputs.refresh_history) }}
+        working-directory: backend
+        run: |
+          python scripts/cache_history.py \
+            --period 2y \
+            --chunk 50
 
       - name: Scheduled paper cycle
         working-directory: backend
@@ -70,18 +87,21 @@ jobs:
           FORCE_RUNTIME: ${{ github.event_name == 'workflow_dispatch' && inputs.force || 'false' }}
         run: |
           python scripts/run_scheduled_runtime.py
+
+          echo
+          echo "===== CLOUD RUNTIME STATUS ====="
+
           python scripts/runtime_status.py
 
-      - name: Save paper state
+      - name: Save persistent paper state
         if: always()
         uses: actions/cache/save@v4
         with:
           path: |
             backend/data/runtime
+            backend/data/forward
             backend/*.db
             backend/data/*.db
-            backend/data/backtests
-            backend/data/cache
           key: paper-state-${{ github.ref_name }}-${{ github.run_id }}
 
       - name: Upload runtime evidence
@@ -93,4 +113,4 @@ jobs:
           if-no-files-found: warn
           path: |
             backend/data/runtime/
-            backend/data/backtests/
+            backend/data/forward/
