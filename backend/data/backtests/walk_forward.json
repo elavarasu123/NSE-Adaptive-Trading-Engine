@@ -1,0 +1,139 @@
+{
+  "generatedAt": "2026-10-25T15:07:13.646835+00:00",
+  "status": "EXPLORATORY",
+  "parameterPolicy": "Parameters are fixed before validation/OOS evaluation. No automatic parameter optimization is performed.",
+  "periods": [
+    {
+      "name": "DEVELOPMENT",
+      "start": "2018-01-01",
+      "end": "2021-12-31",
+      "observations": 0,
+      "horizons": {
+        "5D": {
+          "trades": 0,
+          "winRate": null,
+          "averageReturn": null,
+          "medianReturn": null,
+          "expectancy": null,
+          "profitFactor": null,
+          "maxDrawdownApprox": null
+        },
+        "10D": {
+          "trades": 0,
+          "winRate": null,
+          "averageReturn": null,
+          "medianReturn": null,
+          "expectancy": null,
+          "profitFactor": null,
+          "maxDrawdownApprox": null
+        },
+        "20D": {
+          "trades": 0,
+          "winRate": null,
+          "averageReturn": null,
+          "medianReturn": null,
+          "expectancy": null,
+          "profitFactor": null,
+          "maxDrawdownApprox": null
+        },
+        "30D": {
+          "trades": 0,
+          "winRate": null,
+          "averageReturn": null,
+          "medianReturn": null,
+          "expectancy": null,
+          "profitFactor": null,
+          "maxDrawdownApprox": null
+        }
+      }
+    },
+    {
+      "name": "VALIDATION",
+      "start": "2022-01-01",
+      "end": "2024-12-31",
+      "observations": 980,
+      "horizons": {
+        "5D": {
+          "trades": 980,
+          "winRate": 0.5041,
+          "averageReturn": 0.004457,
+          "medianReturn": 0.001203,
+          "expectancy": 0.004457,
+          "profitFactor": 1.2324,
+          "maxDrawdownApprox": -0.845158
+        },
+        "10D": {
+          "trades": 980,
+          "winRate": 0.5429,
+          "averageReturn": 0.015133,
+          "medianReturn": 0.007156,
+          "expectancy": 0.015133,
+          "profitFactor": 1.6484,
+          "maxDrawdownApprox": -0.941577
+        },
+        "20D": {
+          "trades": 980,
+          "winRate": 0.5867,
+          "averageReturn": 0.030266,
+          "medianReturn": 0.01844,
+          "expectancy": 0.030266,
+          "profitFactor": 1.9852,
+          "maxDrawdownApprox": -0.993801
+        },
+        "30D": {
+          "trades": 980,
+          "winRate": 0.598,
+          "averageReturn": 0.043775,
+          "medianReturn": 0.029172,
+          "expectancy": 0.043775,
+          "profitFactor": 2.2305,
+          "maxDrawdownApprox": -0.99984
+        }
+      }
+    },
+    {
+      "name": "OUT_OF_SAMPLE",
+      "start": "2025-01-01",
+      "end": null,
+      "observations": 400,
+      "horizons": {
+        "5D": {
+          "trades": 390,
+          "winRate": 0.4103,
+          "averageReturn": -0.008349,
+          "medianReturn": -0.009621,
+          "expectancy": -0.008349,
+          "profitFactor": 0.6816,
+          "maxDrawdownApprox": -0.988819
+        },
+        "10D": {
+          "trades": 380,
+          "winRate": 0.4237,
+          "averageReturn": -0.007813,
+          "medianReturn": -0.011525,
+          "expectancy": -0.007813,
+          "profitFactor": 0.7682,
+          "maxDrawdownApprox": -0.993386
+        },
+        "20D": {
+          "trades": 360,
+          "winRate": 0.4694,
+          "averageReturn": 0.001766,
+          "medianReturn": -0.007726,
+          "expectancy": 0.001766,
+          "profitFactor": 1.0463,
+          "maxDrawdownApprox": -0.989737
+        },
+        "30D": {
+          "trades": 340,
+          "winRate": 0.4912,
+          "averageReturn": 0.016452,
+          "medianReturn": -0.003005,
+          "expectancy": 0.016452,
+          "profitFactor": 1.3969,
+          "maxDrawdownApprox": -0.983159
+        }
+      }
+    }
+  ]
+}

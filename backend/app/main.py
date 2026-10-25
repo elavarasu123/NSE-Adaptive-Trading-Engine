@@ -24,6 +24,13 @@ from .trading import (
 
 
 Base.metadata.create_all(engine)
+from .backtest_store import (
+    load_report,
+    LATEST,
+    WALK_FORWARD,
+)
+from .history_cache import cache_stats
+
 
 app = FastAPI(
     title="NSE Adaptive Trading Engine",
@@ -499,3 +506,64 @@ def trades(db: Session = Depends(get_db)):
         }
         for row in rows
     ]
+
+
+@app.get("/api/backtest/latest")
+def backtest_latest():
+    report = load_report(
+        LATEST
+    )
+
+    if report is None:
+        return {
+            "status": "NOT_RUN",
+            "message": (
+                "Run scripts/"
+                "run_backtest.py first."
+            ),
+        }
+
+    return report
+
+
+@app.get("/api/backtest/walk-forward")
+def backtest_walk_forward():
+    report = load_report(
+        WALK_FORWARD
+    )
+
+    if report is None:
+        return {
+            "status": "NOT_RUN",
+            "message": (
+                "Run backtest with "
+                "--walk-forward first."
+            ),
+        }
+
+    return report
+
+
+@app.get("/api/data/status")
+def data_status():
+    from .universe import (
+        load_universe,
+    )
+
+    universe = (
+        load_universe()
+    )
+
+    return {
+        "universeSize":
+            len(universe),
+        "historyCache":
+            cache_stats(),
+        "researchWarning": (
+            "Historical tests use "
+            "current constituent "
+            "membership unless a "
+            "point-in-time universe "
+            "snapshot is supplied."
+        ),
+    }

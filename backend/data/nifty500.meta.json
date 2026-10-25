@@ -1,0 +1,6 @@
+{
+  "source": "https://www.niftyindices.com/IndexConstituent/ind_nifty500list.csv",
+  "downloadedAt": "2026-10-25T15:04:55.138934+00:00",
+  "constituents": 501,
+  "warning": "Current constituent snapshot. Historical backtests using this snapshot have survivorship bias."
+}
