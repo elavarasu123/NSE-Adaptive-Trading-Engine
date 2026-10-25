@@ -567,3 +567,31 @@ def data_status():
             "snapshot is supplied."
         ),
     }
+
+
+@app.get("/api/research/champion-challenger")
+def champion_challenger_report():
+    from pathlib import Path
+    import json
+
+    path = (
+        Path(__file__)
+        .resolve()
+        .parents[1]
+        / "data"
+        / "backtests"
+        / "portfolio_research.json"
+    )
+
+    if not path.exists():
+        return {
+            "status": "NOT_RUN",
+            "message": (
+                "Run scripts/"
+                "run_portfolio_research.py"
+            ),
+        }
+
+    return json.loads(
+        path.read_text()
+    )

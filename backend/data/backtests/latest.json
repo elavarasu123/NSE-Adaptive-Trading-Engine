@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-25T15:06:45.587350+00:00",
+  "generatedAt": "2026-10-25T15:15:35.940331+00:00",
   "status": "EXPLORATORY",
   "warning": "Uses the current Nifty 500 constituent snapshot across historical dates and therefore contains survivorship bias. Do not interpret this as production-grade evidence.",
   "config": {
@@ -19,7 +19,9 @@
       "medianReturn": -0.005003,
       "expectancy": -0.000886,
       "profitFactor": 0.9568,
-      "maxDrawdownApprox": -0.985847
+      "maxDrawdownApprox": -0.985847,
+      "portfolioPeriods": 137,
+      "portfolioMaxDrawdown": -0.292487
     },
     "10D": {
       "trades": 1360,
@@ -28,7 +30,9 @@
       "medianReturn": -0.000958,
       "expectancy": 0.001416,
       "profitFactor": 1.0526,
-      "maxDrawdownApprox": -0.998134
+      "maxDrawdownApprox": -0.998134,
+      "portfolioPeriods": 136,
+      "portfolioMaxDrawdown": -0.423441
     },
     "20D": {
       "trades": 1340,
@@ -37,7 +41,9 @@
       "medianReturn": 0.001597,
       "expectancy": 0.00606,
       "profitFactor": 1.1721,
-      "maxDrawdownApprox": -0.999879
+      "maxDrawdownApprox": -0.999879,
+      "portfolioPeriods": 134,
+      "portfolioMaxDrawdown": -0.538095
     },
     "30D": {
       "trades": 1320,
@@ -46,7 +52,9 @@
       "medianReturn": 0.004723,
       "expectancy": 0.015501,
       "profitFactor": 1.3925,
-      "maxDrawdownApprox": -0.999997
+      "maxDrawdownApprox": -0.999997,
+      "portfolioPeriods": 132,
+      "portfolioMaxDrawdown": -0.661119
     }
   },
   "scoreBuckets": {
@@ -268,7 +276,7 @@
         "medianReturn": -0.001531,
         "expectancy": -0.001593,
         "profitFactor": 0.956,
-        "maxDrawdownApprox": -0.889333
+        "maxDrawdownApprox": -0.889334
       },
       "30D": {
         "trades": 240,

@@ -152,3 +152,33 @@ def test_session_skips_dussehra():
             21,
         )
     )
+
+
+def test_portfolio_returns_group_same_date():
+    from app.backtest import (
+        portfolio_period_returns,
+    )
+
+    rows = [
+        {
+            "date": "2026-01-01",
+            "return20D": 0.10,
+        },
+        {
+            "date": "2026-01-01",
+            "return20D": -0.02,
+        },
+        {
+            "date": "2026-02-01",
+            "return20D": 0.04,
+        },
+    ]
+
+    result = portfolio_period_returns(
+        rows,
+        20,
+    )
+
+    assert len(result) == 2
+    assert round(result[0], 6) == 0.04
+    assert round(result[1], 6) == 0.04

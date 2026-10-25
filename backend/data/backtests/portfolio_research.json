@@ -1,0 +1,236 @@
+{
+  "generatedAt": "2026-10-25T15:21:08.481461+00:00",
+  "status": "RESEARCH_ONLY",
+  "championFrozen": true,
+  "promotionPolicy": "No challenger promotion from development results. A challenger must show consistent validation and out-of-sample improvement without materially worse drawdown before it can be considered for future paper-trading promotion.",
+  "periods": [
+    {
+      "period": "DEVELOPMENT",
+      "champion": {
+        "strategy": "champion-v0.2",
+        "start": "2018-01-02",
+        "end": "2021-12-31",
+        "configuration": {
+          "minimumScore": 65,
+          "holdingSessions": 20,
+          "maxPositions": 6,
+          "maxPositionPct": 0.15,
+          "roundTripCost": 0.003,
+          "allowedRegimes": [
+            "RISK_ON",
+            "NEUTRAL",
+            "DEFENSIVE"
+          ]
+        },
+        "metrics": {
+          "totalReturn": 0.194139,
+          "cagr": 0.045418,
+          "sharpe": 0.3379,
+          "sortino": 0.474,
+          "maxDrawdown": -0.33323,
+          "trades": 275,
+          "winRate": 0.5309,
+          "avgTrade": 0.005919,
+          "profitFactor": 1.1592,
+          "endingCapital": 119253.75,
+          "excessCagrVsNifty": -0.090188
+        },
+        "benchmark": {
+          "totalReturn": 0.661915,
+          "cagr": 0.135606,
+          "sharpe": 0.7529,
+          "sortino": 0.8605,
+          "maxDrawdown": -0.384399
+        }
+      },
+      "challenger": {
+        "strategy": "challenger-30d-v0.1",
+        "start": "2018-01-02",
+        "end": "2021-12-31",
+        "configuration": {
+          "minimumScore": 75,
+          "holdingSessions": 30,
+          "maxPositions": 6,
+          "maxPositionPct": 0.15,
+          "roundTripCost": 0.003,
+          "allowedRegimes": [
+            "RISK_ON",
+            "NEUTRAL"
+          ]
+        },
+        "metrics": {
+          "totalReturn": 0.535134,
+          "cagr": 0.11327,
+          "sharpe": 0.6544,
+          "sortino": 0.8538,
+          "maxDrawdown": -0.320274,
+          "trades": 174,
+          "winRate": 0.523,
+          "avgTrade": 0.021067,
+          "profitFactor": 1.4513,
+          "endingCapital": 153307.52,
+          "excessCagrVsNifty": -0.022336
+        },
+        "benchmark": {
+          "totalReturn": 0.661915,
+          "cagr": 0.135606,
+          "sharpe": 0.7529,
+          "sortino": 0.8605,
+          "maxDrawdown": -0.384399
+        }
+      }
+    },
+    {
+      "period": "VALIDATION",
+      "champion": {
+        "strategy": "champion-v0.2",
+        "start": "2022-01-03",
+        "end": "2024-12-31",
+        "configuration": {
+          "minimumScore": 65,
+          "holdingSessions": 20,
+          "maxPositions": 6,
+          "maxPositionPct": 0.15,
+          "roundTripCost": 0.003,
+          "allowedRegimes": [
+            "RISK_ON",
+            "NEUTRAL",
+            "DEFENSIVE"
+          ]
+        },
+        "metrics": {
+          "totalReturn": 0.099255,
+          "cagr": 0.032129,
+          "sharpe": 0.2583,
+          "sortino": 0.2875,
+          "maxDrawdown": -0.297904,
+          "trades": 210,
+          "winRate": 0.5143,
+          "avgTrade": 0.003703,
+          "profitFactor": 1.0904,
+          "endingCapital": 109785.81,
+          "excessCagrVsNifty": -0.071027
+        },
+        "benchmark": {
+          "totalReturn": 0.341496,
+          "cagr": 0.103156,
+          "sharpe": 0.7842,
+          "sortino": 1.0393,
+          "maxDrawdown": -0.164659
+        }
+      },
+      "challenger": {
+        "strategy": "challenger-30d-v0.1",
+        "start": "2022-01-03",
+        "end": "2024-12-31",
+        "configuration": {
+          "minimumScore": 75,
+          "holdingSessions": 30,
+          "maxPositions": 6,
+          "maxPositionPct": 0.15,
+          "roundTripCost": 0.003,
+          "allowedRegimes": [
+            "RISK_ON",
+            "NEUTRAL"
+          ]
+        },
+        "metrics": {
+          "totalReturn": 0.466272,
+          "cagr": 0.136434,
+          "sharpe": 0.6759,
+          "sortino": 0.7143,
+          "maxDrawdown": -0.217847,
+          "trades": 126,
+          "winRate": 0.627,
+          "avgTrade": 0.024488,
+          "profitFactor": 1.5735,
+          "endingCapital": 146440.79,
+          "excessCagrVsNifty": 0.033278
+        },
+        "benchmark": {
+          "totalReturn": 0.341496,
+          "cagr": 0.103156,
+          "sharpe": 0.7842,
+          "sortino": 1.0393,
+          "maxDrawdown": -0.164659
+        }
+      }
+    },
+    {
+      "period": "OUT_OF_SAMPLE",
+      "champion": {
+        "strategy": "champion-v0.2",
+        "start": "2025-01-01",
+        "end": "2026-10-23",
+        "configuration": {
+          "minimumScore": 65,
+          "holdingSessions": 20,
+          "maxPositions": 6,
+          "maxPositionPct": 0.15,
+          "roundTripCost": 0.003,
+          "allowedRegimes": [
+            "RISK_ON",
+            "NEUTRAL",
+            "DEFENSIVE"
+          ]
+        },
+        "metrics": {
+          "totalReturn": -0.132129,
+          "cagr": -0.075429,
+          "sharpe": -0.4342,
+          "sortino": -0.5616,
+          "maxDrawdown": -0.275373,
+          "trades": 114,
+          "winRate": 0.4035,
+          "avgTrade": -0.006617,
+          "profitFactor": 0.8403,
+          "endingCapital": 86787.08,
+          "excessCagrVsNifty": -0.048497
+        },
+        "benchmark": {
+          "totalReturn": -0.048137,
+          "cagr": -0.026932,
+          "sharpe": -0.1435,
+          "sortino": -0.2173,
+          "maxDrawdown": -0.155601
+        }
+      },
+      "challenger": {
+        "strategy": "challenger-30d-v0.1",
+        "start": "2025-01-01",
+        "end": "2026-10-23",
+        "configuration": {
+          "minimumScore": 75,
+          "holdingSessions": 30,
+          "maxPositions": 6,
+          "maxPositionPct": 0.15,
+          "roundTripCost": 0.003,
+          "allowedRegimes": [
+            "RISK_ON",
+            "NEUTRAL"
+          ]
+        },
+        "metrics": {
+          "totalReturn": -0.171499,
+          "cagr": -0.09888,
+          "sharpe": -0.6153,
+          "sortino": -0.7071,
+          "maxDrawdown": -0.196971,
+          "trades": 66,
+          "winRate": 0.3939,
+          "avgTrade": -0.017485,
+          "profitFactor": 0.6705,
+          "endingCapital": 82850.07,
+          "excessCagrVsNifty": -0.071948
+        },
+        "benchmark": {
+          "totalReturn": -0.048137,
+          "cagr": -0.026932,
+          "sharpe": -0.1435,
+          "sortino": -0.2173,
+          "maxDrawdown": -0.155601
+        }
+      }
+    }
+  ]
+}

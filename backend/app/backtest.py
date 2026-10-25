@@ -357,22 +357,71 @@ def max_drawdown(
     if not returns:
         return 0.0
 
-    curve = (
-        pd.Series(returns)
-        .fillna(0)
-        .add(1)
-        .cumprod()
-    )
+    series = pd.Series(
+        returns,
+        dtype=float,
+    ).dropna()
 
-    peak = curve.cummax()
+    if series.empty:
+        return 0.0
 
-    dd = (
-        curve / peak - 1
+    equity = (
+        1.0 + series
+    ).cumprod()
+
+    peak = equity.cummax()
+
+    drawdown = (
+        equity / peak
+        - 1.0
     )
 
     return float(
-        dd.min()
+        drawdown.min()
     )
+
+
+def portfolio_period_returns(
+    observations,
+    horizon,
+):
+    """
+    Equal-weight selected stocks at each
+    rebalance date, producing ONE portfolio
+    return per rebalance event.
+
+    This avoids incorrectly treating every
+    stock observation as sequential capital.
+    """
+    grouped = {}
+
+    key = f"return{horizon}D"
+
+    for row in observations:
+        value = row.get(key)
+
+        if value is None:
+            continue
+
+        grouped.setdefault(
+            row["date"],
+            [],
+        ).append(
+            float(value)
+        )
+
+    output = []
+
+    for day in sorted(grouped):
+        values = grouped[day]
+
+        if values:
+            output.append(
+                sum(values)
+                / len(values)
+            )
+
+    return output
 
 
 def profit_factor(
@@ -713,9 +762,39 @@ def run_backtest(
             ] is not None
         ]
 
+        horizon_metrics = metrics(
+            values
+        )
+
+        portfolio_returns = (
+            portfolio_period_returns(
+                observations,
+                horizon,
+            )
+        )
+
+        horizon_metrics[
+            "portfolioPeriods"
+        ] = len(
+            portfolio_returns
+        )
+
+        horizon_metrics[
+            "portfolioMaxDrawdown"
+        ] = (
+            round(
+                max_drawdown(
+                    portfolio_returns
+                ),
+                6,
+            )
+            if portfolio_returns
+            else None
+        )
+
         report["horizons"][
             f"{horizon}D"
-        ] = metrics(values)
+        ] = horizon_metrics
 
     buckets = [
         ("65-74", 65, 75),
