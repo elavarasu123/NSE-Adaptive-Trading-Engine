@@ -9,10 +9,13 @@ from .models import (
     Prediction,
     Journal,
     PaperTrade,
+    PredictionOutcome,
+    StrategyVersion,
 )
 from .engine import scan, scan_report, provider
 from .regime import regime_dict, detect_regime
 from .portfolio_risk import portfolio_risk_dict
+from .evaluation import create_checkpoints, evaluate_due_predictions, accuracy_report
 from .trading import (
     paper_buy,
     paper_sell,
@@ -58,6 +61,25 @@ def initialize():
                 )
             )
 
+            db.commit()
+
+        if not db.query(StrategyVersion).filter(
+            StrategyVersion.name
+            == "champion-v0.2"
+        ).first():
+            db.add(
+                StrategyVersion(
+                    name="champion-v0.2",
+                    role="CHAMPION",
+                    description=(
+                        "V0.2 research strategy: "
+                        "momentum, relative strength, "
+                        "market regime and deterministic "
+                        "portfolio risk controls."
+                    ),
+                    active=True,
+                )
+            )
             db.commit()
     finally:
         db.close()
@@ -172,26 +194,84 @@ def market_regime():
 
 
 @app.post("/api/engine/run")
-def run_engine(db: Session = Depends(get_db)):
+def run_engine(
+    db: Session = Depends(get_db),
+):
     rows = scan()
 
+    frozen = 0
+
     for candidate in rows:
-        db.add(
-            Prediction(
-                symbol=candidate["symbol"],
-                up=candidate["up"] / 100,
-                sideways=candidate["sideways"] / 100,
-                down=candidate["down"] / 100,
-                confidence=candidate["score"] / 100,
-                decision=candidate["decision"],
-                evidence="V0.2 feature stack",
+        try:
+            entry = float(
+                candidate["price"]
             )
+        except (
+            KeyError,
+            TypeError,
+            ValueError,
+        ):
+            continue
+
+        prediction = Prediction(
+            symbol=candidate["symbol"],
+            entry_price=entry,
+            up=(
+                candidate["up"]
+                / 100
+            ),
+            sideways=(
+                candidate["sideways"]
+                / 100
+            ),
+            down=(
+                candidate["down"]
+                / 100
+            ),
+            confidence=(
+                candidate["score"]
+                / 100
+            ),
+            decision=candidate[
+                "decision"
+            ],
+            raw_decision=candidate.get(
+                "rawDecision",
+                candidate["decision"],
+            ),
+            regime=candidate.get(
+                "regime",
+                "UNKNOWN",
+            ),
+            strategy_version=(
+                "champion-v0.2"
+            ),
+            evidence=(
+                "Frozen V0.2 research "
+                "feature snapshot"
+            ),
+            frozen=True,
+            status="PENDING",
         )
+
+        db.add(prediction)
+        db.flush()
+
+        create_checkpoints(
+            db,
+            prediction,
+        )
+
+        frozen += 1
 
     db.add(
         Journal(
             kind="SCAN",
-            message=f"Frozen {len(rows)} predictions.",
+            message=(
+                f"Frozen {frozen} predictions "
+                f"with 5D/10D/20D/30D "
+                f"checkpoints."
+            ),
         )
     )
 
@@ -199,7 +279,11 @@ def run_engine(db: Session = Depends(get_db)):
 
     return {
         "status": "complete",
-        "predictionsFrozen": len(rows),
+        "predictionsFrozen": frozen,
+        "checkpointsCreated":
+            frozen * 4,
+        "strategyVersion":
+            "champion-v0.2",
     }
 
 
@@ -279,6 +363,117 @@ def monitor(db: Session = Depends(get_db)):
             provider,
         )
     }
+
+
+@app.post("/api/evaluation/run")
+def run_evaluation(
+    db: Session = Depends(get_db),
+):
+    return evaluate_due_predictions(
+        db,
+        provider,
+    )
+
+
+@app.get("/api/accuracy")
+def accuracy(
+    db: Session = Depends(get_db),
+):
+    return accuracy_report(db)
+
+
+@app.get("/api/outcomes")
+def outcomes(
+    db: Session = Depends(get_db),
+):
+    rows = (
+        db.query(PredictionOutcome)
+        .order_by(
+            PredictionOutcome.id.desc()
+        )
+        .limit(500)
+        .all()
+    )
+
+    return [
+        {
+            "id": row.id,
+            "predictionId":
+                row.prediction_id,
+            "symbol": row.symbol,
+            "horizonDays":
+                row.horizon_days,
+            "dueAt": row.due_at,
+            "evaluatedAt":
+                row.evaluated_at,
+            "entryPrice":
+                row.entry_price,
+            "outcomePrice":
+                row.outcome_price,
+            "forwardReturn":
+                row.forward_return,
+            "predicted":
+                row.predicted_class,
+            "actual":
+                row.actual_class,
+            "correct": row.correct,
+            "brierScore":
+                row.brier_score,
+            "status": row.status,
+        }
+        for row in rows
+    ]
+
+
+@app.get("/api/activity")
+def activity(
+    db: Session = Depends(get_db),
+):
+    rows = (
+        db.query(Journal)
+        .order_by(
+            Journal.created_at.desc()
+        )
+        .limit(100)
+        .all()
+    )
+
+    return [
+        {
+            "id": row.id,
+            "createdAt":
+                row.created_at,
+            "kind": row.kind,
+            "message": row.message,
+        }
+        for row in rows
+    ]
+
+
+@app.get("/api/strategy")
+def strategy(
+    db: Session = Depends(get_db),
+):
+    rows = (
+        db.query(StrategyVersion)
+        .order_by(
+            StrategyVersion.id.desc()
+        )
+        .all()
+    )
+
+    return [
+        {
+            "name": row.name,
+            "role": row.role,
+            "description":
+                row.description,
+            "active": row.active,
+            "createdAt":
+                row.created_at,
+        }
+        for row in rows
+    ]
 
 
 @app.get("/api/trades")

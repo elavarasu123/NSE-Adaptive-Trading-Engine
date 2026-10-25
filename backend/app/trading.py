@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -187,7 +187,7 @@ def paper_sell(
 
     position.current_price = quote.price
     position.status = "CLOSED"
-    position.closed_at = datetime.utcnow()
+    position.closed_at = datetime.now(timezone.utc)
 
     db.add(
         PaperTrade(
