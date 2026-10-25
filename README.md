@@ -156,3 +156,33 @@ The dashboard labels whether the visible runtime state came from a LOCAL process
 The cloud workflow now performs settled daily-history refresh after the regular NSE session rather than treating the 15:15 observation cycle as end-of-day data.
 
 GitHub Actions remains a paper/research orchestrator. It is not a tick-by-tick execution service and is not connected to a live broker.
+
+## V1.0 Automatic Paper Execution
+
+V1.0 converts eligible frozen forward predictions into simulated paper positions.
+
+Execution pipeline:
+
+1. Read the latest immutable forward prediction batch.
+2. Verify the frozen champion model version.
+3. Apply the prediction-time regime gate.
+4. Apply the existing regime-specific score threshold.
+5. Build the existing ATR/structure stop and 2R target.
+6. Size using original capital, cash and regime exposure.
+7. Apply portfolio-wide risk/exposure limits.
+8. Simulate adverse fill slippage and configurable paper transaction costs.
+9. Persist the PaperOrder lifecycle.
+10. Monitor stop/target exits on future runtime cycles.
+
+Default paper assumptions:
+
+- buy slippage: 5 bps,
+- sell slippage: 5 bps,
+- generic execution cost: 10 bps per side,
+- maximum two new positions from one prediction batch.
+
+These are conservative configurable simulation assumptions and are NOT representations of exact broker charges.
+
+PANIC regime remains a complete automatic-entry block.
+
+No live broker API is connected.

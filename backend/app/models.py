@@ -157,3 +157,88 @@ class Journal(Base):
 
     kind = Column(String)
     message = Column(Text)
+
+
+
+class PaperOrder(Base):
+    """
+    V1.0 automatic paper-execution lifecycle.
+
+    One frozen prediction can create at most
+    one PaperOrder.
+    """
+    __tablename__ = "paper_orders"
+
+    id = Column(Integer, primary_key=True)
+
+    prediction_id = Column(
+        String,
+        unique=True,
+        index=True,
+        nullable=False,
+    )
+
+    prediction_date = Column(String)
+
+    model_version = Column(String)
+
+    symbol = Column(
+        String,
+        index=True,
+        nullable=False,
+    )
+
+    score = Column(Float)
+
+    regime = Column(String)
+
+    status = Column(
+        String,
+        default="PENDING",
+        index=True,
+    )
+
+    quantity = Column(
+        Integer,
+        default=0,
+    )
+
+    signal_price = Column(Float)
+
+    fill_price = Column(Float)
+
+    stop_price = Column(Float)
+
+    target_price = Column(Float)
+
+    entry_fee = Column(
+        Float,
+        default=0,
+    )
+
+    exit_price = Column(
+        Float,
+        nullable=True,
+    )
+
+    exit_fee = Column(
+        Float,
+        default=0,
+    )
+
+    realized_pnl = Column(
+        Float,
+        default=0,
+    )
+
+    reason = Column(String)
+
+    created_at = Column(
+        DateTime(timezone=True),
+        default=utc_now,
+    )
+
+    closed_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+    )

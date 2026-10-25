@@ -733,3 +733,31 @@ def reliability_status(
     return reliability_report(
         db
     )
+
+
+@app.get("/api/execution/status")
+def paper_execution_status(
+    db: Session = Depends(get_db),
+):
+    from .execution import (
+        execution_status,
+    )
+
+    return execution_status(
+        db
+    )
+
+
+@app.post("/api/execution/run")
+def run_paper_execution(
+    db: Session = Depends(get_db),
+):
+    from .execution import (
+        run_execution_cycle,
+    )
+    from .market import YahooProvider
+
+    return run_execution_cycle(
+        db,
+        YahooProvider(),
+    )

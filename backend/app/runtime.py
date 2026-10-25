@@ -565,55 +565,67 @@ def run_cycle(
         )
 
         # ----------------------------------------------------
-        # STEP 3 — Monitor existing paper positions
+        # STEP 3 — V1.0 automatic paper execution
         # ----------------------------------------------------
-        try:
-            monitor_result = (
-                monitor_positions(
-                    db,
-                    provider,
-                )
+        from .execution import (
+            run_execution_cycle,
+        )
+
+        execution = (
+            run_execution_cycle(
+                db,
+                provider,
             )
+        )
 
-            result["steps"][
-                "positionMonitor"
-            ] = monitor_result
+        result["steps"][
+            "paperExecution"
+        ] = execution
 
-            activity(
-                "POSITION_MONITOR",
-                "Paper positions monitored.",
-                data={
-                    "runId":
-                        run_id,
-                    "result":
-                        monitor_result,
-                },
-            )
+        entry_data = execution[
+            "entries"
+        ]
 
-        except Exception as exc:
-            result["steps"][
-                "positionMonitor"
-            ] = {
-                "status":
-                    "DEGRADED",
-                "error":
-                    str(exc),
-            }
-
-            activity(
-                "POSITION_MONITOR_ERROR",
-                (
-                    "Position monitoring degraded; "
-                    "runtime continued."
-                ),
-                level="WARN",
-                data={
-                    "runId":
-                        run_id,
-                    "error":
-                        str(exc),
-                },
-            )
+        activity(
+            "PAPER_EXECUTION",
+            (
+                "Automatic paper execution: "
+                f"{len(entry_data['filled'])} filled, "
+                f"{len(entry_data['rejected'])} rejected; "
+                f"{sum(1 for x in execution['exits'] if x.get('action') == 'SELL')} exits."
+            ),
+            data={
+                "runId":
+                    run_id,
+                "filled":
+                    len(
+                        entry_data[
+                            "filled"
+                        ]
+                    ),
+                "rejected":
+                    len(
+                        entry_data[
+                            "rejected"
+                        ]
+                    ),
+                "exits":
+                    len(
+                        [
+                            x
+                            for x in execution[
+                                "exits"
+                            ]
+                            if (
+                                x.get(
+                                    "action"
+                                )
+                                == "SELL"
+                            )
+                        ]
+                    ),
+            },
+        )
 
         # ----------------------------------------------------
         # STEP 4 — Mark portfolio and persist equity
