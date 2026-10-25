@@ -664,3 +664,59 @@ def run_forward_learning():
         "status":
             learning_status(),
     }
+
+
+@app.get("/api/runtime/status")
+def get_runtime_status():
+    from .runtime import runtime_status
+
+    return runtime_status()
+
+
+@app.post("/api/runtime/run")
+def run_runtime_cycle():
+    from .database import SessionLocal
+    from .runtime import run_cycle
+
+    db = SessionLocal()
+
+    try:
+        return run_cycle(db)
+    finally:
+        db.close()
+
+
+@app.get("/api/runtime/activity")
+def get_runtime_activity():
+    from .runtime import (
+        ACTIVITY_PATH,
+        read_jsonl,
+    )
+
+    return {
+        "activity":
+            list(
+                reversed(
+                    read_jsonl(
+                        ACTIVITY_PATH,
+                        limit=100,
+                    )
+                )
+            )
+    }
+
+
+@app.get("/api/runtime/equity")
+def get_runtime_equity():
+    from .runtime import (
+        EQUITY_PATH,
+        read_jsonl,
+    )
+
+    return {
+        "equity":
+            read_jsonl(
+                EQUITY_PATH,
+                limit=500,
+            )
+    }

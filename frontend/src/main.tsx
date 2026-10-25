@@ -22,6 +22,9 @@ import {
   TrendingUp,
   WalletCards,
   Zap,
+  Play,
+  Radio,
+  History,
 } from "lucide-react";
 
 import {
@@ -78,6 +81,50 @@ type ForwardStatus = {
   metrics: {
     horizons:
       Record<string, HorizonMetrics>;
+  };
+};
+
+
+type RuntimeActivity = {
+  eventId?: string;
+  eventType: string;
+  level: string;
+  message: string;
+  recordedAt: string;
+  data?: Record<string, unknown>;
+};
+
+type EquityPoint = {
+  timestamp: string;
+  initialCapital: number;
+  cash: number;
+  marketValue: number;
+  equity: number;
+  realizedPnl: number;
+  unrealizedPnl: number;
+  totalPnl: number;
+  openPositions: number;
+};
+
+type RuntimeStatus = {
+  runtime: {
+    version: string;
+    status: string;
+    lastStartedAt: string | null;
+    lastCompletedAt: string | null;
+    lastSuccessfulAt: string | null;
+    lastRunId: string | null;
+    lastError: string | null;
+    cycles: number;
+  };
+  latestEquity: EquityPoint | null;
+  equityHistory: EquityPoint[];
+  activity: RuntimeActivity[];
+  safety: {
+    paperOnly: boolean;
+    liveBrokerOrders: boolean;
+    capitalResetsDaily: boolean;
+    automaticModelPromotion: boolean;
   };
 };
 
@@ -297,6 +344,18 @@ function App() {
   );
 
   const [
+    runtime,
+    setRuntime,
+  ] = useState<RuntimeStatus | null>(
+    null,
+  );
+
+  const [
+    runningCycle,
+    setRunningCycle,
+  ] = useState(false);
+
+  const [
     loading,
     setLoading,
   ] = useState(true);
@@ -317,6 +376,7 @@ function App() {
         statusData,
         predictionData,
         dashboardData,
+        runtimeData,
       ] = await Promise.all([
         getJson<ForwardStatus>(
           "/api/forward/status",
@@ -333,6 +393,12 @@ function App() {
         ).catch(
           () => null,
         ),
+
+        getJson<RuntimeStatus>(
+          "/api/runtime/status",
+        ).catch(
+          () => null,
+        ),
       ]);
 
       setStatus(statusData);
@@ -345,6 +411,10 @@ function App() {
         dashboardData,
       );
 
+      setRuntime(
+        runtimeData,
+      );
+
       setError(null);
     } catch (err) {
       setError(
@@ -354,6 +424,43 @@ function App() {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+
+  async function runPaperCycle() {
+    if (runningCycle) {
+      return;
+    }
+
+    setRunningCycle(true);
+
+    try {
+      const response = await fetch(
+        `${API}/api/runtime/run`,
+        {
+          method: "POST",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Runtime cycle: ${response.status}`,
+        );
+      }
+
+      await response.json();
+      await load();
+
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Runtime cycle failed.",
+      );
+
+    } finally {
+      setRunningCycle(false);
     }
   }
 
@@ -430,6 +537,48 @@ function App() {
       ?.length ??
     0;
 
+
+  const runtimeState =
+    runtime?.runtime?.status ??
+    "UNKNOWN";
+
+  const equityHistory =
+    runtime?.equityHistory ?? [];
+
+  const recentActivity =
+    runtime?.activity?.slice(
+      0,
+      8,
+    ) ?? [];
+
+  const latestEquity =
+    runtime?.latestEquity;
+
+  const equityMin =
+    equityHistory.length
+      ? Math.min(
+          ...equityHistory.map(
+            (point) =>
+              point.equity,
+          ),
+        )
+      : capital;
+
+  const equityMax =
+    equityHistory.length
+      ? Math.max(
+          ...equityHistory.map(
+            (point) =>
+              point.equity,
+          ),
+        )
+      : capital;
+
+  const equityRange =
+    Math.max(
+      equityMax - equityMin,
+      1,
+    );
 
   if (loading && !status) {
     return (
@@ -529,6 +678,25 @@ function App() {
                 ? "API ERROR"
                 : "ENGINE ONLINE"}
             </div>
+
+            <button
+              className="refresh"
+              onClick={runPaperCycle}
+              disabled={runningCycle}
+            >
+              {runningCycle ? (
+                <RefreshCw
+                  size={17}
+                  className="spin"
+                />
+              ) : (
+                <Play size={17} />
+              )}
+
+              {runningCycle
+                ? "Running…"
+                : "Paper Cycle"}
+            </button>
 
             <button
               className="refresh"
@@ -1015,6 +1183,279 @@ function App() {
             </div>
           </Card>
         </div>
+
+
+
+        <div className="runtime-grid">
+          <Card>
+            <div className="section-head">
+              <div>
+                <span className="section-kicker">
+                  RUNTIME
+                </span>
+
+                <h2>
+                  Engine Heartbeat
+                </h2>
+              </div>
+
+              <Radio
+                className="accent-icon"
+              />
+            </div>
+
+            <div className="heartbeat">
+              <div
+                className={
+                  `heartbeat-orb ${
+                    runtimeState
+                      .toLowerCase()
+                  }`
+                }
+              >
+                <span />
+              </div>
+
+              <div>
+                <strong>
+                  {runtimeState}
+                </strong>
+
+                <p>
+                  {
+                    runtime
+                      ?.runtime
+                      ?.cycles ?? 0
+                  } completed cycles
+                </p>
+              </div>
+            </div>
+
+            <div className="runtime-details">
+              <div>
+                <span>
+                  Last successful cycle
+                </span>
+
+                <strong>
+                  {
+                    runtime
+                      ?.runtime
+                      ?.lastSuccessfulAt
+                      ? new Date(
+                          runtime
+                            .runtime
+                            .lastSuccessfulAt,
+                        ).toLocaleString(
+                          "en-IN",
+                        )
+                      : "Never"
+                  }
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Paper-only
+                </span>
+
+                <strong>
+                  {
+                    runtime
+                      ?.safety
+                      ?.paperOnly
+                      ? "ENFORCED"
+                      : "UNKNOWN"
+                  }
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Broker orders
+                </span>
+
+                <strong>
+                  {
+                    runtime
+                      ?.safety
+                      ?.liveBrokerOrders
+                      ? "ENABLED"
+                      : "DISABLED"
+                  }
+                </strong>
+              </div>
+            </div>
+          </Card>
+
+
+          <Card>
+            <div className="section-head">
+              <div>
+                <span className="section-kicker">
+                  EQUITY
+                </span>
+
+                <h2>
+                  Paper Equity Curve
+                </h2>
+              </div>
+
+              <TrendingUp
+                className="accent-icon"
+              />
+            </div>
+
+            <div className="equity-number">
+              <strong>
+                {money(
+                  latestEquity
+                    ?.equity ??
+                  capital + pnl,
+                )}
+              </strong>
+
+              <span>
+                {
+                  equityHistory.length
+                } snapshots
+              </span>
+            </div>
+
+            <div className="equity-chart">
+              {
+                equityHistory.length
+                  ? equityHistory.map(
+                      (
+                        point,
+                        index,
+                      ) => {
+                        const normalized =
+                          (
+                            point.equity -
+                            equityMin
+                          ) /
+                          equityRange;
+
+                        const height =
+                          15 +
+                          normalized *
+                          85;
+
+                        return (
+                          <div
+                            key={
+                              `${point.timestamp}-${index}`
+                            }
+                            className="equity-bar"
+                            title={
+                              `${point.timestamp} • ${money(point.equity)}`
+                            }
+                            style={{
+                              height:
+                                `${height}%`,
+                            }}
+                          />
+                        );
+                      },
+                    )
+                  : (
+                    <div className="empty-state">
+                      Run a paper cycle to
+                      create equity history.
+                    </div>
+                  )
+              }
+            </div>
+
+            <div className="equity-meta">
+              <span>
+                Low {money(equityMin)}
+              </span>
+
+              <span>
+                High {money(equityMax)}
+              </span>
+            </div>
+          </Card>
+        </div>
+
+
+        <Card className="activity-card">
+          <div className="section-head">
+            <div>
+              <span className="section-kicker">
+                JOURNAL
+              </span>
+
+              <h2>
+                Runtime Activity
+              </h2>
+            </div>
+
+            <History
+              className="accent-icon"
+            />
+          </div>
+
+          <div className="timeline">
+            {
+              recentActivity.length
+                ? recentActivity.map(
+                    (
+                      event,
+                      index,
+                    ) => (
+                      <div
+                        className="timeline-row"
+                        key={
+                          event.eventId ??
+                          `${event.recordedAt}-${index}`
+                        }
+                      >
+                        <div
+                          className={
+                            `timeline-dot ${
+                              event.level
+                                .toLowerCase()
+                            }`
+                          }
+                        />
+
+                        <div className="timeline-body">
+                          <div className="timeline-head">
+                            <strong>
+                              {
+                                event.eventType
+                              }
+                            </strong>
+
+                            <span>
+                              {
+                                new Date(
+                                  event.recordedAt,
+                                ).toLocaleString(
+                                  "en-IN",
+                                )
+                              }
+                            </span>
+                          </div>
+
+                          <p>
+                            {event.message}
+                          </p>
+                        </div>
+                      </div>
+                    ),
+                  )
+                : (
+                  <div className="empty-state">
+                    No runtime activity yet.
+                  </div>
+                )
+            }
+          </div>
+        </Card>
 
 
         <footer>
