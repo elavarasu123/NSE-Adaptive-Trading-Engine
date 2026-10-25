@@ -1,0 +1,2663 @@
+{
+  "DEVELOPMENT": {
+    "start": "2018-01-01",
+    "end": "2021-12-31",
+    "observations": 70407,
+    "scoreBuckets": {
+      "50-64": {
+        "5D": {
+          "n": 8146,
+          "mean": 0.000984,
+          "ciLow": -0.000174,
+          "ciHigh": 0.002112,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 8146,
+          "mean": 0.001462,
+          "ciLow": -0.00022,
+          "ciHigh": 0.003163,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 8146,
+          "mean": 0.004631,
+          "ciLow": 0.002185,
+          "ciHigh": 0.007068,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 8146,
+          "mean": 0.007765,
+          "ciLow": 0.004686,
+          "ciHigh": 0.010795,
+          "significantPositive": true
+        }
+      },
+      "75-84": {
+        "5D": {
+          "n": 6554,
+          "mean": 0.002804,
+          "ciLow": 0.001489,
+          "ciHigh": 0.004169,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 6554,
+          "mean": 0.006097,
+          "ciLow": 0.004094,
+          "ciHigh": 0.008036,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 6554,
+          "mean": 0.009634,
+          "ciLow": 0.006812,
+          "ciHigh": 0.012401,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 6554,
+          "mean": 0.016956,
+          "ciLow": 0.013279,
+          "ciHigh": 0.020443,
+          "significantPositive": true
+        }
+      },
+      "85-100": {
+        "5D": {
+          "n": 17423,
+          "mean": 0.002767,
+          "ciLow": 0.001892,
+          "ciHigh": 0.003674,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 17423,
+          "mean": 0.005992,
+          "ciLow": 0.004675,
+          "ciHigh": 0.007235,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 17423,
+          "mean": 0.012003,
+          "ciLow": 0.01016,
+          "ciHigh": 0.013818,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 17423,
+          "mean": 0.01931,
+          "ciLow": 0.016966,
+          "ciHigh": 0.021649,
+          "significantPositive": true
+        }
+      },
+      "<50": {
+        "5D": {
+          "n": 32536,
+          "mean": -0.000208,
+          "ciLow": -0.000874,
+          "ciHigh": 0.000479,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 32536,
+          "mean": -0.000253,
+          "ciLow": -0.001209,
+          "ciHigh": 0.000661,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 32536,
+          "mean": 0.000603,
+          "ciLow": -0.000712,
+          "ciHigh": 0.001948,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 32536,
+          "mean": 0.000604,
+          "ciLow": -0.001122,
+          "ciHigh": 0.002345,
+          "significantPositive": false
+        }
+      },
+      "65-74": {
+        "5D": {
+          "n": 5748,
+          "mean": 0.001908,
+          "ciLow": 0.000568,
+          "ciHigh": 0.003301,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 5748,
+          "mean": 0.003489,
+          "ciLow": 0.00148,
+          "ciHigh": 0.005512,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 5748,
+          "mean": 0.00752,
+          "ciLow": 0.004608,
+          "ciHigh": 0.010644,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 5748,
+          "mean": 0.011956,
+          "ciLow": 0.008465,
+          "ciHigh": 0.015731,
+          "significantPositive": true
+        }
+      }
+    },
+    "regimes": {
+      "RISK_ON": {
+        "5D": {
+          "n": 41255,
+          "mean": 0.001488,
+          "ciLow": 0.000947,
+          "ciHigh": 0.002029,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 41255,
+          "mean": 0.002834,
+          "ciLow": 0.002026,
+          "ciHigh": 0.003632,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 41255,
+          "mean": 0.005084,
+          "ciLow": 0.003945,
+          "ciHigh": 0.006225,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 41255,
+          "mean": 0.007988,
+          "ciLow": 0.006578,
+          "ciHigh": 0.009462,
+          "significantPositive": true
+        }
+      },
+      "DEFENSIVE": {
+        "5D": {
+          "n": 12447,
+          "mean": 0.001761,
+          "ciLow": 0.000752,
+          "ciHigh": 0.002855,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 12447,
+          "mean": 0.002655,
+          "ciLow": 0.001302,
+          "ciHigh": 0.004127,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 12447,
+          "mean": 0.008686,
+          "ciLow": 0.006508,
+          "ciHigh": 0.010848,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 12447,
+          "mean": 0.008033,
+          "ciLow": 0.00533,
+          "ciHigh": 0.010758,
+          "significantPositive": true
+        }
+      },
+      "NEUTRAL": {
+        "5D": {
+          "n": 8189,
+          "mean": -0.004729,
+          "ciLow": -0.006032,
+          "ciHigh": -0.003421,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 8189,
+          "mean": -0.006864,
+          "ciLow": -0.008765,
+          "ciHigh": -0.00509,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 8189,
+          "mean": -0.008551,
+          "ciLow": -0.011144,
+          "ciHigh": -0.006033,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 8189,
+          "mean": 0.000591,
+          "ciLow": -0.003011,
+          "ciHigh": 0.004228,
+          "significantPositive": false
+        }
+      },
+      "PANIC": {
+        "5D": {
+          "n": 8516,
+          "mean": 0.004021,
+          "ciLow": 0.002406,
+          "ciHigh": 0.005734,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 8516,
+          "mean": 0.00873,
+          "ciLow": 0.006603,
+          "ciHigh": 0.010939,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 8516,
+          "mean": 0.014681,
+          "ciLow": 0.011754,
+          "ciHigh": 0.0178,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 8516,
+          "mean": 0.019354,
+          "ciLow": 0.015457,
+          "ciHigh": 0.02335,
+          "significantPositive": true
+        }
+      }
+    },
+    "sectors": {
+      "CAPITAL GOODS": {
+        "5D": {
+          "n": 9541,
+          "mean": 0.001289,
+          "ciLow": -0.000101,
+          "ciHigh": 0.002582,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 9541,
+          "mean": 0.002815,
+          "ciLow": 0.000874,
+          "ciHigh": 0.00466,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 9541,
+          "mean": 0.006108,
+          "ciLow": 0.003245,
+          "ciHigh": 0.00871,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 9541,
+          "mean": 0.009465,
+          "ciLow": 0.006247,
+          "ciHigh": 0.012588,
+          "significantPositive": true
+        }
+      },
+      "CONSTRUCTION MATERIALS": {
+        "5D": {
+          "n": 1675,
+          "mean": 0.000784,
+          "ciLow": -0.001283,
+          "ciHigh": 0.002863,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1675,
+          "mean": 0.001737,
+          "ciLow": -0.001145,
+          "ciHigh": 0.00468,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1675,
+          "mean": 0.002874,
+          "ciLow": -0.000948,
+          "ciHigh": 0.006701,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 1675,
+          "mean": 0.00458,
+          "ciLow": 9e-06,
+          "ciHigh": 0.009186,
+          "significantPositive": true
+        }
+      },
+      "CHEMICALS": {
+        "5D": {
+          "n": 3849,
+          "mean": 0.003617,
+          "ciLow": 0.001886,
+          "ciHigh": 0.005383,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 3849,
+          "mean": 0.007193,
+          "ciLow": 0.004731,
+          "ciHigh": 0.009594,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 3849,
+          "mean": 0.014883,
+          "ciLow": 0.011432,
+          "ciHigh": 0.018227,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 3849,
+          "mean": 0.022604,
+          "ciLow": 0.018506,
+          "ciHigh": 0.026863,
+          "significantPositive": true
+        }
+      },
+      "HEALTHCARE": {
+        "5D": {
+          "n": 5521,
+          "mean": 0.001531,
+          "ciLow": 0.000221,
+          "ciHigh": 0.002879,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 5521,
+          "mean": 0.002898,
+          "ciLow": 0.001162,
+          "ciHigh": 0.004837,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 5521,
+          "mean": 0.005578,
+          "ciLow": 0.002891,
+          "ciHigh": 0.008285,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 5521,
+          "mean": 0.008141,
+          "ciLow": 0.004618,
+          "ciHigh": 0.011628,
+          "significantPositive": true
+        }
+      },
+      "POWER": {
+        "5D": {
+          "n": 2882,
+          "mean": 0.002498,
+          "ciLow": 5.6e-05,
+          "ciHigh": 0.005218,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 2882,
+          "mean": 0.005565,
+          "ciLow": 0.001822,
+          "ciHigh": 0.009511,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 2882,
+          "mean": 0.013387,
+          "ciLow": 0.00809,
+          "ciHigh": 0.019082,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2882,
+          "mean": 0.022017,
+          "ciLow": 0.014967,
+          "ciHigh": 0.029501,
+          "significantPositive": true
+        }
+      },
+      "METALS & MINING": {
+        "5D": {
+          "n": 2955,
+          "mean": 0.002209,
+          "ciLow": 7.3e-05,
+          "ciHigh": 0.004392,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 2955,
+          "mean": 0.004636,
+          "ciLow": 0.001533,
+          "ciHigh": 0.007855,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 2955,
+          "mean": 0.010377,
+          "ciLow": 0.005751,
+          "ciHigh": 0.015199,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2955,
+          "mean": 0.017803,
+          "ciLow": 0.01161,
+          "ciHigh": 0.024116,
+          "significantPositive": true
+        }
+      },
+      "SERVICES": {
+        "5D": {
+          "n": 1970,
+          "mean": 0.001583,
+          "ciLow": -0.001058,
+          "ciHigh": 0.004344,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1970,
+          "mean": 0.003357,
+          "ciLow": -4.1e-05,
+          "ciHigh": 0.006946,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1970,
+          "mean": 0.006642,
+          "ciLow": 0.001744,
+          "ciHigh": 0.011895,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1970,
+          "mean": 0.011035,
+          "ciLow": 0.004422,
+          "ciHigh": 0.017218,
+          "significantPositive": true
+        }
+      },
+      "REALTY": {
+        "5D": {
+          "n": 1859,
+          "mean": 0.001599,
+          "ciLow": -0.001242,
+          "ciHigh": 0.00448,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1859,
+          "mean": 0.002986,
+          "ciLow": -0.000849,
+          "ciHigh": 0.006964,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1859,
+          "mean": 0.006554,
+          "ciLow": 0.001356,
+          "ciHigh": 0.011909,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1859,
+          "mean": 0.009767,
+          "ciLow": 0.003851,
+          "ciHigh": 0.015651,
+          "significantPositive": true
+        }
+      },
+      "OIL GAS & CONSUMABLE FUELS": {
+        "5D": {
+          "n": 3060,
+          "mean": -0.00156,
+          "ciLow": -0.003287,
+          "ciHigh": 0.000118,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 3060,
+          "mean": -0.00289,
+          "ciLow": -0.005442,
+          "ciHigh": -0.000506,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 3060,
+          "mean": -0.005153,
+          "ciLow": -0.008587,
+          "ciHigh": -0.001759,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 3060,
+          "mean": -0.007196,
+          "ciLow": -0.011511,
+          "ciHigh": -0.002709,
+          "significantPositive": false
+        }
+      },
+      "AUTOMOBILE AND AUTO COMPONENTS": {
+        "5D": {
+          "n": 5935,
+          "mean": -0.000694,
+          "ciLow": -0.002035,
+          "ciHigh": 0.000595,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 5935,
+          "mean": -0.001132,
+          "ciLow": -0.002929,
+          "ciHigh": 0.000601,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 5935,
+          "mean": -0.001349,
+          "ciLow": -0.003801,
+          "ciHigh": 0.001216,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 5935,
+          "mean": -0.00158,
+          "ciLow": -0.004722,
+          "ciHigh": 0.00154,
+          "significantPositive": false
+        }
+      },
+      "CONSUMER DURABLES": {
+        "5D": {
+          "n": 2668,
+          "mean": 0.003391,
+          "ciLow": 0.001471,
+          "ciHigh": 0.005305,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 2668,
+          "mean": 0.006589,
+          "ciLow": 0.003853,
+          "ciHigh": 0.009258,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 2668,
+          "mean": 0.013647,
+          "ciLow": 0.009627,
+          "ciHigh": 0.017629,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2668,
+          "mean": 0.021354,
+          "ciLow": 0.015955,
+          "ciHigh": 0.026597,
+          "significantPositive": true
+        }
+      },
+      "FAST MOVING CONSUMER GOODS": {
+        "5D": {
+          "n": 4728,
+          "mean": 0.000849,
+          "ciLow": -0.000759,
+          "ciHigh": 0.002524,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 4728,
+          "mean": 0.001637,
+          "ciLow": -0.000811,
+          "ciHigh": 0.004153,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 4728,
+          "mean": 0.004053,
+          "ciLow": 0.000171,
+          "ciHigh": 0.008184,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 4728,
+          "mean": 0.007391,
+          "ciLow": 0.001886,
+          "ciHigh": 0.013579,
+          "significantPositive": true
+        }
+      },
+      "FINANCIAL SERVICES": {
+        "5D": {
+          "n": 12822,
+          "mean": -0.001116,
+          "ciLow": -0.002202,
+          "ciHigh": -6e-06,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 12822,
+          "mean": -0.002011,
+          "ciLow": -0.003404,
+          "ciHigh": -0.00056,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 12822,
+          "mean": -0.003287,
+          "ciLow": -0.005405,
+          "ciHigh": -0.001218,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 12822,
+          "mean": -0.004255,
+          "ciLow": -0.006685,
+          "ciHigh": -0.001727,
+          "significantPositive": false
+        }
+      },
+      "CONSUMER SERVICES": {
+        "5D": {
+          "n": 1635,
+          "mean": 0.003911,
+          "ciLow": 0.000603,
+          "ciHigh": 0.007347,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 1635,
+          "mean": 0.007215,
+          "ciLow": 0.002994,
+          "ciHigh": 0.0117,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 1635,
+          "mean": 0.013095,
+          "ciLow": 0.007219,
+          "ciHigh": 0.019382,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1635,
+          "mean": 0.020523,
+          "ciLow": 0.013316,
+          "ciHigh": 0.028202,
+          "significantPositive": true
+        }
+      },
+      "TELECOMMUNICATION": {
+        "5D": {
+          "n": 1748,
+          "mean": 0.003284,
+          "ciLow": -0.000822,
+          "ciHigh": 0.007496,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1748,
+          "mean": 0.007909,
+          "ciLow": 0.001722,
+          "ciHigh": 0.014258,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 1748,
+          "mean": 0.016607,
+          "ciLow": 0.007411,
+          "ciHigh": 0.02618,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1748,
+          "mean": 0.026148,
+          "ciLow": 0.014154,
+          "ciHigh": 0.038812,
+          "significantPositive": true
+        }
+      },
+      "INFORMATION TECHNOLOGY": {
+        "5D": {
+          "n": 3500,
+          "mean": 0.006718,
+          "ciLow": 0.004917,
+          "ciHigh": 0.008643,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 3500,
+          "mean": 0.013445,
+          "ciLow": 0.010714,
+          "ciHigh": 0.016226,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 3500,
+          "mean": 0.026648,
+          "ciLow": 0.022878,
+          "ciHigh": 0.030668,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 3500,
+          "mean": 0.039023,
+          "ciLow": 0.034376,
+          "ciHigh": 0.043853,
+          "significantPositive": true
+        }
+      },
+      "CONSTRUCTION": {
+        "5D": {
+          "n": 2089,
+          "mean": -0.002149,
+          "ciLow": -0.004646,
+          "ciHigh": 0.000242,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 2089,
+          "mean": -0.003996,
+          "ciLow": -0.007244,
+          "ciHigh": -0.000284,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 2089,
+          "mean": -0.007642,
+          "ciLow": -0.012395,
+          "ciHigh": -0.002793,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 2089,
+          "mean": -0.01142,
+          "ciLow": -0.016813,
+          "ciHigh": -0.005695,
+          "significantPositive": false
+        }
+      },
+      "DIVERSIFIED": {
+        "5D": {
+          "n": 197,
+          "mean": -0.00186,
+          "ciLow": -0.007352,
+          "ciHigh": 0.004034,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 197,
+          "mean": -0.003268,
+          "ciLow": -0.011492,
+          "ciHigh": 0.005533,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 197,
+          "mean": -0.00594,
+          "ciLow": -0.018762,
+          "ciHigh": 0.007246,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 197,
+          "mean": -0.008756,
+          "ciLow": -0.0236,
+          "ciHigh": 0.007113,
+          "significantPositive": false
+        }
+      },
+      "TEXTILES": {
+        "5D": {
+          "n": 985,
+          "mean": 0.004534,
+          "ciLow": 0.000624,
+          "ciHigh": 0.008469,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 985,
+          "mean": 0.009416,
+          "ciLow": 0.004068,
+          "ciHigh": 0.014817,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 985,
+          "mean": 0.01947,
+          "ciLow": 0.01209,
+          "ciHigh": 0.027094,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 985,
+          "mean": 0.030043,
+          "ciLow": 0.021284,
+          "ciHigh": 0.03888,
+          "significantPositive": true
+        }
+      },
+      "MEDIA ENTERTAINMENT & PUBLICATION": {
+        "5D": {
+          "n": 788,
+          "mean": -0.002671,
+          "ciLow": -0.00737,
+          "ciHigh": 0.002294,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 788,
+          "mean": -0.005315,
+          "ciLow": -0.011954,
+          "ciHigh": 0.001624,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 788,
+          "mean": -0.010478,
+          "ciLow": -0.019506,
+          "ciHigh": -0.000712,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 788,
+          "mean": -0.015881,
+          "ciLow": -0.026562,
+          "ciHigh": -0.005034,
+          "significantPositive": false
+        }
+      }
+    },
+    "methodology": {
+      "target": "Stock forward return minus Nifty forward return",
+      "sampling": "Every 5 trading sessions",
+      "confidenceInterval": "95% bootstrap mean CI",
+      "promotionRule": "Diagnostics generate hypotheses only. No automatic champion parameter changes."
+    }
+  },
+  "VALIDATION": {
+    "start": "2022-01-01",
+    "end": "2024-12-31",
+    "observations": 61210,
+    "scoreBuckets": {
+      "50-64": {
+        "5D": {
+          "n": 7307,
+          "mean": 0.004275,
+          "ciLow": 0.003208,
+          "ciHigh": 0.005321,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 7307,
+          "mean": 0.007643,
+          "ciLow": 0.006102,
+          "ciHigh": 0.009135,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 7307,
+          "mean": 0.015316,
+          "ciLow": 0.013143,
+          "ciHigh": 0.017525,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 7307,
+          "mean": 0.022787,
+          "ciLow": 0.019914,
+          "ciHigh": 0.025698,
+          "significantPositive": true
+        }
+      },
+      "85-100": {
+        "5D": {
+          "n": 21141,
+          "mean": 0.006306,
+          "ciLow": 0.005512,
+          "ciHigh": 0.007061,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 21141,
+          "mean": 0.013015,
+          "ciLow": 0.011925,
+          "ciHigh": 0.014126,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 21141,
+          "mean": 0.026001,
+          "ciLow": 0.024434,
+          "ciHigh": 0.027547,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 21141,
+          "mean": 0.037478,
+          "ciLow": 0.035431,
+          "ciHigh": 0.039439,
+          "significantPositive": true
+        }
+      },
+      "75-84": {
+        "5D": {
+          "n": 6165,
+          "mean": 0.005281,
+          "ciLow": 0.00404,
+          "ciHigh": 0.006558,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 6165,
+          "mean": 0.010269,
+          "ciLow": 0.008463,
+          "ciHigh": 0.012004,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 6165,
+          "mean": 0.019204,
+          "ciLow": 0.01642,
+          "ciHigh": 0.021914,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 6165,
+          "mean": 0.028031,
+          "ciLow": 0.024496,
+          "ciHigh": 0.031569,
+          "significantPositive": true
+        }
+      },
+      "<50": {
+        "5D": {
+          "n": 21561,
+          "mean": 0.002249,
+          "ciLow": 0.001616,
+          "ciHigh": 0.002867,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 21561,
+          "mean": 0.004449,
+          "ciLow": 0.003596,
+          "ciHigh": 0.005299,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 21561,
+          "mean": 0.008822,
+          "ciLow": 0.007624,
+          "ciHigh": 0.010061,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 21561,
+          "mean": 0.014164,
+          "ciLow": 0.0126,
+          "ciHigh": 0.015734,
+          "significantPositive": true
+        }
+      },
+      "65-74": {
+        "5D": {
+          "n": 5036,
+          "mean": 0.003808,
+          "ciLow": 0.002347,
+          "ciHigh": 0.005176,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 5036,
+          "mean": 0.007223,
+          "ciLow": 0.005265,
+          "ciHigh": 0.009124,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 5036,
+          "mean": 0.013992,
+          "ciLow": 0.011325,
+          "ciHigh": 0.016672,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 5036,
+          "mean": 0.021516,
+          "ciLow": 0.018149,
+          "ciHigh": 0.02487,
+          "significantPositive": true
+        }
+      }
+    },
+    "regimes": {
+      "RISK_ON": {
+        "5D": {
+          "n": 32585,
+          "mean": 0.004342,
+          "ciLow": 0.003794,
+          "ciHigh": 0.004876,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 32585,
+          "mean": 0.01117,
+          "ciLow": 0.010342,
+          "ciHigh": 0.011959,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 32585,
+          "mean": 0.023546,
+          "ciLow": 0.022363,
+          "ciHigh": 0.024683,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 32585,
+          "mean": 0.034844,
+          "ciLow": 0.0333,
+          "ciHigh": 0.036303,
+          "significantPositive": true
+        }
+      },
+      "NEUTRAL": {
+        "5D": {
+          "n": 10755,
+          "mean": 0.0083,
+          "ciLow": 0.007287,
+          "ciHigh": 0.009259,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 10755,
+          "mean": 0.007463,
+          "ciLow": 0.006076,
+          "ciHigh": 0.00885,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 10755,
+          "mean": 0.00845,
+          "ciLow": 0.006466,
+          "ciHigh": 0.010361,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 10755,
+          "mean": 0.008367,
+          "ciLow": 0.005855,
+          "ciHigh": 0.010816,
+          "significantPositive": true
+        }
+      },
+      "DEFENSIVE": {
+        "5D": {
+          "n": 10255,
+          "mean": 0.003783,
+          "ciLow": 0.002861,
+          "ciHigh": 0.00469,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 10255,
+          "mean": 0.007311,
+          "ciLow": 0.006018,
+          "ciHigh": 0.008646,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 10255,
+          "mean": 0.010559,
+          "ciLow": 0.008717,
+          "ciHigh": 0.012308,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 10255,
+          "mean": 0.018821,
+          "ciLow": 0.016414,
+          "ciHigh": 0.021141,
+          "significantPositive": true
+        }
+      },
+      "PANIC": {
+        "5D": {
+          "n": 7615,
+          "mean": -0.000624,
+          "ciLow": -0.001746,
+          "ciHigh": 0.000405,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 7615,
+          "mean": 0.000972,
+          "ciLow": -0.000458,
+          "ciHigh": 0.002341,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 7615,
+          "mean": 0.009749,
+          "ciLow": 0.007485,
+          "ciHigh": 0.011849,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 7615,
+          "mean": 0.016679,
+          "ciLow": 0.013955,
+          "ciHigh": 0.019266,
+          "significantPositive": true
+        }
+      }
+    },
+    "sectors": {
+      "FINANCIAL SERVICES": {
+        "5D": {
+          "n": 12020,
+          "mean": 0.003777,
+          "ciLow": 0.002919,
+          "ciHigh": 0.004685,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 12020,
+          "mean": 0.007335,
+          "ciLow": 0.006084,
+          "ciHigh": 0.008645,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 12020,
+          "mean": 0.014504,
+          "ciLow": 0.012665,
+          "ciHigh": 0.01635,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 12020,
+          "mean": 0.021274,
+          "ciLow": 0.018948,
+          "ciHigh": 0.023594,
+          "significantPositive": true
+        }
+      },
+      "CAPITAL GOODS": {
+        "5D": {
+          "n": 8313,
+          "mean": 0.008848,
+          "ciLow": 0.007533,
+          "ciHigh": 0.010094,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 8313,
+          "mean": 0.017751,
+          "ciLow": 0.015895,
+          "ciHigh": 0.019613,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 8313,
+          "mean": 0.035196,
+          "ciLow": 0.032533,
+          "ciHigh": 0.037933,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 8313,
+          "mean": 0.052622,
+          "ciLow": 0.049339,
+          "ciHigh": 0.056168,
+          "significantPositive": true
+        }
+      },
+      "CONSTRUCTION MATERIALS": {
+        "5D": {
+          "n": 1448,
+          "mean": 2.3e-05,
+          "ciLow": -0.001861,
+          "ciHigh": 0.001908,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1448,
+          "mean": -0.000142,
+          "ciLow": -0.002864,
+          "ciHigh": 0.002618,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1448,
+          "mean": -0.000218,
+          "ciLow": -0.00419,
+          "ciHigh": 0.003547,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 1448,
+          "mean": -0.000439,
+          "ciLow": -0.005394,
+          "ciHigh": 0.004157,
+          "significantPositive": false
+        }
+      },
+      "CHEMICALS": {
+        "5D": {
+          "n": 3655,
+          "mean": 0.002515,
+          "ciLow": 0.000906,
+          "ciHigh": 0.004141,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 3655,
+          "mean": 0.005134,
+          "ciLow": 0.002791,
+          "ciHigh": 0.007454,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 3655,
+          "mean": 0.009978,
+          "ciLow": 0.006265,
+          "ciHigh": 0.013325,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 3655,
+          "mean": 0.014741,
+          "ciLow": 0.010264,
+          "ciHigh": 0.019282,
+          "significantPositive": true
+        }
+      },
+      "HEALTHCARE": {
+        "5D": {
+          "n": 5177,
+          "mean": 0.003464,
+          "ciLow": 0.002318,
+          "ciHigh": 0.00462,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 5177,
+          "mean": 0.00726,
+          "ciLow": 0.005611,
+          "ciHigh": 0.008932,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 5177,
+          "mean": 0.014334,
+          "ciLow": 0.011982,
+          "ciHigh": 0.016525,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 5177,
+          "mean": 0.021551,
+          "ciLow": 0.018587,
+          "ciHigh": 0.024273,
+          "significantPositive": true
+        }
+      },
+      "POWER": {
+        "5D": {
+          "n": 2220,
+          "mean": 0.006199,
+          "ciLow": 0.003698,
+          "ciHigh": 0.008995,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 2220,
+          "mean": 0.012247,
+          "ciLow": 0.008579,
+          "ciHigh": 0.016394,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 2220,
+          "mean": 0.02394,
+          "ciLow": 0.018598,
+          "ciHigh": 0.029185,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2220,
+          "mean": 0.034651,
+          "ciLow": 0.027807,
+          "ciHigh": 0.041304,
+          "significantPositive": true
+        }
+      },
+      "METALS & MINING": {
+        "5D": {
+          "n": 2282,
+          "mean": 0.005102,
+          "ciLow": 0.002997,
+          "ciHigh": 0.007241,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 2282,
+          "mean": 0.010204,
+          "ciLow": 0.007056,
+          "ciHigh": 0.013341,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 2282,
+          "mean": 0.020859,
+          "ciLow": 0.016057,
+          "ciHigh": 0.025539,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2282,
+          "mean": 0.030821,
+          "ciLow": 0.024752,
+          "ciHigh": 0.037081,
+          "significantPositive": true
+        }
+      },
+      "SERVICES": {
+        "5D": {
+          "n": 1569,
+          "mean": 0.003115,
+          "ciLow": 0.000602,
+          "ciHigh": 0.005797,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 1569,
+          "mean": 0.006022,
+          "ciLow": 0.002593,
+          "ciHigh": 0.009561,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 1569,
+          "mean": 0.011488,
+          "ciLow": 0.006853,
+          "ciHigh": 0.016238,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1569,
+          "mean": 0.016753,
+          "ciLow": 0.010876,
+          "ciHigh": 0.023009,
+          "significantPositive": true
+        }
+      },
+      "OIL GAS & CONSUMABLE FUELS": {
+        "5D": {
+          "n": 2368,
+          "mean": 0.004185,
+          "ciLow": 0.002132,
+          "ciHigh": 0.006314,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 2368,
+          "mean": 0.008524,
+          "ciLow": 0.005472,
+          "ciHigh": 0.011659,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 2368,
+          "mean": 0.017297,
+          "ciLow": 0.012666,
+          "ciHigh": 0.021831,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2368,
+          "mean": 0.025926,
+          "ciLow": 0.020084,
+          "ciHigh": 0.031883,
+          "significantPositive": true
+        }
+      },
+      "REALTY": {
+        "5D": {
+          "n": 1765,
+          "mean": 0.005105,
+          "ciLow": 0.003026,
+          "ciHigh": 0.007227,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 1765,
+          "mean": 0.009982,
+          "ciLow": 0.007062,
+          "ciHigh": 0.013027,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 1765,
+          "mean": 0.018777,
+          "ciLow": 0.014679,
+          "ciHigh": 0.022766,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1765,
+          "mean": 0.027933,
+          "ciLow": 0.022688,
+          "ciHigh": 0.033206,
+          "significantPositive": true
+        }
+      },
+      "INFORMATION TECHNOLOGY": {
+        "5D": {
+          "n": 2835,
+          "mean": 0.001455,
+          "ciLow": -0.000176,
+          "ciHigh": 0.003096,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 2835,
+          "mean": 0.003042,
+          "ciLow": 0.000766,
+          "ciHigh": 0.005288,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 2835,
+          "mean": 0.006831,
+          "ciLow": 0.003558,
+          "ciHigh": 0.010217,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2835,
+          "mean": 0.010518,
+          "ciLow": 0.006524,
+          "ciHigh": 0.014639,
+          "significantPositive": true
+        }
+      },
+      "AUTOMOBILE AND AUTO COMPONENTS": {
+        "5D": {
+          "n": 5037,
+          "mean": 0.004398,
+          "ciLow": 0.003188,
+          "ciHigh": 0.005655,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 5037,
+          "mean": 0.008722,
+          "ciLow": 0.006899,
+          "ciHigh": 0.010476,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 5037,
+          "mean": 0.01723,
+          "ciLow": 0.014529,
+          "ciHigh": 0.019816,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 5037,
+          "mean": 0.025737,
+          "ciLow": 0.022624,
+          "ciHigh": 0.029008,
+          "significantPositive": true
+        }
+      },
+      "CONSUMER DURABLES": {
+        "5D": {
+          "n": 2207,
+          "mean": 0.003116,
+          "ciLow": 0.001281,
+          "ciHigh": 0.004974,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 2207,
+          "mean": 0.006226,
+          "ciLow": 0.003469,
+          "ciHigh": 0.008966,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 2207,
+          "mean": 0.012331,
+          "ciLow": 0.008217,
+          "ciHigh": 0.016268,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2207,
+          "mean": 0.018325,
+          "ciLow": 0.013057,
+          "ciHigh": 0.023384,
+          "significantPositive": true
+        }
+      },
+      "FAST MOVING CONSUMER GOODS": {
+        "5D": {
+          "n": 3650,
+          "mean": 0.002628,
+          "ciLow": 0.001282,
+          "ciHigh": 0.004022,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 3650,
+          "mean": 0.005449,
+          "ciLow": 0.003541,
+          "ciHigh": 0.007502,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 3650,
+          "mean": 0.010683,
+          "ciLow": 0.007954,
+          "ciHigh": 0.013611,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 3650,
+          "mean": 0.016054,
+          "ciLow": 0.012563,
+          "ciHigh": 0.019602,
+          "significantPositive": true
+        }
+      },
+      "CONSUMER SERVICES": {
+        "5D": {
+          "n": 1937,
+          "mean": 0.004492,
+          "ciLow": 0.002463,
+          "ciHigh": 0.006629,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 1937,
+          "mean": 0.008556,
+          "ciLow": 0.005884,
+          "ciHigh": 0.011327,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 1937,
+          "mean": 0.016159,
+          "ciLow": 0.012259,
+          "ciHigh": 0.020281,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1937,
+          "mean": 0.024155,
+          "ciLow": 0.018603,
+          "ciHigh": 0.029254,
+          "significantPositive": true
+        }
+      },
+      "TELECOMMUNICATION": {
+        "5D": {
+          "n": 1471,
+          "mean": 0.001813,
+          "ciLow": -0.001181,
+          "ciHigh": 0.004943,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1471,
+          "mean": 0.003154,
+          "ciLow": -0.000912,
+          "ciHigh": 0.007473,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1471,
+          "mean": 0.006825,
+          "ciLow": 0.001142,
+          "ciHigh": 0.012463,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1471,
+          "mean": 0.010423,
+          "ciLow": 0.003387,
+          "ciHigh": 0.01752,
+          "significantPositive": true
+        }
+      },
+      "CONSTRUCTION": {
+        "5D": {
+          "n": 1776,
+          "mean": 0.008863,
+          "ciLow": 0.006162,
+          "ciHigh": 0.01159,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 1776,
+          "mean": 0.01741,
+          "ciLow": 0.013553,
+          "ciHigh": 0.021677,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 1776,
+          "mean": 0.034381,
+          "ciLow": 0.028776,
+          "ciHigh": 0.040161,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1776,
+          "mean": 0.051281,
+          "ciLow": 0.04447,
+          "ciHigh": 0.058739,
+          "significantPositive": true
+        }
+      },
+      "DIVERSIFIED": {
+        "5D": {
+          "n": 148,
+          "mean": 0.002953,
+          "ciLow": -0.003321,
+          "ciHigh": 0.00925,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 148,
+          "mean": 0.005402,
+          "ciLow": -0.004386,
+          "ciHigh": 0.015,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 148,
+          "mean": 0.009301,
+          "ciLow": -0.004371,
+          "ciHigh": 0.023637,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 148,
+          "mean": 0.012631,
+          "ciLow": -0.003875,
+          "ciHigh": 0.031249,
+          "significantPositive": false
+        }
+      },
+      "TEXTILES": {
+        "5D": {
+          "n": 740,
+          "mean": -0.000807,
+          "ciLow": -0.004195,
+          "ciHigh": 0.002295,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 740,
+          "mean": -0.00205,
+          "ciLow": -0.006363,
+          "ciHigh": 0.002133,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 740,
+          "mean": -0.004796,
+          "ciLow": -0.010634,
+          "ciHigh": 0.001035,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 740,
+          "mean": -0.007574,
+          "ciLow": -0.01441,
+          "ciHigh": -0.000266,
+          "significantPositive": false
+        }
+      },
+      "MEDIA ENTERTAINMENT & PUBLICATION": {
+        "5D": {
+          "n": 592,
+          "mean": -0.000401,
+          "ciLow": -0.00462,
+          "ciHigh": 0.004116,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 592,
+          "mean": -0.001029,
+          "ciLow": -0.006903,
+          "ciHigh": 0.004928,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 592,
+          "mean": -0.003505,
+          "ciLow": -0.011304,
+          "ciHigh": 0.004627,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 592,
+          "mean": -0.008081,
+          "ciLow": -0.017134,
+          "ciHigh": 0.00135,
+          "significantPositive": false
+        }
+      }
+    },
+    "methodology": {
+      "target": "Stock forward return minus Nifty forward return",
+      "sampling": "Every 5 trading sessions",
+      "confidenceInterval": "95% bootstrap mean CI",
+      "promotionRule": "Diagnostics generate hypotheses only. No automatic champion parameter changes."
+    }
+  },
+  "OUT_OF_SAMPLE": {
+    "start": "2025-01-01",
+    "end": null,
+    "observations": 41219,
+    "scoreBuckets": {
+      "85-100": {
+        "5D": {
+          "n": 9225,
+          "mean": 0.00267,
+          "ciLow": 0.001645,
+          "ciHigh": 0.003712,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 9156,
+          "mean": 0.005557,
+          "ciLow": 0.004207,
+          "ciHigh": 0.007022,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 9019,
+          "mean": 0.010883,
+          "ciLow": 0.008771,
+          "ciHigh": 0.013018,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 8815,
+          "mean": 0.018506,
+          "ciLow": 0.01574,
+          "ciHigh": 0.021322,
+          "significantPositive": true
+        }
+      },
+      "<50": {
+        "5D": {
+          "n": 21064,
+          "mean": 0.001417,
+          "ciLow": 0.000778,
+          "ciHigh": 0.002046,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 20784,
+          "mean": 0.003678,
+          "ciLow": 0.002865,
+          "ciHigh": 0.004557,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 20230,
+          "mean": 0.008944,
+          "ciLow": 0.007644,
+          "ciHigh": 0.010234,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 19758,
+          "mean": 0.014423,
+          "ciLow": 0.012867,
+          "ciHigh": 0.015996,
+          "significantPositive": true
+        }
+      },
+      "75-84": {
+        "5D": {
+          "n": 3107,
+          "mean": 0.002269,
+          "ciLow": 0.000679,
+          "ciHigh": 0.003894,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 3083,
+          "mean": 0.002174,
+          "ciLow": -0.000182,
+          "ciHigh": 0.004463,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 3016,
+          "mean": 0.004035,
+          "ciLow": 0.000742,
+          "ciHigh": 0.00744,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2937,
+          "mean": 0.008152,
+          "ciLow": 0.003979,
+          "ciHigh": 0.012643,
+          "significantPositive": true
+        }
+      },
+      "50-64": {
+        "5D": {
+          "n": 4586,
+          "mean": -0.000501,
+          "ciLow": -0.001797,
+          "ciHigh": 0.000832,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 4524,
+          "mean": 0.000901,
+          "ciLow": -0.001005,
+          "ciHigh": 0.002753,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 4399,
+          "mean": 0.003139,
+          "ciLow": 0.000469,
+          "ciHigh": 0.005847,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 4290,
+          "mean": 0.006925,
+          "ciLow": 0.003572,
+          "ciHigh": 0.01026,
+          "significantPositive": true
+        }
+      },
+      "65-74": {
+        "5D": {
+          "n": 2763,
+          "mean": 0.000186,
+          "ciLow": -0.001357,
+          "ciHigh": 0.001802,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 2724,
+          "mean": 0.000304,
+          "ciLow": -0.00213,
+          "ciHigh": 0.002651,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 2659,
+          "mean": 0.003368,
+          "ciLow": -0.000319,
+          "ciHigh": 0.007157,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 2575,
+          "mean": 0.008925,
+          "ciLow": 0.00442,
+          "ciHigh": 0.013568,
+          "significantPositive": true
+        }
+      }
+    },
+    "regimes": {
+      "PANIC": {
+        "5D": {
+          "n": 13328,
+          "mean": -0.000309,
+          "ciLow": -0.001132,
+          "ciHigh": 0.000533,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 12854,
+          "mean": 0.003739,
+          "ciLow": 0.002556,
+          "ciHigh": 0.004935,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 11906,
+          "mean": 0.008559,
+          "ciLow": 0.006763,
+          "ciHigh": 0.010366,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 10958,
+          "mean": 0.019239,
+          "ciLow": 0.01674,
+          "ciHigh": 0.021603,
+          "significantPositive": true
+        }
+      },
+      "DEFENSIVE": {
+        "5D": {
+          "n": 7761,
+          "mean": 0.003791,
+          "ciLow": 0.002719,
+          "ciHigh": 0.004842,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 7761,
+          "mean": 0.003351,
+          "ciLow": 0.001748,
+          "ciHigh": 0.004905,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 7761,
+          "mean": 0.012487,
+          "ciLow": 0.010357,
+          "ciHigh": 0.014563,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 7761,
+          "mean": 0.019402,
+          "ciLow": 0.016859,
+          "ciHigh": 0.022071,
+          "significantPositive": true
+        }
+      },
+      "RISK_ON": {
+        "5D": {
+          "n": 12665,
+          "mean": 0.00036,
+          "ciLow": -0.00042,
+          "ciHigh": 0.001126,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 12665,
+          "mean": 0.00229,
+          "ciLow": 0.001193,
+          "ciHigh": 0.003342,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 12665,
+          "mean": 0.003792,
+          "ciLow": 0.002116,
+          "ciHigh": 0.005357,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 12665,
+          "mean": 0.005482,
+          "ciLow": 0.003554,
+          "ciHigh": 0.007324,
+          "significantPositive": true
+        }
+      },
+      "NEUTRAL": {
+        "5D": {
+          "n": 6991,
+          "mean": 0.004275,
+          "ciLow": 0.003317,
+          "ciHigh": 0.005302,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 6991,
+          "mean": 0.00513,
+          "ciLow": 0.003704,
+          "ciHigh": 0.006481,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 6991,
+          "mean": 0.009609,
+          "ciLow": 0.007695,
+          "ciHigh": 0.011479,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 6991,
+          "mean": 0.013431,
+          "ciLow": 0.011057,
+          "ciHigh": 0.015734,
+          "significantPositive": true
+        }
+      }
+    },
+    "sectors": {
+      "FINANCIAL SERVICES": {
+        "5D": {
+          "n": 8042,
+          "mean": 0.001929,
+          "ciLow": 0.001022,
+          "ciHigh": 0.002814,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 7950,
+          "mean": 0.004392,
+          "ciLow": 0.003145,
+          "ciHigh": 0.005654,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 7766,
+          "mean": 0.009239,
+          "ciLow": 0.00749,
+          "ciHigh": 0.010958,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 7582,
+          "mean": 0.015435,
+          "ciLow": 0.013297,
+          "ciHigh": 0.017614,
+          "significantPositive": true
+        }
+      },
+      "CAPITAL GOODS": {
+        "5D": {
+          "n": 5729,
+          "mean": 0.002684,
+          "ciLow": 0.001254,
+          "ciHigh": 0.004175,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 5662,
+          "mean": 0.006502,
+          "ciLow": 0.00455,
+          "ciHigh": 0.008597,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 5528,
+          "mean": 0.015137,
+          "ciLow": 0.012137,
+          "ciHigh": 0.018186,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 5394,
+          "mean": 0.025519,
+          "ciLow": 0.021738,
+          "ciHigh": 0.029347,
+          "significantPositive": true
+        }
+      },
+      "CONSTRUCTION MATERIALS": {
+        "5D": {
+          "n": 890,
+          "mean": -0.000521,
+          "ciLow": -0.002449,
+          "ciHigh": 0.001408,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 880,
+          "mean": -0.001437,
+          "ciLow": -0.004346,
+          "ciHigh": 0.001417,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 860,
+          "mean": -0.00214,
+          "ciLow": -0.00617,
+          "ciHigh": 0.002026,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 840,
+          "mean": -0.002668,
+          "ciLow": -0.007423,
+          "ciHigh": 0.001949,
+          "significantPositive": false
+        }
+      },
+      "FAST MOVING CONSUMER GOODS": {
+        "5D": {
+          "n": 2466,
+          "mean": 0.001609,
+          "ciLow": 4e-06,
+          "ciHigh": 0.003326,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 2438,
+          "mean": 0.003845,
+          "ciLow": 0.001396,
+          "ciHigh": 0.006251,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 2382,
+          "mean": 0.008651,
+          "ciLow": 0.004945,
+          "ciHigh": 0.012338,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2326,
+          "mean": 0.013382,
+          "ciLow": 0.008606,
+          "ciHigh": 0.018122,
+          "significantPositive": true
+        }
+      },
+      "CHEMICALS": {
+        "5D": {
+          "n": 2314,
+          "mean": 0.00075,
+          "ciLow": -0.001007,
+          "ciHigh": 0.002543,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 2288,
+          "mean": 0.002184,
+          "ciLow": -0.000204,
+          "ciHigh": 0.004657,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 2236,
+          "mean": 0.005442,
+          "ciLow": 0.00189,
+          "ciHigh": 0.009112,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 2184,
+          "mean": 0.009118,
+          "ciLow": 0.004501,
+          "ciHigh": 0.013633,
+          "significantPositive": true
+        }
+      },
+      "HEALTHCARE": {
+        "5D": {
+          "n": 3619,
+          "mean": 0.002018,
+          "ciLow": 0.000573,
+          "ciHigh": 0.00343,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 3576,
+          "mean": 0.004272,
+          "ciLow": 0.002245,
+          "ciHigh": 0.006238,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 3490,
+          "mean": 0.010384,
+          "ciLow": 0.007487,
+          "ciHigh": 0.013208,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 3404,
+          "mean": 0.017614,
+          "ciLow": 0.014006,
+          "ciHigh": 0.021094,
+          "significantPositive": true
+        }
+      },
+      "POWER": {
+        "5D": {
+          "n": 1423,
+          "mean": 0.000798,
+          "ciLow": -0.001411,
+          "ciHigh": 0.003107,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1406,
+          "mean": 0.00244,
+          "ciLow": -0.000959,
+          "ciHigh": 0.005727,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1372,
+          "mean": 0.006286,
+          "ciLow": 0.00139,
+          "ciHigh": 0.011347,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1338,
+          "mean": 0.011731,
+          "ciLow": 0.005302,
+          "ciHigh": 0.018293,
+          "significantPositive": true
+        }
+      },
+      "METALS & MINING": {
+        "5D": {
+          "n": 1513,
+          "mean": 0.003342,
+          "ciLow": 0.001157,
+          "ciHigh": 0.005664,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 1496,
+          "mean": 0.00672,
+          "ciLow": 0.00341,
+          "ciHigh": 0.010067,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 1462,
+          "mean": 0.015146,
+          "ciLow": 0.010334,
+          "ciHigh": 0.020159,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1428,
+          "mean": 0.025056,
+          "ciLow": 0.018815,
+          "ciHigh": 0.031122,
+          "significantPositive": true
+        }
+      },
+      "SERVICES": {
+        "5D": {
+          "n": 1107,
+          "mean": 0.002726,
+          "ciLow": -0.0,
+          "ciHigh": 0.0056,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1094,
+          "mean": 0.005974,
+          "ciLow": 0.00242,
+          "ciHigh": 0.009843,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 1068,
+          "mean": 0.013051,
+          "ciLow": 0.007601,
+          "ciHigh": 0.019006,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1042,
+          "mean": 0.020889,
+          "ciLow": 0.014055,
+          "ciHigh": 0.027673,
+          "significantPositive": true
+        }
+      },
+      "OIL GAS & CONSUMABLE FUELS": {
+        "5D": {
+          "n": 1442,
+          "mean": 0.002289,
+          "ciLow": 0.000131,
+          "ciHigh": 0.004467,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 1425,
+          "mean": 0.004098,
+          "ciLow": 0.001209,
+          "ciHigh": 0.007029,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 1391,
+          "mean": 0.009153,
+          "ciLow": 0.004994,
+          "ciHigh": 0.013277,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 1357,
+          "mean": 0.014922,
+          "ciLow": 0.009765,
+          "ciHigh": 0.019972,
+          "significantPositive": true
+        }
+      },
+      "REALTY": {
+        "5D": {
+          "n": 1157,
+          "mean": -0.001383,
+          "ciLow": -0.003948,
+          "ciHigh": 0.001103,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1144,
+          "mean": -0.002358,
+          "ciLow": -0.005911,
+          "ciHigh": 0.001224,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1118,
+          "mean": -0.002905,
+          "ciLow": -0.007836,
+          "ciHigh": 0.002002,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 1092,
+          "mean": -0.00335,
+          "ciLow": -0.009068,
+          "ciHigh": 0.002238,
+          "significantPositive": false
+        }
+      },
+      "INFORMATION TECHNOLOGY": {
+        "5D": {
+          "n": 1985,
+          "mean": -0.000607,
+          "ciLow": -0.002608,
+          "ciHigh": 0.001501,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1961,
+          "mean": -0.001503,
+          "ciLow": -0.004427,
+          "ciHigh": 0.001578,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1913,
+          "mean": -0.003982,
+          "ciLow": -0.008636,
+          "ciHigh": 0.000615,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 1865,
+          "mean": -0.005162,
+          "ciLow": -0.010846,
+          "ciHigh": 0.000652,
+          "significantPositive": false
+        }
+      },
+      "AUTOMOBILE AND AUTO COMPONENTS": {
+        "5D": {
+          "n": 3262,
+          "mean": 0.002534,
+          "ciLow": 0.001121,
+          "ciHigh": 0.004075,
+          "significantPositive": true
+        },
+        "10D": {
+          "n": 3223,
+          "mean": 0.005721,
+          "ciLow": 0.003468,
+          "ciHigh": 0.00795,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 3145,
+          "mean": 0.012264,
+          "ciLow": 0.009091,
+          "ciHigh": 0.015363,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 3067,
+          "mean": 0.020365,
+          "ciLow": 0.016508,
+          "ciHigh": 0.023989,
+          "significantPositive": true
+        }
+      },
+      "CONSUMER DURABLES": {
+        "5D": {
+          "n": 1335,
+          "mean": -0.001087,
+          "ciLow": -0.003831,
+          "ciHigh": 0.001864,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1320,
+          "mean": -0.001373,
+          "ciLow": -0.005218,
+          "ciHigh": 0.00263,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1290,
+          "mean": -0.00124,
+          "ciLow": -0.006796,
+          "ciHigh": 0.004501,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 1260,
+          "mean": -0.000936,
+          "ciLow": -0.007724,
+          "ciHigh": 0.005898,
+          "significantPositive": false
+        }
+      },
+      "CONSUMER SERVICES": {
+        "5D": {
+          "n": 1493,
+          "mean": -0.001443,
+          "ciLow": -0.003603,
+          "ciHigh": 0.000736,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1474,
+          "mean": -0.002636,
+          "ciLow": -0.005718,
+          "ciHigh": 0.000411,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1436,
+          "mean": -0.00502,
+          "ciLow": -0.009121,
+          "ciHigh": -0.000728,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 1398,
+          "mean": -0.006924,
+          "ciLow": -0.011995,
+          "ciHigh": -0.001922,
+          "significantPositive": false
+        }
+      },
+      "TELECOMMUNICATION": {
+        "5D": {
+          "n": 964,
+          "mean": 0.003358,
+          "ciLow": -0.000567,
+          "ciHigh": 0.007567,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 953,
+          "mean": 0.006965,
+          "ciLow": 0.001161,
+          "ciHigh": 0.013016,
+          "significantPositive": true
+        },
+        "20D": {
+          "n": 931,
+          "mean": 0.014374,
+          "ciLow": 0.005577,
+          "ciHigh": 0.024155,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 909,
+          "mean": 0.02551,
+          "ciLow": 0.012524,
+          "ciHigh": 0.039153,
+          "significantPositive": true
+        }
+      },
+      "CONSTRUCTION": {
+        "5D": {
+          "n": 1114,
+          "mean": -0.002437,
+          "ciLow": -0.004943,
+          "ciHigh": 0.00036,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 1101,
+          "mean": -0.003699,
+          "ciLow": -0.007667,
+          "ciHigh": 0.000312,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 1075,
+          "mean": -0.005167,
+          "ciLow": -0.01093,
+          "ciHigh": 0.000419,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 1049,
+          "mean": -0.005358,
+          "ciLow": -0.012872,
+          "ciHigh": 0.002326,
+          "significantPositive": false
+        }
+      },
+      "DIVERSIFIED": {
+        "5D": {
+          "n": 89,
+          "mean": 0.000168,
+          "ciLow": -0.01168,
+          "ciHigh": 0.013895,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 88,
+          "mean": 0.00208,
+          "ciLow": -0.014917,
+          "ciHigh": 0.021215,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 86,
+          "mean": 0.009534,
+          "ciLow": -0.01579,
+          "ciHigh": 0.038257,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 84,
+          "mean": 0.017929,
+          "ciLow": -0.011172,
+          "ciHigh": 0.049435,
+          "significantPositive": false
+        }
+      },
+      "TEXTILES": {
+        "5D": {
+          "n": 445,
+          "mean": 0.00084,
+          "ciLow": -0.003492,
+          "ciHigh": 0.004948,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 440,
+          "mean": 0.001913,
+          "ciLow": -0.00374,
+          "ciHigh": 0.007792,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 430,
+          "mean": 0.004983,
+          "ciLow": -0.00315,
+          "ciHigh": 0.013703,
+          "significantPositive": false
+        },
+        "30D": {
+          "n": 420,
+          "mean": 0.00878,
+          "ciLow": -0.001376,
+          "ciHigh": 0.0191,
+          "significantPositive": false
+        }
+      },
+      "MEDIA ENTERTAINMENT & PUBLICATION": {
+        "5D": {
+          "n": 356,
+          "mean": 0.002923,
+          "ciLow": -0.003051,
+          "ciHigh": 0.009195,
+          "significantPositive": false
+        },
+        "10D": {
+          "n": 352,
+          "mean": 0.006465,
+          "ciLow": -0.002552,
+          "ciHigh": 0.015897,
+          "significantPositive": false
+        },
+        "20D": {
+          "n": 344,
+          "mean": 0.01252,
+          "ciLow": 0.000154,
+          "ciHigh": 0.025703,
+          "significantPositive": true
+        },
+        "30D": {
+          "n": 336,
+          "mean": 0.020012,
+          "ciLow": 0.004196,
+          "ciHigh": 0.035604,
+          "significantPositive": true
+        }
+      }
+    },
+    "methodology": {
+      "target": "Stock forward return minus Nifty forward return",
+      "sampling": "Every 5 trading sessions",
+      "confidenceInterval": "95% bootstrap mean CI",
+      "promotionRule": "Diagnostics generate hypotheses only. No automatic champion parameter changes."
+    }
+  }
+}
