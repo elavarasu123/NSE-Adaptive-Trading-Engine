@@ -2,6 +2,8 @@ import os
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
@@ -29,7 +31,43 @@ class FixedProvider:
         self.price = price
 
     def quote(self, symbol):
-        return FixedQuote(symbol, self.price)
+        return FixedQuote(
+            symbol,
+            self.price,
+        )
+
+    def history(self, symbol, period="1y"):
+        # Deterministic OHLC history for ATR/risk tests.
+        # Final close equals self.price.
+        rows = []
+        start = self.price * 0.90
+
+        for i in range(100):
+            close = (
+                start
+                + (
+                    self.price - start
+                )
+                * i
+                / 99
+            )
+
+            spread = max(
+                close * 0.01,
+                1.0,
+            )
+
+            rows.append(
+                {
+                    "Open": close,
+                    "High": close + spread,
+                    "Low": close - spread,
+                    "Close": close,
+                    "Volume": 1000000,
+                }
+            )
+
+        return pd.DataFrame(rows)
 
 
 def setup_function():

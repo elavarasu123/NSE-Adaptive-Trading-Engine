@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from .models import Portfolio, Position, PaperTrade, Journal
-from .risk import position_size
+from .risk import build_trade_plan
 
 
 def get_portfolio(db: Session):
@@ -27,8 +27,7 @@ def paper_buy(
     db: Session,
     provider,
     symbol: str,
-    stop_pct: float = 0.06,
-    target_pct: float = 0.10,
+    exposure_multiplier: float = 1.0,
 ):
     symbol = symbol.upper().replace(".NS", "")
 
@@ -42,40 +41,62 @@ def paper_buy(
     )
 
     if existing:
-        raise HTTPException(400, "Position already open")
+        raise HTTPException(
+            400,
+            "Position already open",
+        )
 
     portfolio = get_portfolio(db)
-    quote = provider.quote(symbol)
 
-    if quote.price <= 0:
-        raise HTTPException(400, "Invalid market price")
+    try:
+        history = provider.history(
+            symbol,
+            period="1y",
+        )
 
-    stop = round(quote.price * (1 - stop_pct), 2)
-    target = round(quote.price * (1 + target_pct), 2)
+        plan = build_trade_plan(
+            history,
+            cash=portfolio.cash,
+            capital=portfolio.initial_capital,
+            exposure_multiplier=
+                exposure_multiplier,
+        )
 
-    qty = position_size(
-        portfolio.cash,
-        quote.price,
-        stop,
+    except Exception as exc:
+        raise HTTPException(
+            400,
+            f"Risk plan unavailable: {exc}",
+        )
+
+    if not plan.valid:
+        raise HTTPException(
+            400,
+            plan.reason,
+        )
+
+    cost = round(
+        plan.quantity * plan.entry,
+        2,
     )
 
-    if qty < 1:
-        raise HTTPException(400, "Risk gate rejected trade")
-
-    cost = round(qty * quote.price, 2)
-
     if cost > portfolio.cash:
-        raise HTTPException(400, "Insufficient paper cash")
+        raise HTTPException(
+            400,
+            "Insufficient paper cash",
+        )
 
-    portfolio.cash = round(portfolio.cash - cost, 2)
+    portfolio.cash = round(
+        portfolio.cash - cost,
+        2,
+    )
 
     position = Position(
         symbol=symbol,
-        quantity=qty,
-        avg_price=quote.price,
-        current_price=quote.price,
-        stop_price=stop,
-        target_price=target,
+        quantity=plan.quantity,
+        avg_price=plan.entry,
+        current_price=plan.entry,
+        stop_price=plan.stop,
+        target_price=plan.target,
         status="OPEN",
     )
 
@@ -85,11 +106,11 @@ def paper_buy(
         PaperTrade(
             symbol=symbol,
             side="BUY",
-            quantity=qty,
-            price=quote.price,
+            quantity=plan.quantity,
+            price=plan.entry,
             value=cost,
             realized_pnl=0,
-            reason="ENTRY",
+            reason="ATR_RISK_ENTRY",
         )
     )
 
@@ -97,8 +118,13 @@ def paper_buy(
         Journal(
             kind="PAPER_BUY",
             message=(
-                f"{symbol}: BUY {qty} @ ₹{quote.price}; "
-                f"stop ₹{stop}; target ₹{target}"
+                f"{symbol}: BUY "
+                f"{plan.quantity} @ "
+                f"₹{plan.entry}; "
+                f"stop ₹{plan.stop}; "
+                f"target ₹{plan.target}; "
+                f"risk ₹{plan.capital_risk}; "
+                f"RR {plan.reward_risk}"
             ),
         )
     )

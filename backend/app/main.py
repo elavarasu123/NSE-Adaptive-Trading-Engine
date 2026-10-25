@@ -11,7 +11,7 @@ from .models import (
     PaperTrade,
 )
 from .engine import scan, scan_report, provider
-from .regime import regime_dict
+from .regime import regime_dict, detect_regime
 from .trading import (
     paper_buy,
     paper_sell,
@@ -220,10 +220,17 @@ def buy(
     symbol: str,
     db: Session = Depends(get_db),
 ):
+    try:
+        regime = detect_regime(provider)
+        exposure = regime.exposure_multiplier
+    except Exception:
+        exposure = 0.0
+
     position = paper_buy(
         db,
         provider,
         symbol,
+        exposure_multiplier=exposure,
     )
 
     return {
