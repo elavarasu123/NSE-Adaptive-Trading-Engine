@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from .models import Portfolio, Position, PaperTrade, Journal
 from .risk import build_trade_plan
+from .portfolio_risk import validate_new_trade
 
 
 def get_portfolio(db: Session):
@@ -72,6 +73,19 @@ def paper_buy(
         raise HTTPException(
             400,
             plan.reason,
+        )
+
+    portfolio_gate = validate_new_trade(
+        db=db,
+        capital=portfolio.initial_capital,
+        proposed_value=plan.position_value,
+        proposed_risk=plan.capital_risk,
+    )
+
+    if not portfolio_gate.approved:
+        raise HTTPException(
+            400,
+            portfolio_gate.reason,
         )
 
     cost = round(

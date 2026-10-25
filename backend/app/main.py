@@ -12,6 +12,7 @@ from .models import (
 )
 from .engine import scan, scan_report, provider
 from .regime import regime_dict, detect_regime
+from .portfolio_risk import portfolio_risk_dict
 from .trading import (
     paper_buy,
     paper_sell,
@@ -139,6 +140,20 @@ def dashboard(db: Session = Depends(get_db)):
             for p in positions
         ],
     }
+
+
+@app.get("/api/risk")
+def risk_status(
+    db: Session = Depends(get_db),
+):
+    portfolio = db.query(
+        Portfolio
+    ).first()
+
+    return portfolio_risk_dict(
+        db,
+        portfolio.initial_capital,
+    )
 
 
 @app.get("/api/candidates")
