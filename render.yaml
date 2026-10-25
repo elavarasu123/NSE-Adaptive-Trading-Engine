@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: nse-adaptive-trading-engine
+    runtime: docker
+    plan: free
+
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+
+    healthCheckPath: /health
+
+    envVars:
+      - key: SHARED_STATE_BACKEND
+        value: db
+
+      - key: RUNTIME_SOURCE
+        value: RENDER_DASHBOARD
+
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+      - key: DATABASE_URL
+        sync: false

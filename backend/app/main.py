@@ -102,7 +102,7 @@ def health():
         "mode": "PAPER",
         "provider": provider.__class__.__name__,
         "tickByTick": False,
-        "version": "0.2",
+        "version": "1.2",
     }
 
 
@@ -824,3 +824,15 @@ def shared_database_status(
                 EquitySnapshot
             ).count(),
     }
+
+# ==================================================
+# V1.2 PRODUCTION DASHBOARD
+# ==================================================
+# Keep this block at the end of the module.
+# API routes are registered first and the React
+# single-page application fallback is registered last.
+
+from .static_dashboard import mount_dashboard
+
+mount_dashboard(app)
+

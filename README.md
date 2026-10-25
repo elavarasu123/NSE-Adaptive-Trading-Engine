@@ -206,3 +206,33 @@ When `DATABASE_URL` points to PostgreSQL and
 SQLite and JSONL remain available as a local-development fallback.
 
 GitHub Actions no longer treats its paper-state cache as the canonical trading account. The old cache is restored only to perform the one-time migration into PostgreSQL.
+
+## V1.2 Permanent Cloud Dashboard
+
+V1.2 deploys the existing React dashboard and FastAPI API
+as one cloud web service.
+
+Production architecture:
+
+GitHub Actions
+    -> scheduled paper engine
+    -> Neon PostgreSQL
+    -> FastAPI API
+    -> React dashboard
+    -> permanent HTTPS dashboard
+
+GitHub Actions and the dashboard use the same Neon
+PostgreSQL database introduced in V1.1.
+
+Safety constraints remain enforced:
+
+- paper trading only
+- one-time INR 100,000 paper capital
+- no daily capital reset
+- no live broker orders
+- no automatic real-money execution
+- no automatic model promotion
+
+DATABASE_URL is supplied through deployment secrets and
+must never be committed to Git.
+
