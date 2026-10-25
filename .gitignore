@@ -5,3 +5,6 @@ __pycache__/
 node_modules/
 dist/
 .env
+
+# Forward-learning runtime state
+backend/data/forward/*.jsonl

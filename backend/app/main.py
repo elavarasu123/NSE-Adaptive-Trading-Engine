@@ -623,3 +623,44 @@ def signal_validation_report():
     return json.loads(
         path.read_text()
     )
+
+@app.get("/api/forward/status")
+def forward_learning_status():
+    from .forward_learning import learning_status
+
+    return learning_status()
+
+
+@app.get("/api/forward/predictions")
+def forward_predictions():
+    from .forward_learning import latest_predictions
+
+    return {
+        "predictions":
+            latest_predictions()
+    }
+
+
+@app.post("/api/forward/run")
+def run_forward_learning():
+    from .forward_learning import (
+        generate_predictions,
+        mature_outcomes,
+        learning_status,
+    )
+
+    outcomes = mature_outcomes()
+
+    predictions = generate_predictions(
+        minimum_score=65,
+        top_n=10,
+    )
+
+    return {
+        "outcomes":
+            outcomes,
+        "predictions":
+            predictions,
+        "status":
+            learning_status(),
+    }
