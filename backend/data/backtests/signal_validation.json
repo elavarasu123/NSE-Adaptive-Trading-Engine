@@ -1,0 +1,1311 @@
+{
+  "status": "RESEARCH_ONLY",
+  "methodology": {
+    "bootstrap": "Moving block bootstrap over date-level cross sections.",
+    "ic": "Cross-sectional Spearman correlation of engine score with future stock excess return vs Nifty.",
+    "topBucketTest": "Score >=85 compared with same-date eligible universe.",
+    "promotion": "No automatic strategy promotion."
+  },
+  "periods": {
+    "DEVELOPMENT": {
+      "start": "2018-01-01",
+      "end": "2021-12-31",
+      "observations": 70407,
+      "horizons": {
+        "5D": {
+          "informationCoefficient": {
+            "nDates": 197,
+            "mean": 0.011122,
+            "ciLow": -0.009754,
+            "ciHigh": 0.031478,
+            "positive": false,
+            "positiveIcRate": 0.5584,
+            "medianIc": 0.021202
+          },
+          "monotonicity": {
+            "nDates": 197,
+            "mean": 0.093401,
+            "ciLow": 0.016751,
+            "ciHigh": 0.176142,
+            "positive": true,
+            "positiveRate": 0.5584
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 197,
+              "mean": -7e-05,
+              "ciLow": -0.003198,
+              "ciHigh": 0.003032,
+              "positive": false
+            },
+            "50-64": {
+              "nDates": 197,
+              "mean": 0.000215,
+              "ciLow": -0.002552,
+              "ciHigh": 0.002878,
+              "positive": false
+            },
+            "65-74": {
+              "nDates": 197,
+              "mean": 0.001463,
+              "ciLow": -0.001314,
+              "ciHigh": 0.004336,
+              "positive": false
+            },
+            "75-84": {
+              "nDates": 196,
+              "mean": 0.002458,
+              "ciLow": -0.000377,
+              "ciHigh": 0.005396,
+              "positive": false
+            },
+            "85-100": {
+              "nDates": 197,
+              "mean": 0.002053,
+              "ciLow": -0.000548,
+              "ciHigh": 0.004583,
+              "positive": false
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 195,
+            "mean": 0.000784,
+            "ciLow": -0.001014,
+            "ciHigh": 0.002633,
+            "positive": false
+          }
+        },
+        "10D": {
+          "informationCoefficient": {
+            "nDates": 197,
+            "mean": 0.021221,
+            "ciLow": -0.005067,
+            "ciHigh": 0.048403,
+            "positive": false,
+            "positiveIcRate": 0.6091,
+            "medianIc": 0.048455
+          },
+          "monotonicity": {
+            "nDates": 197,
+            "mean": 0.172589,
+            "ciLow": 0.083731,
+            "ciHigh": 0.26401,
+            "positive": true,
+            "positiveRate": 0.6193
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 197,
+              "mean": -0.00074,
+              "ciLow": -0.006054,
+              "ciHigh": 0.005189,
+              "positive": false
+            },
+            "50-64": {
+              "nDates": 197,
+              "mean": 0.000424,
+              "ciLow": -0.004279,
+              "ciHigh": 0.00545,
+              "positive": false
+            },
+            "65-74": {
+              "nDates": 197,
+              "mean": 0.00265,
+              "ciLow": -0.001546,
+              "ciHigh": 0.007199,
+              "positive": false
+            },
+            "75-84": {
+              "nDates": 196,
+              "mean": 0.00509,
+              "ciLow": 0.000497,
+              "ciHigh": 0.009557,
+              "positive": true
+            },
+            "85-100": {
+              "nDates": 197,
+              "mean": 0.004635,
+              "ciLow": 0.000323,
+              "ciHigh": 0.009202,
+              "positive": true
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 195,
+            "mean": 0.002461,
+            "ciLow": -0.00058,
+            "ciHigh": 0.00553,
+            "positive": false
+          }
+        },
+        "20D": {
+          "informationCoefficient": {
+            "nDates": 197,
+            "mean": 0.029173,
+            "ciLow": -0.004596,
+            "ciHigh": 0.06353,
+            "positive": false,
+            "positiveIcRate": 0.6091,
+            "medianIc": 0.04548
+          },
+          "monotonicity": {
+            "nDates": 197,
+            "mean": 0.230964,
+            "ciLow": 0.123769,
+            "ciHigh": 0.342132,
+            "positive": true,
+            "positiveRate": 0.665
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 197,
+              "mean": -0.000753,
+              "ciLow": -0.010564,
+              "ciHigh": 0.010382,
+              "positive": false
+            },
+            "50-64": {
+              "nDates": 197,
+              "mean": 0.001111,
+              "ciLow": -0.00713,
+              "ciHigh": 0.009843,
+              "positive": false
+            },
+            "65-74": {
+              "nDates": 197,
+              "mean": 0.005247,
+              "ciLow": -0.002092,
+              "ciHigh": 0.013409,
+              "positive": false
+            },
+            "75-84": {
+              "nDates": 196,
+              "mean": 0.00701,
+              "ciLow": -0.00067,
+              "ciHigh": 0.015173,
+              "positive": false
+            },
+            "85-100": {
+              "nDates": 197,
+              "mean": 0.008457,
+              "ciLow": 0.001022,
+              "ciHigh": 0.017269,
+              "positive": true
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 195,
+            "mean": 0.005141,
+            "ciLow": 0.00037,
+            "ciHigh": 0.010245,
+            "positive": true
+          }
+        },
+        "30D": {
+          "informationCoefficient": {
+            "nDates": 197,
+            "mean": 0.036276,
+            "ciLow": -0.001778,
+            "ciHigh": 0.074998,
+            "positive": false,
+            "positiveIcRate": 0.6193,
+            "medianIc": 0.056884
+          },
+          "monotonicity": {
+            "nDates": 197,
+            "mean": 0.24264,
+            "ciLow": 0.112652,
+            "ciHigh": 0.368553,
+            "positive": true,
+            "positiveRate": 0.6497
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 197,
+              "mean": 0.00055,
+              "ciLow": -0.013028,
+              "ciHigh": 0.014582,
+              "positive": false
+            },
+            "50-64": {
+              "nDates": 197,
+              "mean": 0.002969,
+              "ciLow": -0.008969,
+              "ciHigh": 0.015718,
+              "positive": false
+            },
+            "65-74": {
+              "nDates": 197,
+              "mean": 0.008238,
+              "ciLow": -0.002274,
+              "ciHigh": 0.019764,
+              "positive": false
+            },
+            "75-84": {
+              "nDates": 196,
+              "mean": 0.012205,
+              "ciLow": 0.00104,
+              "ciHigh": 0.024657,
+              "positive": true
+            },
+            "85-100": {
+              "nDates": 197,
+              "mean": 0.013584,
+              "ciLow": 0.002945,
+              "ciHigh": 0.026412,
+              "positive": true
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 195,
+            "mean": 0.007663,
+            "ciLow": 0.001239,
+            "ciHigh": 0.014317,
+            "positive": true
+          }
+        }
+      },
+      "factorAttribution30D": {
+        "sectors": {
+          "CAPITAL GOODS": {
+            "nDates": 197,
+            "mean": 0.000324,
+            "ciLow": -0.008909,
+            "ciHigh": 0.009678,
+            "positive": false
+          },
+          "CONSTRUCTION MATERIALS": {
+            "nDates": 197,
+            "mean": -0.003777,
+            "ciLow": -0.017741,
+            "ciHigh": 0.012159,
+            "positive": false
+          },
+          "CHEMICALS": {
+            "nDates": 197,
+            "mean": 0.014269,
+            "ciLow": 0.001717,
+            "ciHigh": 0.02628,
+            "positive": true
+          },
+          "HEALTHCARE": {
+            "nDates": 197,
+            "mean": 0.000713,
+            "ciLow": -0.018657,
+            "ciHigh": 0.023244,
+            "positive": false
+          },
+          "POWER": {
+            "nDates": 197,
+            "mean": 0.013369,
+            "ciLow": -0.002195,
+            "ciHigh": 0.029267,
+            "positive": false
+          },
+          "METALS & MINING": {
+            "nDates": 197,
+            "mean": 0.010322,
+            "ciLow": -0.011059,
+            "ciHigh": 0.033467,
+            "positive": false
+          },
+          "SERVICES": {
+            "nDates": 197,
+            "mean": 0.003554,
+            "ciLow": -0.00627,
+            "ciHigh": 0.015618,
+            "positive": false
+          },
+          "REALTY": {
+            "nDates": 197,
+            "mean": 0.000607,
+            "ciLow": -0.019765,
+            "ciHigh": 0.020552,
+            "positive": false
+          },
+          "OIL GAS & CONSUMABLE FUELS": {
+            "nDates": 197,
+            "mean": -0.015028,
+            "ciLow": -0.028961,
+            "ciHigh": -0.002793,
+            "positive": false
+          },
+          "AUTOMOBILE AND AUTO COMPONENTS": {
+            "nDates": 197,
+            "mean": -0.009534,
+            "ciLow": -0.019324,
+            "ciHigh": -0.000426,
+            "positive": false
+          },
+          "CONSUMER DURABLES": {
+            "nDates": 197,
+            "mean": 0.012611,
+            "ciLow": -0.000862,
+            "ciHigh": 0.029008,
+            "positive": false
+          },
+          "FAST MOVING CONSUMER GOODS": {
+            "nDates": 197,
+            "mean": -9e-05,
+            "ciLow": -0.017669,
+            "ciHigh": 0.020463,
+            "positive": false
+          },
+          "FINANCIAL SERVICES": {
+            "nDates": 197,
+            "mean": -0.013051,
+            "ciLow": -0.024538,
+            "ciHigh": -0.002213,
+            "positive": false
+          },
+          "CONSUMER SERVICES": {
+            "nDates": 197,
+            "mean": 0.010552,
+            "ciLow": -0.006894,
+            "ciHigh": 0.028681,
+            "positive": false
+          },
+          "TELECOMMUNICATION": {
+            "nDates": 197,
+            "mean": 0.017379,
+            "ciLow": -0.00758,
+            "ciHigh": 0.048733,
+            "positive": false
+          },
+          "INFORMATION TECHNOLOGY": {
+            "nDates": 197,
+            "mean": 0.030271,
+            "ciLow": 0.01172,
+            "ciHigh": 0.047678,
+            "positive": true
+          },
+          "CONSTRUCTION": {
+            "nDates": 197,
+            "mean": -0.021756,
+            "ciLow": -0.03424,
+            "ciHigh": -0.010287,
+            "positive": false
+          },
+          "TEXTILES": {
+            "nDates": 197,
+            "mean": 0.022562,
+            "ciLow": 0.004281,
+            "ciHigh": 0.044607,
+            "positive": true
+          },
+          "MEDIA ENTERTAINMENT & PUBLICATION": {
+            "nDates": 197,
+            "mean": -0.023362,
+            "ciLow": -0.045674,
+            "ciHigh": -0.000799,
+            "positive": false
+          }
+        },
+        "regimes": {
+          "RISK_ON": {
+            "nDates": 115,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          },
+          "DEFENSIVE": {
+            "nDates": 35,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          },
+          "NEUTRAL": {
+            "nDates": 23,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          },
+          "PANIC": {
+            "nDates": 24,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          }
+        }
+      }
+    },
+    "VALIDATION": {
+      "start": "2022-01-01",
+      "end": "2024-12-31",
+      "observations": 61210,
+      "horizons": {
+        "5D": {
+          "informationCoefficient": {
+            "nDates": 148,
+            "mean": 0.012165,
+            "ciLow": -0.004706,
+            "ciHigh": 0.029099,
+            "positive": false,
+            "positiveIcRate": 0.5676,
+            "medianIc": 0.019204
+          },
+          "monotonicity": {
+            "nDates": 148,
+            "mean": 0.154054,
+            "ciLow": 0.058784,
+            "ciHigh": 0.241892,
+            "positive": true,
+            "positiveRate": 0.5946
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 148,
+              "mean": 0.00222,
+              "ciLow": 0.00014,
+              "ciHigh": 0.004423,
+              "positive": true
+            },
+            "50-64": {
+              "nDates": 148,
+              "mean": 0.003523,
+              "ciLow": 0.001312,
+              "ciHigh": 0.005851,
+              "positive": true
+            },
+            "65-74": {
+              "nDates": 148,
+              "mean": 0.00318,
+              "ciLow": 0.000629,
+              "ciHigh": 0.005706,
+              "positive": true
+            },
+            "75-84": {
+              "nDates": 148,
+              "mean": 0.004914,
+              "ciLow": 0.00249,
+              "ciHigh": 0.007357,
+              "positive": true
+            },
+            "85-100": {
+              "nDates": 148,
+              "mean": 0.005813,
+              "ciLow": 0.003106,
+              "ciHigh": 0.008495,
+              "positive": true
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 148,
+            "mean": 0.00153,
+            "ciLow": 0.000306,
+            "ciHigh": 0.002733,
+            "positive": true
+          }
+        },
+        "10D": {
+          "informationCoefficient": {
+            "nDates": 148,
+            "mean": 0.023255,
+            "ciLow": 0.005917,
+            "ciHigh": 0.041246,
+            "positive": true,
+            "positiveIcRate": 0.5878,
+            "medianIc": 0.015238
+          },
+          "monotonicity": {
+            "nDates": 148,
+            "mean": 0.222973,
+            "ciLow": 0.125659,
+            "ciHigh": 0.311486,
+            "positive": true,
+            "positiveRate": 0.6351
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 148,
+              "mean": 0.004813,
+              "ciLow": 0.001211,
+              "ciHigh": 0.008635,
+              "positive": true
+            },
+            "50-64": {
+              "nDates": 148,
+              "mean": 0.006681,
+              "ciLow": 0.002698,
+              "ciHigh": 0.010492,
+              "positive": true
+            },
+            "65-74": {
+              "nDates": 148,
+              "mean": 0.006663,
+              "ciLow": 0.00268,
+              "ciHigh": 0.010895,
+              "positive": true
+            },
+            "75-84": {
+              "nDates": 148,
+              "mean": 0.009315,
+              "ciLow": 0.005218,
+              "ciHigh": 0.013075,
+              "positive": true
+            },
+            "85-100": {
+              "nDates": 148,
+              "mean": 0.01207,
+              "ciLow": 0.007821,
+              "ciHigh": 0.016489,
+              "positive": true
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 148,
+            "mean": 0.00355,
+            "ciLow": 0.00207,
+            "ciHigh": 0.005192,
+            "positive": true
+          }
+        },
+        "20D": {
+          "informationCoefficient": {
+            "nDates": 148,
+            "mean": 0.033682,
+            "ciLow": 0.014061,
+            "ciHigh": 0.059923,
+            "positive": true,
+            "positiveIcRate": 0.6216,
+            "medianIc": 0.040484
+          },
+          "monotonicity": {
+            "nDates": 148,
+            "mean": 0.264865,
+            "ciLow": 0.165524,
+            "ciHigh": 0.380439,
+            "positive": true,
+            "positiveRate": 0.6959
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 148,
+              "mean": 0.009545,
+              "ciLow": 0.002884,
+              "ciHigh": 0.016949,
+              "positive": true
+            },
+            "50-64": {
+              "nDates": 148,
+              "mean": 0.014456,
+              "ciLow": 0.007239,
+              "ciHigh": 0.022762,
+              "positive": true
+            },
+            "65-74": {
+              "nDates": 148,
+              "mean": 0.013569,
+              "ciLow": 0.007489,
+              "ciHigh": 0.021267,
+              "positive": true
+            },
+            "75-84": {
+              "nDates": 148,
+              "mean": 0.017898,
+              "ciLow": 0.01108,
+              "ciHigh": 0.025324,
+              "positive": true
+            },
+            "85-100": {
+              "nDates": 148,
+              "mean": 0.023964,
+              "ciLow": 0.017053,
+              "ciHigh": 0.033002,
+              "positive": true
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 148,
+            "mean": 0.007093,
+            "ciLow": 0.004644,
+            "ciHigh": 0.010772,
+            "positive": true
+          }
+        },
+        "30D": {
+          "informationCoefficient": {
+            "nDates": 148,
+            "mean": 0.035886,
+            "ciLow": 0.014593,
+            "ciHigh": 0.067607,
+            "positive": true,
+            "positiveIcRate": 0.6216,
+            "medianIc": 0.022022
+          },
+          "monotonicity": {
+            "nDates": 148,
+            "mean": 0.275,
+            "ciLow": 0.170912,
+            "ciHigh": 0.410152,
+            "positive": true,
+            "positiveRate": 0.7027
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 148,
+              "mean": 0.014989,
+              "ciLow": 0.006251,
+              "ciHigh": 0.026484,
+              "positive": true
+            },
+            "50-64": {
+              "nDates": 148,
+              "mean": 0.021851,
+              "ciLow": 0.01268,
+              "ciHigh": 0.034258,
+              "positive": true
+            },
+            "65-74": {
+              "nDates": 148,
+              "mean": 0.021253,
+              "ciLow": 0.013227,
+              "ciHigh": 0.03381,
+              "positive": true
+            },
+            "75-84": {
+              "nDates": 148,
+              "mean": 0.026796,
+              "ciLow": 0.017844,
+              "ciHigh": 0.039594,
+              "positive": true
+            },
+            "85-100": {
+              "nDates": 148,
+              "mean": 0.034304,
+              "ciLow": 0.026489,
+              "ciHigh": 0.047704,
+              "positive": true
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 148,
+            "mean": 0.009219,
+            "ciLow": 0.006024,
+            "ciHigh": 0.014569,
+            "positive": true
+          }
+        }
+      },
+      "factorAttribution30D": {
+        "sectors": {
+          "FINANCIAL SERVICES": {
+            "nDates": 148,
+            "mean": -0.003899,
+            "ciLow": -0.012903,
+            "ciHigh": 0.004502,
+            "positive": false
+          },
+          "CAPITAL GOODS": {
+            "nDates": 148,
+            "mean": 0.027815,
+            "ciLow": 0.015821,
+            "ciHigh": 0.044526,
+            "positive": true
+          },
+          "CONSTRUCTION MATERIALS": {
+            "nDates": 148,
+            "mean": -0.025559,
+            "ciLow": -0.040471,
+            "ciHigh": -0.011417,
+            "positive": false
+          },
+          "CHEMICALS": {
+            "nDates": 148,
+            "mean": -0.010067,
+            "ciLow": -0.025755,
+            "ciHigh": 0.00341,
+            "positive": false
+          },
+          "HEALTHCARE": {
+            "nDates": 148,
+            "mean": -0.005014,
+            "ciLow": -0.018115,
+            "ciHigh": 0.007075,
+            "positive": false
+          },
+          "POWER": {
+            "nDates": 148,
+            "mean": 0.009565,
+            "ciLow": -0.012077,
+            "ciHigh": 0.031864,
+            "positive": false
+          },
+          "METALS & MINING": {
+            "nDates": 148,
+            "mean": 0.006097,
+            "ciLow": -0.017757,
+            "ciHigh": 0.026182,
+            "positive": false
+          },
+          "SERVICES": {
+            "nDates": 148,
+            "mean": -0.008683,
+            "ciLow": -0.019451,
+            "ciHigh": 0.003687,
+            "positive": false
+          },
+          "OIL GAS & CONSUMABLE FUELS": {
+            "nDates": 148,
+            "mean": 0.00084,
+            "ciLow": -0.022554,
+            "ciHigh": 0.024982,
+            "positive": false
+          },
+          "REALTY": {
+            "nDates": 148,
+            "mean": 0.002485,
+            "ciLow": -0.01088,
+            "ciHigh": 0.018323,
+            "positive": false
+          },
+          "INFORMATION TECHNOLOGY": {
+            "nDates": 148,
+            "mean": -0.014582,
+            "ciLow": -0.033794,
+            "ciHigh": 0.004207,
+            "positive": false
+          },
+          "AUTOMOBILE AND AUTO COMPONENTS": {
+            "nDates": 148,
+            "mean": 0.000401,
+            "ciLow": -0.011006,
+            "ciHigh": 0.012939,
+            "positive": false
+          },
+          "CONSUMER DURABLES": {
+            "nDates": 148,
+            "mean": -0.006921,
+            "ciLow": -0.020595,
+            "ciHigh": 0.00743,
+            "positive": false
+          },
+          "FAST MOVING CONSUMER GOODS": {
+            "nDates": 148,
+            "mean": -0.009044,
+            "ciLow": -0.020012,
+            "ciHigh": 6.9e-05,
+            "positive": false
+          },
+          "CONSUMER SERVICES": {
+            "nDates": 148,
+            "mean": -0.000361,
+            "ciLow": -0.013912,
+            "ciHigh": 0.011468,
+            "positive": false
+          },
+          "TELECOMMUNICATION": {
+            "nDates": 148,
+            "mean": -0.015016,
+            "ciLow": -0.028406,
+            "ciHigh": 0.001606,
+            "positive": false
+          },
+          "CONSTRUCTION": {
+            "nDates": 148,
+            "mean": 0.026195,
+            "ciLow": 0.007455,
+            "ciHigh": 0.051135,
+            "positive": true
+          },
+          "TEXTILES": {
+            "nDates": 148,
+            "mean": -0.032659,
+            "ciLow": -0.048193,
+            "ciHigh": -0.017134,
+            "positive": false
+          },
+          "MEDIA ENTERTAINMENT & PUBLICATION": {
+            "nDates": 148,
+            "mean": -0.033166,
+            "ciLow": -0.054857,
+            "ciHigh": -0.01565,
+            "positive": false
+          }
+        },
+        "regimes": {
+          "RISK_ON": {
+            "nDates": 78,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          },
+          "NEUTRAL": {
+            "nDates": 26,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          },
+          "DEFENSIVE": {
+            "nDates": 25,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          },
+          "PANIC": {
+            "nDates": 19,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          }
+        }
+      }
+    },
+    "OUT_OF_SAMPLE": {
+      "start": "2025-01-01",
+      "end": null,
+      "observations": 41219,
+      "horizons": {
+        "5D": {
+          "informationCoefficient": {
+            "nDates": 89,
+            "mean": 0.001765,
+            "ciLow": -0.023279,
+            "ciHigh": 0.02632,
+            "positive": false,
+            "positiveIcRate": 0.5618,
+            "medianIc": 0.008812
+          },
+          "monotonicity": {
+            "nDates": 89,
+            "mean": 0.082022,
+            "ciLow": -0.021376,
+            "ciHigh": 0.193258,
+            "positive": false,
+            "positiveRate": 0.4831
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 89,
+              "mean": 0.00127,
+              "ciLow": -0.001724,
+              "ciHigh": 0.004436,
+              "positive": false
+            },
+            "50-64": {
+              "nDates": 89,
+              "mean": -0.000119,
+              "ciLow": -0.003049,
+              "ciHigh": 0.002865,
+              "positive": false
+            },
+            "65-74": {
+              "nDates": 89,
+              "mean": 0.000582,
+              "ciLow": -0.002179,
+              "ciHigh": 0.003532,
+              "positive": false
+            },
+            "75-84": {
+              "nDates": 89,
+              "mean": 0.002124,
+              "ciLow": -0.001178,
+              "ciHigh": 0.005576,
+              "positive": false
+            },
+            "85-100": {
+              "nDates": 89,
+              "mean": 0.001037,
+              "ciLow": -0.001835,
+              "ciHigh": 0.004237,
+              "positive": false
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 89,
+            "mean": -0.000386,
+            "ciLow": -0.002398,
+            "ciHigh": 0.001517,
+            "positive": false
+          }
+        },
+        "10D": {
+          "informationCoefficient": {
+            "nDates": 88,
+            "mean": 0.005676,
+            "ciLow": -0.022928,
+            "ciHigh": 0.039484,
+            "positive": false,
+            "positiveIcRate": 0.5682,
+            "medianIc": 0.016857
+          },
+          "monotonicity": {
+            "nDates": 88,
+            "mean": 0.088636,
+            "ciLow": -0.042074,
+            "ciHigh": 0.229545,
+            "positive": false,
+            "positiveRate": 0.5455
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 88,
+              "mean": 0.002908,
+              "ciLow": -0.0023,
+              "ciHigh": 0.009365,
+              "positive": false
+            },
+            "50-64": {
+              "nDates": 88,
+              "mean": 0.001721,
+              "ciLow": -0.002725,
+              "ciHigh": 0.007243,
+              "positive": false
+            },
+            "65-74": {
+              "nDates": 88,
+              "mean": 0.001904,
+              "ciLow": -0.0028,
+              "ciHigh": 0.007819,
+              "positive": false
+            },
+            "75-84": {
+              "nDates": 88,
+              "mean": 0.002676,
+              "ciLow": -0.002445,
+              "ciHigh": 0.009716,
+              "positive": false
+            },
+            "85-100": {
+              "nDates": 88,
+              "mean": 0.003226,
+              "ciLow": -0.002126,
+              "ciHigh": 0.010257,
+              "positive": false
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 88,
+            "mean": -0.000129,
+            "ciLow": -0.003139,
+            "ciHigh": 0.003259,
+            "positive": false
+          }
+        },
+        "20D": {
+          "informationCoefficient": {
+            "nDates": 86,
+            "mean": 0.007781,
+            "ciLow": -0.031533,
+            "ciHigh": 0.056515,
+            "positive": false,
+            "positiveIcRate": 0.5465,
+            "medianIc": 0.026572
+          },
+          "monotonicity": {
+            "nDates": 86,
+            "mean": 0.077907,
+            "ciLow": -0.084884,
+            "ciHigh": 0.268634,
+            "positive": false,
+            "positiveRate": 0.5465
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 86,
+              "mean": 0.006807,
+              "ciLow": -0.003261,
+              "ciHigh": 0.019867,
+              "positive": false
+            },
+            "50-64": {
+              "nDates": 86,
+              "mean": 0.00474,
+              "ciLow": -0.003497,
+              "ciHigh": 0.016794,
+              "positive": false
+            },
+            "65-74": {
+              "nDates": 86,
+              "mean": 0.006986,
+              "ciLow": -0.002003,
+              "ciHigh": 0.018739,
+              "positive": false
+            },
+            "75-84": {
+              "nDates": 86,
+              "mean": 0.004836,
+              "ciLow": -0.003275,
+              "ciHigh": 0.017805,
+              "positive": false
+            },
+            "85-100": {
+              "nDates": 86,
+              "mean": 0.009007,
+              "ciLow": 0.000748,
+              "ciHigh": 0.022229,
+              "positive": true
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 86,
+            "mean": 0.001207,
+            "ciLow": -0.004501,
+            "ciHigh": 0.007917,
+            "positive": false
+          }
+        },
+        "30D": {
+          "informationCoefficient": {
+            "nDates": 84,
+            "mean": 0.014996,
+            "ciLow": -0.04043,
+            "ciHigh": 0.070219,
+            "positive": false,
+            "positiveIcRate": 0.5833,
+            "medianIc": 0.027136
+          },
+          "monotonicity": {
+            "nDates": 84,
+            "mean": 0.138095,
+            "ciLow": -0.065476,
+            "ciHigh": 0.347619,
+            "positive": false,
+            "positiveRate": 0.6071
+          },
+          "buckets": {
+            "<50": {
+              "nDates": 84,
+              "mean": 0.011387,
+              "ciLow": -0.002436,
+              "ciHigh": 0.031356,
+              "positive": false
+            },
+            "50-64": {
+              "nDates": 84,
+              "mean": 0.008702,
+              "ciLow": -0.003117,
+              "ciHigh": 0.027817,
+              "positive": false
+            },
+            "65-74": {
+              "nDates": 84,
+              "mean": 0.012659,
+              "ciLow": 0.000477,
+              "ciHigh": 0.031385,
+              "positive": true
+            },
+            "75-84": {
+              "nDates": 84,
+              "mean": 0.00895,
+              "ciLow": -0.002941,
+              "ciHigh": 0.029523,
+              "positive": false
+            },
+            "85-100": {
+              "nDates": 84,
+              "mean": 0.016573,
+              "ciLow": 0.00416,
+              "ciHigh": 0.038223,
+              "positive": true
+            }
+          },
+          "top85VsUniverse": {
+            "nDates": 84,
+            "mean": 0.003167,
+            "ciLow": -0.007257,
+            "ciHigh": 0.013534,
+            "positive": false
+          }
+        }
+      },
+      "factorAttribution30D": {
+        "sectors": {
+          "FINANCIAL SERVICES": {
+            "nDates": 84,
+            "mean": 0.002038,
+            "ciLow": -0.008001,
+            "ciHigh": 0.011118,
+            "positive": false
+          },
+          "CAPITAL GOODS": {
+            "nDates": 84,
+            "mean": 0.011742,
+            "ciLow": -0.00018,
+            "ciHigh": 0.03022,
+            "positive": false
+          },
+          "CONSTRUCTION MATERIALS": {
+            "nDates": 84,
+            "mean": -0.016074,
+            "ciLow": -0.039703,
+            "ciHigh": 0.004687,
+            "positive": false
+          },
+          "FAST MOVING CONSUMER GOODS": {
+            "nDates": 84,
+            "mean": 1.8e-05,
+            "ciLow": -0.013872,
+            "ciHigh": 0.009586,
+            "positive": false
+          },
+          "CHEMICALS": {
+            "nDates": 84,
+            "mean": -0.004288,
+            "ciLow": -0.01523,
+            "ciHigh": 0.003739,
+            "positive": false
+          },
+          "HEALTHCARE": {
+            "nDates": 84,
+            "mean": 0.003283,
+            "ciLow": -0.014002,
+            "ciHigh": 0.016952,
+            "positive": false
+          },
+          "POWER": {
+            "nDates": 84,
+            "mean": -0.002568,
+            "ciLow": -0.025835,
+            "ciHigh": 0.023629,
+            "positive": false
+          },
+          "METALS & MINING": {
+            "nDates": 84,
+            "mean": 0.01165,
+            "ciLow": -0.014143,
+            "ciHigh": 0.039026,
+            "positive": false
+          },
+          "SERVICES": {
+            "nDates": 84,
+            "mean": 0.00695,
+            "ciLow": -0.001727,
+            "ciHigh": 0.014545,
+            "positive": false
+          },
+          "OIL GAS & CONSUMABLE FUELS": {
+            "nDates": 84,
+            "mean": 0.001368,
+            "ciLow": -0.016366,
+            "ciHigh": 0.014265,
+            "positive": false
+          },
+          "REALTY": {
+            "nDates": 84,
+            "mean": -0.016756,
+            "ciLow": -0.031922,
+            "ciHigh": 0.001816,
+            "positive": false
+          },
+          "INFORMATION TECHNOLOGY": {
+            "nDates": 84,
+            "mean": -0.019563,
+            "ciLow": -0.04736,
+            "ciHigh": 0.002516,
+            "positive": false
+          },
+          "AUTOMOBILE AND AUTO COMPONENTS": {
+            "nDates": 84,
+            "mean": 0.006837,
+            "ciLow": -0.003617,
+            "ciHigh": 0.020241,
+            "positive": false
+          },
+          "CONSUMER DURABLES": {
+            "nDates": 84,
+            "mean": -0.014342,
+            "ciLow": -0.029554,
+            "ciHigh": 0.001059,
+            "positive": false
+          },
+          "CONSUMER SERVICES": {
+            "nDates": 84,
+            "mean": -0.02119,
+            "ciLow": -0.041706,
+            "ciHigh": -0.004547,
+            "positive": false
+          },
+          "TELECOMMUNICATION": {
+            "nDates": 84,
+            "mean": 0.010628,
+            "ciLow": -0.019492,
+            "ciHigh": 0.051119,
+            "positive": false
+          },
+          "CONSTRUCTION": {
+            "nDates": 84,
+            "mean": -0.019057,
+            "ciLow": -0.035581,
+            "ciHigh": 0.006712,
+            "positive": false
+          },
+          "TEXTILES": {
+            "nDates": 84,
+            "mean": -0.004626,
+            "ciLow": -0.028721,
+            "ciHigh": 0.019086,
+            "positive": false
+          },
+          "MEDIA ENTERTAINMENT & PUBLICATION": {
+            "nDates": 84,
+            "mean": 0.006606,
+            "ciLow": -0.020057,
+            "ciHigh": 0.030153,
+            "positive": false
+          }
+        },
+        "regimes": {
+          "PANIC": {
+            "nDates": 24,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          },
+          "DEFENSIVE": {
+            "nDates": 17,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          },
+          "RISK_ON": {
+            "nDates": 28,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          },
+          "NEUTRAL": {
+            "nDates": 15,
+            "mean": 0.0,
+            "ciLow": 0.0,
+            "ciHigh": 0.0,
+            "positive": false
+          }
+        }
+      }
+    }
+  },
+  "gate": {
+    "checks": {
+      "DEVELOPMENT": {
+        "icPositive": false,
+        "top85Positive": true,
+        "monotonicPositive": true
+      },
+      "VALIDATION": {
+        "icPositive": true,
+        "top85Positive": true,
+        "monotonicPositive": true
+      },
+      "OUT_OF_SAMPLE": {
+        "icPositive": false,
+        "top85Positive": false,
+        "monotonicPositive": false
+      }
+    },
+    "candidateForChallengerResearch": false,
+    "automaticPromotion": false,
+    "note": "Passing this gate only permits construction of a new research challenger. Portfolio simulation and forward paper evidence are still required."
+  }
+}

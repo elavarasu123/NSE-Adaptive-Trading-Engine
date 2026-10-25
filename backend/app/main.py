@@ -595,3 +595,31 @@ def champion_challenger_report():
     return json.loads(
         path.read_text()
     )
+
+
+@app.get("/api/research/signal-validation")
+def signal_validation_report():
+    from pathlib import Path
+    import json
+
+    path = (
+        Path(__file__)
+        .resolve()
+        .parents[1]
+        / "data"
+        / "backtests"
+        / "signal_validation.json"
+    )
+
+    if not path.exists():
+        return {
+            "status": "NOT_RUN",
+            "message": (
+                "Run scripts/"
+                "run_signal_validation.py"
+            ),
+        }
+
+    return json.loads(
+        path.read_text()
+    )
