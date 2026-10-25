@@ -16,6 +16,9 @@ services:
       - key: RUNTIME_SOURCE
         value: RENDER_DASHBOARD
 
+      - key: PUBLIC_DASHBOARD_READ_ONLY
+        value: "true"
+
       - key: PYTHONUNBUFFERED
         value: "1"
 

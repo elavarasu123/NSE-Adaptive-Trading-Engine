@@ -832,7 +832,9 @@ def shared_database_status(
 # API routes are registered first and the React
 # single-page application fallback is registered last.
 
+from .dashboard_security import install_dashboard_security
 from .static_dashboard import mount_dashboard
 
+install_dashboard_security(app)
 mount_dashboard(app)
 
