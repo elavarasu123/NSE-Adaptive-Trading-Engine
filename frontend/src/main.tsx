@@ -22,7 +22,6 @@ import {
   TrendingUp,
   WalletCards,
   Zap,
-  Play,
   Radio,
   History,
 } from "lucide-react";
@@ -32,6 +31,7 @@ import {
 } from "react-dom/client";
 
 import "./style.css";
+import InteractiveInspector from "./InteractiveInspector";
 
 
 type Outcome = {
@@ -379,10 +379,6 @@ function App() {
     null,
   );
 
-  const [
-    runningCycle,
-    setRunningCycle,
-  ] = useState(false);
 
   const [
     loading,
@@ -467,42 +463,6 @@ function App() {
     }
   }
 
-
-  async function runPaperCycle() {
-    if (runningCycle) {
-      return;
-    }
-
-    setRunningCycle(true);
-
-    try {
-      const response = await fetch(
-        `${API}/api/runtime/run`,
-        {
-          method: "POST",
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Runtime cycle: ${response.status}`,
-        );
-      }
-
-      await response.json();
-      await load();
-
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Runtime cycle failed.",
-      );
-
-    } finally {
-      setRunningCycle(false);
-    }
-  }
 
 
   useEffect(() => {
@@ -719,24 +679,6 @@ function App() {
                 : "ENGINE ONLINE"}
             </div>
 
-            <button
-              className="refresh"
-              onClick={runPaperCycle}
-              disabled={runningCycle}
-            >
-              {runningCycle ? (
-                <RefreshCw
-                  size={17}
-                  className="spin"
-                />
-              ) : (
-                <Play size={17} />
-              )}
-
-              {runningCycle
-                ? "Running…"
-                : "Paper Cycle"}
-            </button>
 
             <button
               className="refresh"
@@ -1545,9 +1487,11 @@ function App() {
         </Card>
 
 
+        <InteractiveInspector />
+
         <footer>
           <span>
-            Adaptive Engine V0.6
+            Adaptive Engine V1.2.2
           </span>
 
           <span>

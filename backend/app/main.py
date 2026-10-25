@@ -102,7 +102,7 @@ def health():
         "mode": "PAPER",
         "provider": provider.__class__.__name__,
         "tickByTick": False,
-        "version": "1.2",
+        "version": "1.2.2",
     }
 
 
@@ -824,6 +824,54 @@ def shared_database_status(
                 EquitySnapshot
             ).count(),
     }
+
+
+@app.get("/api/system/architecture")
+def system_architecture():
+    return {
+        "version": "1.2.2",
+        "timezone": "Asia/Kolkata",
+        "scheduler": {
+            "owner": "GITHUB_ACTIONS",
+            "times": [
+                "09:15", "10:15", "11:15", "12:15",
+                "13:15", "14:15", "15:15", "16:05"
+            ],
+            "note": (
+                "GitHub Actions is the only execution scheduler. "
+                "NSE session guards can skip invalid sessions."
+            ),
+        },
+        "flow": [
+            {
+                "id": "github",
+                "label": "GitHub Actions",
+                "action": "EXECUTE",
+            },
+            {
+                "id": "neon",
+                "label": "Neon PostgreSQL",
+                "action": "STORE",
+            },
+            {
+                "id": "render",
+                "label": "Render",
+                "action": "DISPLAY",
+            },
+            {
+                "id": "chatgpt",
+                "label": "ChatGPT",
+                "action": "EXPLAIN / ALERT / TEACH",
+            },
+        ],
+        "safety": {
+            "paperOnly": True,
+            "liveBrokerOrders": False,
+            "publicDashboardReadOnly": True,
+            "chatgptExecutesTrades": False,
+        },
+    }
+
 
 # ==================================================
 # V1.2 PRODUCTION DASHBOARD
