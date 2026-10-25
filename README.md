@@ -137,3 +137,22 @@ The scheduled workflow currently targets approximately:
 - 15:15 IST
 
 These cycles are research/paper observations, not live trading instructions.
+
+## V0.9 Reliability
+
+V0.9 adds a fail-closed reliability layer around the paper engine.
+
+Before a runtime cycle can generate or mature predictions, the engine checks:
+
+- benchmark data freshness,
+- one-time portfolio integrity,
+- append-only forward-ledger integrity,
+- previous successful runtime checkpoint fingerprints.
+
+A normal interrupted/failed cycle can enter recovery mode and rebuild a clean checkpoint after the next successful cycle.
+
+The dashboard labels whether the visible runtime state came from a LOCAL process or GITHUB_ACTIONS.
+
+The cloud workflow now performs settled daily-history refresh after the regular NSE session rather than treating the 15:15 observation cycle as end-of-day data.
+
+GitHub Actions remains a paper/research orchestrator. It is not a tick-by-tick execution service and is not connected to a live broker.

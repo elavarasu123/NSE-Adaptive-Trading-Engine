@@ -23,6 +23,16 @@ MARKET_CLOSE = time(
     30,
 )
 
+POST_CLOSE_OPEN = time(
+    16,
+    0,
+)
+
+POST_CLOSE_CLOSE = time(
+    16,
+    20,
+)
+
 
 @dataclass(frozen=True)
 class SessionGuard:
@@ -31,6 +41,7 @@ class SessionGuard:
     is_weekday: bool
     is_trading_day: bool
     in_market_window: bool
+    in_post_close_window: bool
     should_run: bool
     reason: str
 
@@ -76,9 +87,18 @@ def session_guard(
         <= MARKET_CLOSE
     )
 
+    in_post_close_window = (
+        POST_CLOSE_OPEN
+        <= current
+        <= POST_CLOSE_CLOSE
+    )
+
     should_run = (
         is_trading_day
-        and in_market_window
+        and (
+            in_market_window
+            or in_post_close_window
+        )
     )
 
     if not is_weekday:
@@ -87,13 +107,18 @@ def session_guard(
     elif not is_trading_day:
         reason = "NSE_HOLIDAY"
 
-    elif not in_market_window:
+    elif in_post_close_window:
+        reason = (
+            "POST_CLOSE_WINDOW"
+        )
+
+    elif in_market_window:
+        reason = "MARKET_WINDOW"
+
+    else:
         reason = (
             "OUTSIDE_MARKET_WINDOW"
         )
-
-    else:
-        reason = "MARKET_WINDOW"
 
     return SessionGuard(
         now_ist=now.isoformat(),
@@ -103,6 +128,8 @@ def session_guard(
             is_trading_day,
         in_market_window=
             in_market_window,
+        in_post_close_window=
+            in_post_close_window,
         should_run=should_run,
         reason=reason,
     )

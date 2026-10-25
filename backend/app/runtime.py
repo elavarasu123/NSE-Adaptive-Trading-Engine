@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 import json
+import os
 import traceback
 import uuid
 
@@ -121,7 +122,11 @@ def activity(
 def load_state():
     if not STATE_PATH.exists():
         return {
-            "version": "v0.7",
+            "version": "v0.9",
+            "source": os.getenv(
+                "RUNTIME_SOURCE",
+                "LOCAL",
+            ),
             "status": "NEVER_RUN",
             "lastStartedAt": None,
             "lastCompletedAt": None,
@@ -139,7 +144,11 @@ def load_state():
         )
     except Exception:
         return {
-            "version": "v0.7",
+            "version": "v0.9",
+            "source": os.getenv(
+                "RUNTIME_SOURCE",
+                "LOCAL",
+            ),
             "status": "STATE_ERROR",
             "lastStartedAt": None,
             "lastCompletedAt": None,
@@ -407,6 +416,29 @@ def run_cycle(
     - portfolio capital is never reset
     - no broker orders are possible
     """
+    from .reliability import (
+        reliability_report,
+    )
+
+    preflight = (
+        reliability_report(
+            db
+        )
+    )
+
+    if not preflight[
+        "allowRuntime"
+    ]:
+        raise RuntimeError(
+            "Reliability preflight blocked "
+            "runtime: "
+            + ", ".join(
+                preflight[
+                    "blockers"
+                ]
+            )
+        )
+
     run_id = str(
         uuid.uuid4()
     )
@@ -417,7 +449,11 @@ def run_cycle(
 
     state.update(
         {
-            "version": "v0.7",
+            "version": "v0.9",
+            "source": os.getenv(
+                "RUNTIME_SOURCE",
+                "LOCAL",
+            ),
             "status": "RUNNING",
             "lastStartedAt":
                 started,
@@ -443,6 +479,8 @@ def run_cycle(
         "startedAt": started,
         "refreshRequested":
             refresh_cache,
+        "preflight":
+            preflight,
         "steps": {},
     }
 
@@ -621,6 +659,13 @@ def run_cycle(
 
         state.update(
             {
+                "version":
+                    "v0.9",
+                "source":
+                    os.getenv(
+                        "RUNTIME_SOURCE",
+                        "LOCAL",
+                    ),
                 "status":
                     "HEALTHY",
                 "lastCompletedAt":
@@ -660,6 +705,29 @@ def run_cycle(
             },
         )
 
+        from .reliability import (
+            write_checkpoint,
+        )
+
+        checkpoint = (
+            write_checkpoint(
+                db
+            )
+        )
+
+        result[
+            "checkpoint"
+        ] = {
+            "version":
+                checkpoint[
+                    "version"
+                ],
+            "runtimeSource":
+                checkpoint[
+                    "runtimeSource"
+                ],
+        }
+
         return result
 
     except Exception as exc:
@@ -671,6 +739,13 @@ def run_cycle(
 
         state.update(
             {
+                "version":
+                    "v0.9",
+                "source":
+                    os.getenv(
+                        "RUNTIME_SOURCE",
+                        "LOCAL",
+                    ),
                 "status":
                     "ERROR",
                 "lastCompletedAt":

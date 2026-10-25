@@ -86,3 +86,28 @@ def test_nse_holiday_skips():
         result.reason
         == "NSE_HOLIDAY"
     )
+
+
+def test_post_close_window_runs():
+    now = datetime(
+        2026,
+        10,
+        26,
+        16,
+        5,
+        tzinfo=IST,
+    )
+
+    result = session_guard(
+        now
+    )
+
+    assert (
+        result.should_run
+        is True
+    )
+
+    assert (
+        result.reason
+        == "POST_CLOSE_WINDOW"
+    )

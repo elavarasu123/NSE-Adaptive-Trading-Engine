@@ -12,3 +12,4 @@ backend/data/forward/*.jsonl
 # V0.7 runtime state
 backend/data/runtime/*.jsonl
 backend/data/runtime/runtime_state.json
+backend/data/runtime/integrity_checkpoint.json

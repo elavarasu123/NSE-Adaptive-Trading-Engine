@@ -720,3 +720,16 @@ def get_runtime_equity():
                 limit=500,
             )
     }
+
+
+@app.get("/api/reliability/status")
+def reliability_status(
+    db: Session = Depends(get_db),
+):
+    from .reliability import (
+        reliability_report,
+    )
+
+    return reliability_report(
+        db
+    )

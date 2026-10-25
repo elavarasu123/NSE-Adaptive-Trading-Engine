@@ -116,6 +116,7 @@ type RuntimeStatus = {
     lastRunId: string | null;
     lastError: string | null;
     cycles: number;
+    source?: string;
   };
   latestEquity: EquityPoint | null;
   equityHistory: EquityPoint[];
@@ -125,6 +126,27 @@ type RuntimeStatus = {
     liveBrokerOrders: boolean;
     capitalResetsDaily: boolean;
     automaticModelPromotion: boolean;
+  };
+};
+
+type ReliabilityStatus = {
+  status: string;
+  allowRuntime: boolean;
+  runtimeSource: string;
+  marketData: {
+    status: string;
+    latestSession: string | null;
+    expectedSession: string;
+    sessionsBehind: number | null;
+  };
+  portfolio: {
+    status: string;
+  };
+  ledger: {
+    status: string;
+  };
+  checkpoint: {
+    status: string;
   };
 };
 
@@ -351,6 +373,13 @@ function App() {
   );
 
   const [
+    reliability,
+    setReliability,
+  ] = useState<ReliabilityStatus | null>(
+    null,
+  );
+
+  const [
     runningCycle,
     setRunningCycle,
   ] = useState(false);
@@ -377,6 +406,7 @@ function App() {
         predictionData,
         dashboardData,
         runtimeData,
+        reliabilityData,
       ] = await Promise.all([
         getJson<ForwardStatus>(
           "/api/forward/status",
@@ -399,6 +429,12 @@ function App() {
         ).catch(
           () => null,
         ),
+
+        getJson<ReliabilityStatus>(
+          "/api/reliability/status",
+        ).catch(
+          () => null,
+        ),
       ]);
 
       setStatus(statusData);
@@ -413,6 +449,10 @@ function App() {
 
       setRuntime(
         runtimeData,
+      );
+
+      setReliability(
+        reliabilityData,
       );
 
       setError(null);
@@ -1250,6 +1290,53 @@ function App() {
                           "en-IN",
                         )
                       : "Never"
+                  }
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Runtime source
+                </span>
+
+                <strong>
+                  {
+                    runtime
+                      ?.runtime
+                      ?.source
+                    ?? reliability
+                      ?.runtimeSource
+                    ?? "LOCAL"
+                  }
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Market data
+                </span>
+
+                <strong>
+                  {
+                    reliability
+                      ?.marketData
+                      ?.status
+                    ?? "UNKNOWN"
+                  }
+                </strong>
+              </div>
+
+              <div>
+                <span>
+                  Integrity
+                </span>
+
+                <strong>
+                  {
+                    reliability
+                      ?.checkpoint
+                      ?.status
+                    ?? "UNKNOWN"
                   }
                 </strong>
               </div>

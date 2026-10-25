@@ -16,6 +16,7 @@ on:
         type: boolean
 
   schedule:
+    # Intraday observation cycles.
     - cron: "45 3 * * 1-5"
     - cron: "45 4 * * 1-5"
     - cron: "45 5 * * 1-5"
@@ -23,6 +24,11 @@ on:
     - cron: "45 7 * * 1-5"
     - cron: "45 8 * * 1-5"
     - cron: "45 9 * * 1-5"
+
+    # 16:05 IST post-close:
+    # refresh settled daily history and
+    # create the final daily observation batch.
+    - cron: "35 10 * * 1-5"
 
 permissions:
   contents: read
@@ -39,6 +45,7 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
       MARKET_PROVIDER: "yahoo"
+      RUNTIME_SOURCE: "GITHUB_ACTIONS"
 
     steps:
       - name: Checkout
@@ -69,17 +76,26 @@ jobs:
           restore-keys: |
             paper-state-${{ github.ref_name }}-
 
-      # Daily EOD refresh.
-      #
-      # 09:45 UTC = 15:15 IST.
-      # Manual runs only refresh when explicitly selected.
-      - name: Refresh EOD market history
-        if: ${{ (github.event_name == 'schedule' && github.event.schedule == '45 9 * * 1-5') || (github.event_name == 'workflow_dispatch' && inputs.refresh_history) }}
+      - name: Restore latest market history
+        uses: actions/cache/restore@v4
+        with:
+          path: backend/data/history
+          key: market-history-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            market-history-${{ github.ref_name }}-
+
+      - name: Refresh settled market history
+        if: ${{ (github.event_name == 'schedule' && github.event.schedule == '35 10 * * 1-5') || (github.event_name == 'workflow_dispatch' && inputs.refresh_history) }}
         working-directory: backend
         run: |
           python scripts/cache_history.py \
             --period 2y \
             --chunk 50
+
+      - name: Reliability preflight
+        working-directory: backend
+        run: |
+          python scripts/reliability_status.py
 
       - name: Scheduled paper cycle
         working-directory: backend
@@ -93,6 +109,11 @@ jobs:
 
           python scripts/runtime_status.py
 
+          echo
+          echo "===== CLOUD RELIABILITY STATUS ====="
+
+          python scripts/reliability_status.py
+
       - name: Save persistent paper state
         if: always()
         uses: actions/cache/save@v4
@@ -103,6 +124,13 @@ jobs:
             backend/*.db
             backend/data/*.db
           key: paper-state-${{ github.ref_name }}-${{ github.run_id }}
+
+      - name: Save refreshed market history
+        if: ${{ success() && ((github.event_name == 'schedule' && github.event.schedule == '35 10 * * 1-5') || (github.event_name == 'workflow_dispatch' && inputs.refresh_history)) }}
+        uses: actions/cache/save@v4
+        with:
+          path: backend/data/history
+          key: market-history-${{ github.ref_name }}-${{ github.run_id }}
 
       - name: Upload runtime evidence
         if: always()
