@@ -761,3 +761,66 @@ def run_paper_execution(
         db,
         YahooProvider(),
     )
+
+
+@app.get("/api/shared-db/status")
+def shared_database_status(
+    db: Session = Depends(get_db),
+):
+    from .database import (
+        is_postgres,
+    )
+    from .models import (
+        EquitySnapshot,
+        ForwardEvent,
+        PaperOrder,
+        Portfolio,
+        RuntimeActivity,
+    )
+    from .shared_state import (
+        shared_state_enabled,
+    )
+
+    portfolio = (
+        db.query(Portfolio)
+        .first()
+    )
+
+    return {
+        "database":
+            (
+                "POSTGRESQL"
+                if is_postgres()
+                else "SQLITE"
+            ),
+        "sharedState":
+            shared_state_enabled(),
+        "portfolio":
+            (
+                {
+                    "initialCapital":
+                        portfolio
+                        .initial_capital,
+                    "cash":
+                        portfolio.cash,
+                }
+                if portfolio
+                else None
+            ),
+        "forwardEvents":
+            db.query(
+                ForwardEvent
+            ).count(),
+        "paperOrders":
+            db.query(
+                PaperOrder
+            ).count(),
+        "activityEvents":
+            db.query(
+                RuntimeActivity
+            ).count(),
+        "equitySnapshots":
+            db.query(
+                EquitySnapshot
+            ).count(),
+    }

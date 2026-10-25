@@ -6,6 +6,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     Integer,
+    JSON,
     String,
     Text,
 )
@@ -241,4 +242,185 @@ class PaperOrder(Base):
     closed_at = Column(
         DateTime(timezone=True),
         nullable=True,
+    )
+
+
+
+class ForwardEvent(Base):
+    __tablename__ = "forward_events"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+    )
+
+    event_id = Column(
+        String,
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+
+    event_type = Column(
+        String,
+        index=True,
+    )
+
+    prediction_id = Column(
+        String,
+        index=True,
+        nullable=True,
+    )
+
+    horizon = Column(
+        Integer,
+        nullable=True,
+    )
+
+    model_version = Column(
+        String,
+        nullable=True,
+    )
+
+    prediction_date = Column(
+        String,
+        index=True,
+        nullable=True,
+    )
+
+    symbol = Column(
+        String,
+        index=True,
+        nullable=True,
+    )
+
+    payload = Column(
+        JSON,
+        nullable=False,
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        default=utc_now,
+    )
+
+
+class RuntimeState(Base):
+    __tablename__ = "runtime_state_shared"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        default=1,
+    )
+
+    version = Column(String)
+    source = Column(String)
+    status = Column(String)
+
+    last_started_at = Column(
+        String,
+        nullable=True,
+    )
+
+    last_completed_at = Column(
+        String,
+        nullable=True,
+    )
+
+    last_successful_at = Column(
+        String,
+        nullable=True,
+    )
+
+    last_run_id = Column(
+        String,
+        nullable=True,
+    )
+
+    last_error = Column(
+        Text,
+        nullable=True,
+    )
+
+    cycles = Column(
+        Integer,
+        default=0,
+    )
+
+
+class RuntimeActivity(Base):
+    __tablename__ = "runtime_activity"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+    )
+
+    event_id = Column(
+        String,
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+
+    event_type = Column(String)
+    level = Column(String)
+    message = Column(Text)
+
+    data = Column(
+        JSON,
+        nullable=False,
+        default=dict,
+    )
+
+    recorded_at = Column(
+        String,
+        index=True,
+    )
+
+
+class EquitySnapshot(Base):
+    __tablename__ = "equity_snapshots"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+    )
+
+    timestamp = Column(
+        String,
+        index=True,
+    )
+
+    initial_capital = Column(Float)
+    cash = Column(Float)
+    market_value = Column(Float)
+    equity = Column(Float)
+    realized_pnl = Column(Float)
+    unrealized_pnl = Column(Float)
+    total_pnl = Column(Float)
+
+    open_positions = Column(Integer)
+    positions_marked = Column(Integer)
+
+
+class IntegrityCheckpoint(Base):
+    __tablename__ = "integrity_checkpoints"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        default=1,
+    )
+
+    payload = Column(
+        JSON,
+        nullable=False,
+    )
+
+    created_at = Column(
+        DateTime(timezone=True),
+        default=utc_now,
+        onupdate=utc_now,
     )

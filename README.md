@@ -186,3 +186,23 @@ These are conservative configurable simulation assumptions and are NOT represent
 PANIC regime remains a complete automatic-entry block.
 
 No live broker API is connected.
+
+## V1.1 Shared Cloud State
+
+V1.1 introduces a canonical PostgreSQL state store.
+
+When `DATABASE_URL` points to PostgreSQL and
+`SHARED_STATE_BACKEND=db`, the following state is shared:
+
+- the one-time ₹1,00,000 paper portfolio,
+- positions and paper trades,
+- automatic PaperOrder lifecycle,
+- immutable forward prediction/outcome events,
+- runtime heartbeat,
+- activity journal,
+- equity snapshots,
+- integrity checkpoint.
+
+SQLite and JSONL remain available as a local-development fallback.
+
+GitHub Actions no longer treats its paper-state cache as the canonical trading account. The old cache is restored only to perform the one-time migration into PostgreSQL.

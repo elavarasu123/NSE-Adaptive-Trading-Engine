@@ -19,6 +19,16 @@ from .forward_learning import (
 from .market import YahooProvider
 from .trading import monitor_positions
 
+from .shared_state import (
+    load_runtime_state,
+    read_activity,
+    read_equity,
+    record_activity,
+    record_equity,
+    save_runtime_state,
+    shared_state_enabled,
+)
+
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_DIR = ROOT / "data" / "runtime"
@@ -102,27 +112,39 @@ def activity(
     level: str = "INFO",
     data: dict[str, Any] | None = None,
 ):
+    payload = {
+        "eventId":
+            str(uuid.uuid4()),
+        "eventType":
+            event_type,
+        "level":
+            level,
+        "message":
+            message,
+        "data":
+            data or {},
+    }
+
+    if shared_state_enabled():
+        return record_activity(
+            payload
+        )
+
     return append_jsonl(
         ACTIVITY_PATH,
-        {
-            "eventId":
-                str(uuid.uuid4()),
-            "eventType":
-                event_type,
-            "level":
-                level,
-            "message":
-                message,
-            "data":
-                data or {},
-        },
+        payload,
     )
 
 
 def load_state():
+    if shared_state_enabled():
+        return (
+            load_runtime_state()
+        )
+
     if not STATE_PATH.exists():
         return {
-            "version": "v0.9",
+            "version": "v1.1",
             "source": os.getenv(
                 "RUNTIME_SOURCE",
                 "LOCAL",
@@ -142,9 +164,10 @@ def load_state():
                 encoding="utf-8"
             )
         )
+
     except Exception:
         return {
-            "version": "v0.9",
+            "version": "v1.1",
             "source": os.getenv(
                 "RUNTIME_SOURCE",
                 "LOCAL",
@@ -161,6 +184,12 @@ def load_state():
 
 
 def save_state(state):
+    if shared_state_enabled():
+        save_runtime_state(
+            state
+        )
+        return
+
     tmp = STATE_PATH.with_suffix(
         ".tmp"
     )
@@ -341,10 +370,15 @@ def portfolio_snapshot(
             marked,
     }
 
-    append_jsonl(
-        EQUITY_PATH,
-        snapshot,
-    )
+    if shared_state_enabled():
+        record_equity(
+            snapshot
+        )
+    else:
+        append_jsonl(
+            EQUITY_PATH,
+            snapshot,
+        )
 
     db.commit()
 
@@ -354,18 +388,33 @@ def portfolio_snapshot(
 def runtime_status():
     state = load_state()
 
-    activities = read_jsonl(
-        ACTIVITY_PATH,
-        limit=25,
-    )
+    if shared_state_enabled():
+        activities = (
+            read_activity(
+                limit=25
+            )
+        )
 
-    equity = read_jsonl(
-        EQUITY_PATH,
-        limit=100,
-    )
+        equity = (
+            read_equity(
+                limit=100
+            )
+        )
+
+    else:
+        activities = read_jsonl(
+            ACTIVITY_PATH,
+            limit=25,
+        )
+
+        equity = read_jsonl(
+            EQUITY_PATH,
+            limit=100,
+        )
 
     try:
         forward = learning_status()
+
     except Exception as exc:
         forward = {
             "error": str(exc)
@@ -449,7 +498,7 @@ def run_cycle(
 
     state.update(
         {
-            "version": "v0.9",
+            "version": "v1.1",
             "source": os.getenv(
                 "RUNTIME_SOURCE",
                 "LOCAL",

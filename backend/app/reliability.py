@@ -28,6 +28,16 @@ from .sessions import (
     trading_sessions,
 )
 
+from .shared_state import (
+    load_runtime_state,
+    load_shared_checkpoint,
+    read_activity,
+    read_equity,
+    read_forward_events,
+    save_shared_checkpoint,
+    shared_state_enabled,
+)
+
 
 ROOT = Path(
     __file__
@@ -100,7 +110,46 @@ def sha256_file(
     return digest.hexdigest()
 
 
+def _sha_json(
+    value,
+):
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    ).encode("utf-8")
+
+    return hashlib.sha256(
+        encoded
+    ).hexdigest()
+
+
 def fingerprints():
+    if shared_state_enabled():
+        return {
+            "runtimeState":
+                _sha_json(
+                    load_runtime_state()
+                ),
+            "activity":
+                _sha_json(
+                    read_activity(
+                        limit=5000
+                    )
+                ),
+            "equity":
+                _sha_json(
+                    read_equity(
+                        limit=5000
+                    )
+                ),
+            "forwardLedger":
+                _sha_json(
+                    read_forward_events()
+                ),
+        }
+
     return {
         "runtimeState":
             sha256_file(
@@ -379,138 +428,136 @@ def portfolio_integrity(
 
 
 def ledger_integrity():
-    if not LEDGER_PATH.exists():
-        return {
-            "status": "EMPTY",
-            "blocking": False,
-            "events": 0,
-            "predictions": 0,
-            "outcomes": 0,
-            "issues": [],
-        }
+    # Cloud V1.1:
+    # canonical forward events live in PostgreSQL.
+    if shared_state_enabled():
+        rows = read_forward_events()
+
+    # Local development / pytest:
+    # preserve the original file-ledger behaviour,
+    # including monkeypatched LEDGER_PATH.
+    else:
+        if not LEDGER_PATH.exists():
+            return {
+                "status": "EMPTY",
+                "blocking": False,
+                "events": 0,
+                "predictions": 0,
+                "outcomes": 0,
+                "issues": [],
+            }
+
+        rows = []
+
+        with LEDGER_PATH.open(
+            encoding="utf-8"
+        ) as f:
+            for number, raw in enumerate(
+                f,
+                start=1,
+            ):
+                line = raw.strip()
+
+                if not line:
+                    continue
+
+                try:
+                    rows.append(
+                        json.loads(line)
+                    )
+                except json.JSONDecodeError:
+                    # Preserve malformed event so
+                    # integrity check blocks it.
+                    rows.append(
+                        {
+                            "__invalid_json__":
+                                number
+                        }
+                    )
 
     issues = []
-
     prediction_ids = set()
     prediction_keys = set()
     outcome_keys = set()
-
     outcomes = []
-    events = 0
 
-    with LEDGER_PATH.open(
-        encoding="utf-8"
-    ) as f:
-        for number, raw in enumerate(
-            f,
-            start=1,
-        ):
-            line = raw.strip()
+    for number, event in enumerate(
+        rows,
+        start=1,
+    ):
+        if "__invalid_json__" in event:
+            issues.append(
+                "Invalid JSON at ledger "
+                f"event {number}."
+            )
+            continue
 
-            if not line:
-                continue
+        event_type = event.get(
+            "eventType"
+        )
 
-            events += 1
-
-            try:
-                event = json.loads(
-                    line
-                )
-            except json.JSONDecodeError:
-                issues.append(
-                    f"Invalid JSON at "
-                    f"ledger line {number}."
-                )
-                continue
-
-            event_type = event.get(
-                "eventType"
+        if event_type == "PREDICTION":
+            prediction_id = event.get(
+                "predictionId"
             )
 
-            if event_type == "PREDICTION":
-                prediction_id = (
-                    event.get(
-                        "predictionId"
-                    )
-                )
+            key = (
+                event.get("modelVersion"),
+                event.get("predictionDate"),
+                event.get("symbol"),
+            )
 
-                key = (
-                    event.get(
-                        "modelVersion"
-                    ),
-                    event.get(
-                        "predictionDate"
-                    ),
-                    event.get(
-                        "symbol"
-                    ),
-                )
-
-                if not prediction_id:
-                    issues.append(
-                        f"Prediction missing ID "
-                        f"at line {number}."
-                    )
-                    continue
-
-                if (
-                    prediction_id
-                    in prediction_ids
-                ):
-                    issues.append(
-                        "Duplicate prediction ID: "
-                        + prediction_id
-                    )
-
-                if (
-                    key
-                    in prediction_keys
-                ):
-                    issues.append(
-                        "Duplicate frozen "
-                        "prediction key: "
-                        + repr(key)
-                    )
-
-                prediction_ids.add(
-                    prediction_id
-                )
-
-                prediction_keys.add(
-                    key
-                )
-
-            elif event_type == "OUTCOME":
-                key = (
-                    event.get(
-                        "predictionId"
-                    ),
-                    event.get(
-                        "horizon"
-                    ),
-                )
-
-                if key in outcome_keys:
-                    issues.append(
-                        "Duplicate matured "
-                        "outcome: "
-                        + repr(key)
-                    )
-
-                outcome_keys.add(key)
-                outcomes.append(key)
-
-            else:
+            if not prediction_id:
                 issues.append(
-                    f"Unknown ledger event "
-                    f"at line {number}."
+                    "Prediction missing ID "
+                    f"at event {number}."
                 )
+                continue
+
+            if prediction_id in prediction_ids:
+                issues.append(
+                    "Duplicate prediction ID: "
+                    + prediction_id
+                )
+
+            if key in prediction_keys:
+                issues.append(
+                    "Duplicate frozen "
+                    "prediction key: "
+                    + repr(key)
+                )
+
+            prediction_ids.add(
+                prediction_id
+            )
+
+            prediction_keys.add(
+                key
+            )
+
+        elif event_type == "OUTCOME":
+            key = (
+                event.get("predictionId"),
+                event.get("horizon"),
+            )
+
+            if key in outcome_keys:
+                issues.append(
+                    "Duplicate matured outcome: "
+                    + repr(key)
+                )
+
+            outcome_keys.add(key)
+            outcomes.append(key)
+
+        else:
+            issues.append(
+                "Unknown ledger event "
+                f"at event {number}."
+            )
 
     for prediction_id, horizon in outcomes:
-        if (
-            prediction_id
-            not in prediction_ids
-        ):
+        if prediction_id not in prediction_ids:
             issues.append(
                 "Outcome references unknown "
                 "prediction: "
@@ -519,15 +566,13 @@ def ledger_integrity():
 
     return {
         "status":
-            (
-                "OK"
-                if not issues
-                else "BROKEN"
-            ),
+            "OK"
+            if not issues
+            else "BROKEN",
         "blocking":
             bool(issues),
         "events":
-            events,
+            len(rows),
         "predictions":
             len(prediction_ids),
         "outcomes":
@@ -538,6 +583,11 @@ def ledger_integrity():
 
 
 def load_checkpoint():
+    if shared_state_enabled():
+        return (
+            load_shared_checkpoint()
+        )
+
     if not CHECKPOINT_PATH.exists():
         return None
 
@@ -555,6 +605,15 @@ def load_checkpoint():
 
 
 def _runtime_state_status():
+    if shared_state_enabled():
+        return (
+            load_runtime_state()
+            .get(
+                "status",
+                "UNKNOWN",
+            )
+        )
+
     if not STATE_PATH.exists():
         return "NEVER_RUN"
 
@@ -730,7 +789,7 @@ def write_checkpoint(
     db: Session,
 ):
     payload = {
-        "version": "v0.9",
+        "version": "v1.1",
         "createdAt":
             datetime.now(
                 ZoneInfo("UTC")
@@ -748,6 +807,13 @@ def write_checkpoint(
         "fingerprints":
             fingerprints(),
     }
+
+    if shared_state_enabled():
+        save_shared_checkpoint(
+            payload
+        )
+
+        return payload
 
     tmp = (
         CHECKPOINT_PATH
@@ -770,3 +836,4 @@ def write_checkpoint(
     )
 
     return payload
+

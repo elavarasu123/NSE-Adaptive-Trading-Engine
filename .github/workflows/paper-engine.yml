@@ -46,6 +46,8 @@ jobs:
       PYTHONUNBUFFERED: "1"
       MARKET_PROVIDER: "yahoo"
       RUNTIME_SOURCE: "GITHUB_ACTIONS"
+      SHARED_STATE_BACKEND: "db"
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - name: Checkout
@@ -64,6 +66,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Validate shared database
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "DATABASE_URL secret is missing"
+            exit 1
+          fi
+
       - name: Restore persistent paper state
         uses: actions/cache/restore@v4
         with:
@@ -75,6 +84,12 @@ jobs:
           key: paper-state-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
             paper-state-${{ github.ref_name }}-
+
+      - name: Migrate legacy state to shared database
+        working-directory: backend
+        run: |
+          python scripts/migrate_legacy_to_shared_db.py
+          python scripts/shared_db_status.py
 
       - name: Restore latest market history
         uses: actions/cache/restore@v4
@@ -114,16 +129,10 @@ jobs:
 
           python scripts/reliability_status.py
 
-      - name: Save persistent paper state
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            backend/data/runtime
-            backend/data/forward
-            backend/*.db
-            backend/data/*.db
-          key: paper-state-${{ github.ref_name }}-${{ github.run_id }}
+          echo
+          echo "===== SHARED DATABASE STATUS ====="
+
+          python scripts/shared_db_status.py
 
       - name: Save refreshed market history
         if: ${{ success() && ((github.event_name == 'schedule' && github.event.schedule == '35 10 * * 1-5') || (github.event_name == 'workflow_dispatch' && inputs.refresh_history)) }}

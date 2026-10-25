@@ -14,6 +14,12 @@ from .backtest import enrich, feature_score, regime_at
 from .history_cache import load_history
 from .universe import load_universe
 
+from .shared_state import (
+    append_forward_event,
+    read_forward_events,
+    shared_state_enabled,
+)
+
 
 MODEL_VERSION = "champion-v0.2-frozen"
 HORIZONS = (5, 10, 20, 30)
@@ -50,6 +56,9 @@ def _safe_float(value):
 
 
 def read_ledger():
+    if shared_state_enabled():
+        return read_forward_events()
+
     if not LEDGER_PATH.exists():
         return []
 
@@ -70,14 +79,17 @@ def read_ledger():
 
 
 def append_event(event):
+    if shared_state_enabled():
+        return append_forward_event(
+            event
+        )
+
     event = {
         **event,
         "recordedAt": utc_now(),
     }
 
-    with LEDGER_PATH.open(
-        "a"
-    ) as f:
+    with LEDGER_PATH.open("a") as f:
         f.write(
             json.dumps(
                 event,
