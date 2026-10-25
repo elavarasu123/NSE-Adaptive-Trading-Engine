@@ -79,3 +79,11 @@ def test_bad_symbol_does_not_crash_scan():
     assert report["successful"] == 1
     assert report["failed"] == 1
     assert report["warnings"][0]["symbol"] == "MISSING"
+
+
+def test_yahoo_index_symbol_is_not_modified():
+    from app.market import YahooProvider
+
+    assert YahooProvider.normalize_symbol("^NSEI") == "^NSEI"
+    assert YahooProvider.normalize_symbol("TCS") == "TCS.NS"
+    assert YahooProvider.normalize_symbol("TCS.NS") == "TCS.NS"

@@ -88,6 +88,11 @@ class YahooProvider(MarketDataProvider):
     def normalize_symbol(symbol: str) -> str:
         symbol = symbol.upper().strip()
 
+        # Yahoo index symbols such as ^NSEI must not
+        # receive the NSE equity suffix.
+        if symbol.startswith("^"):
+            return symbol
+
         if symbol.endswith(".NS"):
             return symbol
 
