@@ -10,7 +10,7 @@ from .models import (
     Journal,
     PaperTrade,
 )
-from .engine import scan, provider
+from .engine import scan, scan_report, provider
 from .trading import (
     paper_buy,
     paper_sell,
@@ -143,6 +143,11 @@ def dashboard(db: Session = Depends(get_db)):
 @app.get("/api/candidates")
 def candidates():
     return scan()
+
+
+@app.get("/api/scanner/report")
+def scanner_report():
+    return scan_report()
 
 
 @app.post("/api/engine/run")
