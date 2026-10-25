@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 
 from .indicators import build_snapshot
+from .universe import load_universe, symbol_sector_map
+from .sector import apply_sector_strength
 
 
 DEFAULT_UNIVERSE = [
@@ -212,7 +214,14 @@ def scan_market(
     provider,
     universe: List[str] = None,
 ) -> Dict:
-    symbols = universe or DEFAULT_UNIVERSE
+    if universe:
+        symbols = universe
+    else:
+        loaded = load_universe()
+        symbols = [
+            stock.symbol
+            for stock in loaded
+        ]
 
     warnings = []
     results = []
@@ -350,6 +359,11 @@ def scan_market(
                 }
             )
 
+    results, sector_scores = apply_sector_strength(
+        results,
+        symbol_sector_map(),
+    )
+
     results.sort(
         key=lambda item: item["score"],
         reverse=True,
@@ -357,6 +371,7 @@ def scan_market(
 
     return {
         "universeSize": len(symbols),
+        "sectorStrength": sector_scores,
         "successful": len(results),
         "failed": len(warnings),
         "benchmark": "NIFTY50",

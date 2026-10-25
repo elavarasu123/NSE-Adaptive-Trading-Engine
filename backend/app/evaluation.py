@@ -4,6 +4,8 @@ from typing import Iterable
 
 from sqlalchemy.orm import Session
 
+from .sessions import add_trading_sessions
+
 from .models import (
     Prediction,
     PredictionOutcome,
@@ -111,8 +113,10 @@ def create_checkpoints(
                 prediction_id=prediction.id,
                 symbol=prediction.symbol,
                 horizon_days=days,
-                due_at=created
-                + timedelta(days=days),
+                due_at=add_trading_sessions(
+                    created,
+                    days,
+                ),
                 entry_price=prediction.entry_price,
                 predicted_class=pclass,
                 status="PENDING",

@@ -6,6 +6,7 @@ from .market import (
 )
 from .scanner import scan_market
 from .regime import detect_regime, apply_regime
+from .cache import market_cache
 
 
 PROVIDER_NAME = os.getenv(
@@ -71,8 +72,16 @@ def scan():
     return scan_report()["results"]
 
 
-def scan_report():
+def scan_report(force=False):
     if PROVIDER_NAME == "yahoo":
+        if not force:
+            cached = market_cache.get(
+                "scanner-report"
+            )
+
+            if cached is not None:
+                return cached
+
         report = scan_market(provider)
 
         try:
@@ -106,6 +115,12 @@ def scan_report():
                     "error": str(exc),
                 }
             )
+
+        market_cache.set(
+            "scanner-report",
+            report,
+            ttl_seconds=900,
+        )
 
         return report
 
