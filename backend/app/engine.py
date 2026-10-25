@@ -5,6 +5,7 @@ from .market import (
     YahooProvider,
 )
 from .scanner import scan_market
+from .regime import detect_regime, apply_regime
 
 
 PROVIDER_NAME = os.getenv(
@@ -67,16 +68,46 @@ def demo_scan():
 
 
 def scan():
-    if PROVIDER_NAME == "yahoo":
-        report = scan_market(provider)
-        return report["results"]
-
-    return demo_scan()
+    return scan_report()["results"]
 
 
 def scan_report():
     if PROVIDER_NAME == "yahoo":
-        return scan_market(provider)
+        report = scan_market(provider)
+
+        try:
+            regime = detect_regime(provider)
+
+            report["regime"] = {
+                "name": regime.name,
+                "score": regime.score,
+                "confidence": regime.confidence,
+                "exposureMultiplier":
+                    regime.exposure_multiplier,
+                "buyThreshold":
+                    regime.buy_threshold,
+                "reasons": regime.reasons,
+            }
+
+            report["results"] = [
+                apply_regime(row, regime)
+                for row in report["results"]
+            ]
+
+        except Exception as exc:
+            report["regime"] = {
+                "name": "UNKNOWN",
+                "error": str(exc),
+            }
+
+            report["warnings"].append(
+                {
+                    "symbol": "REGIME",
+                    "error": str(exc),
+                }
+            )
+
+        return report
 
     rows = demo_scan()
 
@@ -85,6 +116,16 @@ def scan_report():
         "successful": len(rows),
         "failed": 0,
         "benchmark": "DEMO",
+        "regime": {
+            "name": "DEMO",
+            "score": 0,
+            "confidence": 0,
+            "exposureMultiplier": 1,
+            "buyThreshold": 75,
+            "reasons": [
+                "Demo mode has no real regime"
+            ],
+        },
         "results": rows,
         "warnings": [],
     }

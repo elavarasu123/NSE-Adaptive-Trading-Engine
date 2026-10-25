@@ -11,6 +11,7 @@ from .models import (
     PaperTrade,
 )
 from .engine import scan, scan_report, provider
+from .regime import regime_dict
 from .trading import (
     paper_buy,
     paper_sell,
@@ -148,6 +149,11 @@ def candidates():
 @app.get("/api/scanner/report")
 def scanner_report():
     return scan_report()
+
+
+@app.get("/api/regime")
+def market_regime():
+    return regime_dict(provider)
 
 
 @app.post("/api/engine/run")
