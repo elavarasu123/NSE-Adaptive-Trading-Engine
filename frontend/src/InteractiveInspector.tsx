@@ -1,6 +1,7 @@
 import React, {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 
 import "./interactive.css";
+import PaperActivity, { OrderList, PositionList, TradeList, TradingState } from "./PaperActivity";
 
 const API =
   import.meta.env.VITE_API_URL || "";
@@ -30,6 +32,7 @@ type Panel =
   | "learning"
   | "portfolio"
   | "orders"
+  | "trades"
   | "runtime"
   | "reliability"
   | "activity"
@@ -76,6 +79,9 @@ export default function InteractiveInspector() {
 
   const [query, setQuery] =
     useState("");
+  const [refreshing, setRefreshing] = useState(true);
+  const drawer = useRef<HTMLElement>(null);
+  const latestRequest = useRef(0);
 
   const [data, setData] =
     useState<any>({
@@ -86,9 +92,19 @@ export default function InteractiveInspector() {
       reliability: null,
       execution: null,
       architecture: null,
+      trades: null,
+      tradingErrors: { trades: null, orders: null, positions: null },
     });
 
   async function load() {
+    const request = ++latestRequest.current;
+    setRefreshing(true);
+    const tradingRead = (path: string, message: string, valid: (value: any) => boolean) => read(path)
+      .then(value => {
+        if (!valid(value)) throw new Error("Unexpected paper-account response");
+        return { value, error: null };
+      })
+      .catch(() => ({ value: null, error: message }));
     const [
       forward,
       predictions,
@@ -97,6 +113,7 @@ export default function InteractiveInspector() {
       reliability,
       execution,
       architecture,
+      trades,
     ] = await Promise.all([
       read("/api/forward/status")
         .catch(() => null),
@@ -106,8 +123,7 @@ export default function InteractiveInspector() {
           predictions: [],
         })),
 
-      read("/api/dashboard")
-        .catch(() => null),
+      tradingRead("/api/dashboard", "Open positions could not be loaded.", value => Array.isArray(value?.positions)),
 
       read("/api/runtime/status")
         .catch(() => null),
@@ -115,23 +131,27 @@ export default function InteractiveInspector() {
       read("/api/reliability/status")
         .catch(() => null),
 
-      read("/api/execution/status")
-        .catch(() => null),
+      tradingRead("/api/execution/status", "Order decisions could not be loaded.", value => Array.isArray(value?.orders)),
 
       read("/api/system/architecture")
         .catch(() => null),
+      tradingRead("/api/trades", "Trade history could not be loaded.", Array.isArray),
     ]);
 
+    if (request !== latestRequest.current) return;
     setData({
       forward,
       predictions:
         predictions?.predictions ?? [],
-      dashboard,
+      dashboard: dashboard.value,
       runtime,
       reliability,
-      execution,
+      execution: execution.value,
       architecture,
+      trades: trades.value,
+      tradingErrors: { trades: trades.error, orders: execution.error, positions: dashboard.error },
     });
+    setRefreshing(false);
   }
 
   useEffect(() => {
@@ -143,9 +163,37 @@ export default function InteractiveInspector() {
         30000,
       );
 
-    return () =>
+    return () => {
       window.clearInterval(timer);
+      latestRequest.current += 1;
+    };
   }, []);
+
+  useEffect(() => {
+    if (!panel) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    drawer.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    function keydown(event: KeyboardEvent) {
+      if (event.key === "Escape") { setPanel(null); setSymbol(null); }
+      if (event.key === "Tab") {
+        const elements = drawer.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input, summary, a[href], [tabindex="0"]',
+        );
+        if (!elements?.length) return;
+        const first = elements[0], last = elements[elements.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    }
+    document.addEventListener("keydown", keydown);
+    return () => {
+      document.body.style.overflow = overflow;
+      document.removeEventListener("keydown", keydown);
+      previous?.focus();
+    };
+  }, [panel]);
 
   useEffect(() => {
     function openFromClick(
@@ -160,7 +208,7 @@ export default function InteractiveInspector() {
         ) ||
         target.closest(
           ".v122-architecture",
-        )
+        ) || target.closest(".paper-trading-section")
       ) {
         return;
       }
@@ -327,6 +375,15 @@ export default function InteractiveInspector() {
 
   return (
     <>
+      <PaperActivity
+        trades={data.trades}
+        orders={data.execution?.orders ?? null}
+        positions={data.dashboard?.positions ?? null}
+        errors={data.tradingErrors}
+        refreshing={refreshing}
+        onOpen={setPanel}
+        onRefresh={load}
+      />
       <section className="card v122-architecture">
         <div className="v122-title">
           <div>
@@ -453,13 +510,13 @@ export default function InteractiveInspector() {
             }
           }}
         >
-          <aside className="v122-drawer">
+          <aside className="v122-drawer" ref={drawer} role="dialog" aria-modal="true" aria-labelledby="inspection-title">
             <header>
               <div>
                 <span>
                   INTERACTIVE DETAILS
                 </span>
-                <h2>
+                <h2 id="inspection-title">
                   {panel.toUpperCase()}
                 </h2>
               </div>
@@ -677,15 +734,12 @@ export default function InteractiveInspector() {
 
               {panel ===
                 "portfolio" && (
-                <div className="v122-copy">
-                  Open positions:{" "}
-                  {
-                    data.dashboard
-                      ?.positions
-                      ?.length ??
-                    0
-                  }
-                </div>
+                <>
+                  <button type="button" className="paper-link" onClick={load}>Refresh activity</button>
+                  <TradingState error={data.tradingErrors.positions} pending={!data.dashboard}>
+                    <PositionList positions={data.dashboard?.positions ?? []} />
+                  </TradingState>
+                </>
               )}
 
               {panel ===
@@ -768,9 +822,22 @@ export default function InteractiveInspector() {
 
               {panel ===
                 "orders" && (
-                <OrderList
-                  orders={orders}
-                />
+                <>
+                  <button type="button" className="paper-link" onClick={load}>Refresh activity</button>
+                  <TradingState error={data.tradingErrors.orders} pending={!data.execution}>
+                    <OrderList orders={orders} />
+                  </TradingState>
+                </>
+              )}
+
+              {panel === "trades" && (
+                <>
+                  <button type="button" className="paper-link" onClick={load}>Refresh activity</button>
+                  <p className="paper-caption">Up to 200 recent buy/sell fills. Entries and exits are separate records.</p>
+                  <TradingState error={data.tradingErrors.trades} pending={data.trades === null}>
+                    <TradeList trades={data.trades ?? []} />
+                  </TradingState>
+                </>
               )}
 
               {panel ===
@@ -849,13 +916,6 @@ export default function InteractiveInspector() {
                 </div>
               )}
 
-              {panel ===
-                "orders" &&
-                !orders.length && (
-                  <div className="v122-copy">
-                    No paper orders yet.
-                  </div>
-                )}
             </main>
           </aside>
         </div>
@@ -875,46 +935,6 @@ function K({
     <div className="v122-k">
       <span>{a}</span>
       <strong>{b}</strong>
-    </div>
-  );
-}
-
-function OrderList({
-  orders,
-}: {
-  orders: any[];
-}) {
-  return (
-    <div className="v122-list">
-      {orders.map(
-        (order: any) => (
-          <div
-            className="v122-order"
-            key={order.id}
-          >
-            <div>
-              <strong>
-                {order.symbol}
-              </strong>
-              <span>
-                Score {order.score}
-              </span>
-            </div>
-
-            <div>
-              <b>
-                {order.status}
-              </b>
-              <small>
-                {
-                  order.reason ??
-                  "—"
-                }
-              </small>
-            </div>
-          </div>
-        ),
-      )}
     </div>
   );
 }
