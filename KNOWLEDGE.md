@@ -72,3 +72,17 @@ also produce readable GitHub annotations. A guarded manual run is distinct from
 schedule-event proof. New lifecycle tests use isolated in-memory SQLite and fake
 prices to verify fills, rejections, idempotency, cost accounting, gap exits and
 portfolio limits without touching the shared account.
+
+
+## User-authorized adaptive paper entry policy
+
+The user requested a market-responsive engine and explicitly selected automatic
+paper updates after validation. This supersedes the earlier static-paper-policy
+assumption: future paper entry thresholds may now update automatically after the
+specified evidence gates. Baseline scores/predictions remain immutable controls;
+there is still no automatic score-model promotion or live broker execution.
+See README for adaptive-entry-v1 eligibility, purged validation, friction,
+bootstrap, coverage and threshold bounds. No accuracy improvement is claimed
+until real forward evidence demonstrates it. Missing/unmatured evidence keeps
+the baseline. Persisted real market analysis replaces production DEMO scanner
+responses and explicitly separates settled daily signals from delayed quotes.

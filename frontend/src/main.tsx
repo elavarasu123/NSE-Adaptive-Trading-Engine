@@ -32,6 +32,7 @@ import {
 
 import "./style.css";
 import InteractiveInspector from "./InteractiveInspector";
+import MarketAnalysisCard, { type MarketAnalysis } from "./MarketAnalysis";
 
 
 type Outcome = {
@@ -346,6 +347,7 @@ function Maturity({
 
 
 function App() {
+  const [analysis, setAnalysis] = useState<MarketAnalysis | null>(null);
   const [
     status,
     setStatus,
@@ -403,6 +405,7 @@ function App() {
         dashboardData,
         runtimeData,
         reliabilityData,
+        analysisData,
       ] = await Promise.all([
         getJson<ForwardStatus>(
           "/api/forward/status",
@@ -431,9 +434,11 @@ function App() {
         ).catch(
           () => null,
         ),
+        getJson<MarketAnalysis>("/api/market/analysis").catch(() => null),
       ]);
 
       setStatus(statusData);
+      setAnalysis(analysisData);
 
       setPredictions(
         predictionData.predictions,
@@ -510,7 +515,7 @@ function App() {
 
 
   const regime =
-    latest[0]?.regime ||
+    analysis?.regime.name ||
     "UNKNOWN";
 
   const capital =
@@ -749,6 +754,8 @@ function App() {
         </div>
 
 
+        <MarketAnalysisCard analysis={analysis} />
+
         <div className="primary-grid">
           <Card className="pulse-card">
             <div className="section-head">
@@ -810,13 +817,12 @@ function App() {
 
                   <div>
                     <strong>
-                      Model frozen
+                      Adaptive entry policy
                     </strong>
 
                     <span>
                       {
-                        status
-                          ?.modelVersion
+                        analysis?.adaptivePolicy?.status ?? "Waiting for analysis"
                       }
                     </span>
                   </div>
@@ -927,8 +933,7 @@ function App() {
               />
 
               <span>
-                Outcomes cannot rewrite
-                the frozen champion.
+                Validated outcomes can update paper entry thresholds; original predictions remain unchanged.
               </span>
             </div>
           </Card>
@@ -1154,7 +1159,7 @@ function App() {
                 <span className="check">
                   ✓
                 </span>
-                Champion remains frozen
+                Paper policy adapts after validation
               </div>
 
               <div>

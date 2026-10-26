@@ -1759,3 +1759,11 @@ footer {
     height: 120px;
   }
 }
+
+.market-analysis { margin-bottom: 24px; }
+.market-analysis > p { color: var(--muted); line-height: 1.6; }
+.market-analysis-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.market-analysis-grid h3 { font-size: 1rem; }
+.market-analysis-grid p, .market-analysis-grid li { font-size: .88rem; line-height: 1.65; color: var(--muted); }
+.market-analysis-grid ul { padding-left: 18px; }
+@media (max-width: 850px) { .market-analysis-grid { grid-template-columns: 1fr; gap: 12px; } }

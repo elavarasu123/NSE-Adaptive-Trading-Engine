@@ -310,3 +310,45 @@ Safety constraints remain enforced:
 DATABASE_URL is supplied through deployment secrets and
 must never be committed to Git.
 
+
+
+## Market analysis and automatic paper adaptation
+
+The execution cycle records real daily analysis in shared runtime activity.
+`GET /api/market/analysis` supplies the dashboard with the settled data date,
+benchmark indicators, actual execution regime, universe coverage, delayed Nifty
+observation and learning decision. In public read-only mode, scanner, candidates,
+regime and dashboard metadata use this persisted report. Missing reports return
+UNAVAILABLE; stale reports suppress BUY decisions. Production never substitutes
+DEMO candidates. Render neither downloads market history nor trains the policy.
+
+One cycle shares its settled, date-bounded history/features and observed quotes
+across learning, analysis, execution and marking. Partial/future daily bars are
+excluded. Paper entries size against an observed five-minute delayed quote;
+quote timestamps come from the actual bar, not the fetch clock. Stale/future or
+invalid quotes are rejected. Yahoo remains a delayed research feed, not tick-grade
+execution data. Daily signals update after settled history refresh; an intraday
+quote is displayed separately and does not masquerade as a new settled signal.
+
+The user has authorized **automatic validated paper-policy updates**. The original
+score model and immutable predictions remain comparison controls. Adaptive entry
+v1 can automatically tighten each non-PANIC regime's score threshold by 5 or 10
+points; it never expands exposure, removes the PANIC gate, resets capital or
+promotes a different score model. Existing order decisions are not retried.
+
+Learning uses only baseline 20-session outcomes that matured strictly before the
+signal date, with at least 30 training dates and 40 later validation dates and
+100 outcomes in each split. Training labels crossing validation start are purged.
+Two threshold candidates are compared on training data; only the chosen candidate
+is evaluated on validation. Activation requires positive held-out return uplift,
+positive net benchmark excess (both 95% lower bounds using 20-date block
+bootstrap), and entries on at least half of validation dates. Paper slippage and
+fees are deducted. This evaluates a top-two equal-weight forward-return proxy,
+not a capital-constrained portfolio backtest or proof of future accuracy.
+
+Every cycle recomputes its policy from available immutable evidence and records
+its revision, thresholds and validation result before paper execution. If any
+gate fails, the baseline threshold is used. With the currently unmatured forward
+ledger, the correct initial status is BASELINE_RETAINED / WAITING_FOR_EVIDENCE.
+The dashboard shows that explicitly rather than inventing a learned improvement.
+GitHub Actions remains the sole execution scheduler and Neon the shared source.

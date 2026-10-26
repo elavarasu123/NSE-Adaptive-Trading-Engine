@@ -89,8 +89,10 @@ def paper_buy(
             period="1y",
         )
 
+        quote = provider.quote(symbol)
         plan = build_trade_plan(
             history,
+            entry_price=float(quote.price),
             cash=portfolio.cash,
             capital=
                 portfolio.initial_capital,

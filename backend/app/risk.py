@@ -160,6 +160,7 @@ def build_trade_plan(
     position_cap=0.15,
     atr_multiple=2.0,
     reward_risk=2.0,
+    entry_price=None,
 ):
     if df is None or df.empty:
         raise ValueError(
@@ -187,7 +188,9 @@ def build_trade_plan(
             "Insufficient history"
         )
 
-    entry = float(close.iloc[-1])
+    entry = float(close.iloc[-1] if entry_price is None else entry_price)
+    if not np.isfinite(entry) or entry <= 0:
+        raise ValueError("Invalid observed entry price")
 
     atr_series = atr(data, 14)
     atr_values = atr_series.dropna()

@@ -98,16 +98,17 @@ class YahooProvider(MarketDataProvider):
 
         return f"{symbol}.NS"
 
-    def history(self, symbol: str, period: str = "1y"):
+    def history(self, symbol: str, period: str = "1y", interval: str = "1d"):
         ticker = self.normalize_symbol(symbol)
 
         df = self.yf.download(
             ticker,
             period=period,
-            interval="1d",
+            interval=interval,
             auto_adjust=True,
             progress=False,
             threads=False,
+            timeout=15,
         )
 
         if df is None or df.empty:
@@ -125,25 +126,50 @@ class YahooProvider(MarketDataProvider):
         return df
 
     def quote(self, symbol: str) -> Quote:
-        df = self.history(symbol, period="5d")
-
+        from zoneinfo import ZoneInfo
+        import pandas as pd
+        from .scheduler_guard import session_guard
+        from .reliability import expected_closed_session
+        df = self.history(symbol, period="5d", interval="5m")
         if df is None or df.empty or "close" not in df.columns:
-            raise RuntimeError(f"No reliable price available for {symbol}")
+            raise RuntimeError(f"No reliable delayed price available for {symbol}")
+        closes = df["close"].dropna().sort_index()
+        if closes.empty:
+            raise RuntimeError(f"No delayed price available for {symbol}")
+        price = float(closes.iloc[-1])
+        observed = pd.Timestamp(closes.index[-1])
+        if observed.tzinfo is None:
+            observed = observed.tz_localize("Asia/Kolkata")
+        timestamp = observed.to_pydatetime().astimezone(timezone.utc)
+        now = datetime.now(timezone.utc)
+        age = (now - timestamp).total_seconds()
+        guard = session_guard(now)
+        local_day = timestamp.astimezone(ZoneInfo("Asia/Kolkata")).date()
+        if (not math.isfinite(price) or price <= 0 or age < -120
+                or (guard.in_market_window and (age > 20 * 60 or local_day != now.astimezone(ZoneInfo("Asia/Kolkata")).date()))
+                or (guard.in_post_close_window and local_day != now.astimezone(ZoneInfo("Asia/Kolkata")).date())
+                or local_day < expected_closed_session(now)):
+            raise RuntimeError(f"Stale or invalid delayed price for {symbol}")
+        return Quote(symbol=symbol.upper().replace(".NS", ""), price=round(price, 2),
+                     timestamp=timestamp, source="YAHOO_DELAYED_5M", is_live=False)
 
-        close_series = df["close"].dropna()
 
-        if close_series.empty:
-            raise RuntimeError(f"No close price available for {symbol}")
+class CycleMarketProvider:
+    """Reuse settled histories and one observed quote per symbol within a cycle."""
+    def __init__(self, provider, context):
+        self.provider, self.context, self.quotes = provider, context, {}
 
-        price = float(close_series.iloc[-1])
+    def history(self, symbol, period="1y"):
+        frame = self.context.frame(symbol)
+        if frame is None:
+            raise RuntimeError(f"Settled history unavailable for {symbol}")
+        return frame
 
-        return Quote(
-            symbol=symbol.upper().replace(".NS", ""),
-            price=round(price, 2),
-            timestamp=datetime.now(timezone.utc),
-            source="YAHOO_DELAYED",
-            is_live=False,
-        )
+    def quote(self, symbol):
+        if symbol not in self.quotes:
+            self.quotes[symbol] = self.provider.quote(symbol)
+        return self.quotes[symbol]
+
 
 
 def get_market_provider(name: Optional[str] = None) -> MarketDataProvider:

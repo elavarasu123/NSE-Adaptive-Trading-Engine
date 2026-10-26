@@ -68,6 +68,7 @@ function reason(value: string | null) {
   if (value === "BATCH_ENTRY_CAP") return "The batch entry limit was reached.";
   if (value === "POSITION_ALREADY_OPEN") return "A position in this stock is already open.";
   if (value === "MODEL_NOT_CHAMPION") return "This prediction is not from the approved champion.";
+  if (value?.startsWith("BELOW_ADAPTIVE_THRESHOLD:")) return `Score is below the validated adaptive threshold of ${value.split(":")[1]}.`;
   if (value?.startsWith("BELOW_REGIME_THRESHOLD:")) {
     return `Score is below the regime threshold of ${value.split(":")[1]}.`;
   }

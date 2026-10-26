@@ -209,9 +209,77 @@ def _price_on_or_before(
     )
 
 
+class LearningContext:
+    """One settled, point-in-time view per cycle; load/enrich each symbol once."""
+    def __init__(self, as_of=None):
+        from .reliability import expected_closed_session
+        self.as_of = as_of or expected_closed_session()
+        self.frames = {}
+        self.coverage = {"missing": 0, "insufficient": 0, "unaligned": 0}
+        self._candidates = None
+
+    def frame(self, symbol):
+        if symbol not in self.frames:
+            raw = load_history(symbol)
+            if raw is None or raw.empty:
+                self.frames[symbol] = None
+            else:
+                raw = raw.copy()
+                for column in ["open", "high", "low", "close", "volume"]:
+                    if column in raw:
+                        raw[column] = pd.to_numeric(raw[column], errors="coerce")
+                index = pd.to_datetime(raw.index)
+                if index.tz is not None:
+                    index = index.tz_convert("Asia/Kolkata").tz_localize(None)
+                raw.index = index.normalize()
+                raw = raw.loc[~raw.index.duplicated(keep="last")].sort_index()
+                raw = raw.loc[raw.index <= pd.Timestamp(self.as_of)]
+                # Partial/future daily bars must never enter labels or features.
+                raw = raw.loc[np.isfinite(raw["close"]) & (raw["close"] > 0)]
+                self.frames[symbol] = enrich(raw) if not raw.empty else None
+        return self.frames[symbol]
+
+    def candidates(self):
+        if self._candidates is not None:
+            return self._candidates
+        benchmark = self.frame("^NSEI")
+        if benchmark is None or len(benchmark) < 300:
+            raise RuntimeError("Nifty history unavailable.")
+        self.market_date = benchmark.index[-1]
+        if self.market_date.date() != self.as_of:
+            raise RuntimeError("Benchmark does not contain the expected settled session.")
+        self.benchmark_row = benchmark.iloc[-1]
+        self.regime = regime_at(self.benchmark_row)
+        self.universe = load_universe()
+        candidates = []
+        for stock in self.universe:
+            frame = self.frame(stock.symbol)
+            if frame is None:
+                self.coverage["missing"] += 1
+                continue
+            if len(frame) < 300:
+                self.coverage["insufficient"] += 1
+                continue
+            if self.market_date not in frame.index:
+                self.coverage["unaligned"] += 1
+                continue
+            row = frame.loc[self.market_date]
+            score = feature_score(row, self.benchmark_row)
+            price = _safe_float(row.get("close"))
+            if score is None or not math.isfinite(score) or price is None:
+                self.coverage["insufficient"] += 1
+                continue
+            candidates.append({"symbol": stock.symbol, "sector": stock.sector,
+                               "score": float(score), "entryPrice": price, "regime": self.regime})
+        candidates.sort(key=lambda x: x["score"], reverse=True)
+        self._candidates = candidates
+        return candidates
+
+
 def generate_predictions(
     minimum_score=65,
     top_n=10,
+    context=None,
 ):
     """
     Generate one frozen prediction batch for the
@@ -220,105 +288,12 @@ def generate_predictions(
     Re-running on the same date/model/symbol is
     idempotent: duplicate predictions are skipped.
     """
-    benchmark = load_history(
-        "^NSEI"
-    )
-
-    if benchmark is None or len(
-        benchmark
-    ) < 300:
-        raise RuntimeError(
-            "Nifty history unavailable."
-        )
-
-    benchmark = enrich(
-        benchmark
-    )
-
-    market_date = (
-        benchmark.index[-1]
-    )
-
-    benchmark_row = benchmark.loc[
-        market_date
-    ]
-
-    regime = regime_at(
-        benchmark_row
-    )
-
-    universe = load_universe()
-
+    context = context or LearningContext()
+    candidates = [x for x in context.candidates() if x["score"] >= minimum_score]
+    benchmark = context.frame("^NSEI")
+    market_date, regime = context.market_date, context.regime
     existing = latest_predictions()
-
-    duplicate_keys = {
-        (
-            x["modelVersion"],
-            x["predictionDate"],
-            x["symbol"],
-        )
-        for x in existing
-    }
-
-    candidates = []
-
-    for stock in universe:
-        frame = load_history(
-            stock.symbol
-        )
-
-        if (
-            frame is None
-            or len(frame) < 300
-        ):
-            continue
-
-        frame = enrich(frame)
-
-        if market_date not in frame.index:
-            continue
-
-        row = frame.loc[
-            market_date
-        ]
-
-        score = feature_score(
-            row,
-            benchmark_row,
-        )
-
-        if (
-            score is None
-            or score < minimum_score
-        ):
-            continue
-
-        entry_price = _safe_float(
-            row.get("close")
-        )
-
-        if entry_price is None:
-            continue
-
-        candidates.append(
-            {
-                "symbol":
-                    stock.symbol,
-                "sector":
-                    stock.sector,
-                "score":
-                    float(score),
-                "entryPrice":
-                    entry_price,
-                "regime":
-                    regime,
-            }
-        )
-
-    candidates.sort(
-        key=lambda x: x["score"],
-        reverse=True,
-    )
+    duplicate_keys = {(x["modelVersion"], x["predictionDate"], x["symbol"]) for x in existing}
 
     created = []
     skipped = []
@@ -416,25 +391,17 @@ def generate_predictions(
     }
 
 
-def mature_outcomes():
+def mature_outcomes(context=None):
     """
     Append outcomes ONLY when the required number
     of subsequent trading sessions exists.
 
     Prediction records themselves are never edited.
     """
-    benchmark = load_history(
-        "^NSEI"
-    )
-
+    context = context or LearningContext()
+    benchmark = context.frame("^NSEI")
     if benchmark is None:
-        raise RuntimeError(
-            "Nifty history unavailable."
-        )
-
-    benchmark = enrich(
-        benchmark
-    )
+        raise RuntimeError("Nifty history unavailable.")
 
     predictions = (
         latest_predictions()
@@ -447,14 +414,9 @@ def mature_outcomes():
             "symbol"
         ]
 
-        frame = load_history(
-            symbol
-        )
-
+        frame = context.frame(symbol)
         if frame is None:
             continue
-
-        frame = enrich(frame)
 
         prediction_date = (
             pd.Timestamp(
@@ -603,10 +565,8 @@ def mature_outcomes():
     }
 
 
-def forward_metrics():
-    predictions = (
-        latest_predictions()
-    )
+def forward_metrics(predictions=None):
+    predictions = latest_predictions() if predictions is None else predictions
 
     result = {
         "modelVersion":
@@ -760,7 +720,7 @@ def learning_status():
         latest_predictions()
     )
 
-    metrics = forward_metrics()
+    metrics = forward_metrics(predictions)
 
     today = date.today()
 
@@ -785,7 +745,11 @@ def learning_status():
             else:
                 pending[key] += 1
 
+    from .market_analysis import load_market_analysis
+    analysis = load_market_analysis()
     return {
+        "adaptivePolicy": analysis.get("adaptivePolicy"),
+        "automaticPaperPolicyUpdates": True,
         "engine":
             "FORWARD_PAPER_LEARNING",
         "modelVersion":
@@ -807,10 +771,8 @@ def learning_status():
         "metrics":
             metrics,
         "promotionPolicy": (
-            "Historical OOS is frozen. "
-            "Model changes require a separate "
-            "challenger plus matured forward "
-            "paper evidence. No automatic "
-            "promotion."
+            "Baseline scores and recorded predictions remain immutable. "
+            "Paper entry thresholds adapt automatically after purged chronological "
+            "validation on matured outcomes. No automatic score-model promotion."
         ),
     }

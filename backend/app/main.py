@@ -22,6 +22,8 @@ from .trading import (
     monitor_positions,
 )
 from .scheduler_schedule import SCHEDULE_TIMES_IST
+from .dashboard_security import public_dashboard_read_only
+from .market_analysis import load_market_analysis
 
 
 Base.metadata.create_all(engine)
@@ -101,7 +103,7 @@ def health():
     return {
         "status": "ok",
         "mode": "PAPER",
-        "provider": provider.__class__.__name__,
+        "provider": "SHARED_EXECUTION_ANALYSIS" if public_dashboard_read_only() else provider.__class__.__name__,
         "tickByTick": False,
         "version": "1.2.2",
     }
@@ -129,6 +131,8 @@ def dashboard(db: Session = Depends(get_db)):
 
     unrealized = market_value - cost
 
+    analysis = load_market_analysis() if public_dashboard_read_only() else None
+
     return {
         "portfolio": {
             "initialCapital": portfolio.initial_capital,
@@ -153,8 +157,9 @@ def dashboard(db: Session = Depends(get_db)):
         },
         "engine": {
             "status": "ONLINE",
-            "strategy": "champion-v1",
-            "regime": "NEUTRAL",
+            "strategy": "baseline-with-adaptive-entry-policy",
+            "regime": analysis["regime"]["name"] if analysis else "UNKNOWN",
+            "analysisAsOf": analysis["asOf"] if analysis else None,
             "mode": "PAPER",
         },
         "positions": [
@@ -188,17 +193,25 @@ def risk_status(
 
 @app.get("/api/candidates")
 def candidates():
-    return scan()
+    return load_market_analysis()["results"] if public_dashboard_read_only() else scan()
 
 
 @app.get("/api/scanner/report")
 def scanner_report():
-    return scan_report()
+    return load_market_analysis() if public_dashboard_read_only() else scan_report()
 
 
 @app.get("/api/regime")
 def market_regime():
+    if public_dashboard_read_only():
+        report = load_market_analysis()
+        return {**report["regime"], "asOf": report["asOf"], "status": report["status"], "dataLive": False}
     return regime_dict(provider)
+
+
+@app.get("/api/market/analysis")
+def persisted_market_analysis():
+    return load_market_analysis()
 
 
 @app.post("/api/engine/run")

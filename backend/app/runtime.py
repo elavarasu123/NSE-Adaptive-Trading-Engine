@@ -12,6 +12,8 @@ import uuid
 from sqlalchemy.orm import Session
 
 from .forward_learning import (
+    LearningContext,
+    latest_predictions,
     generate_predictions,
     learning_status,
     mature_outcomes,
@@ -439,6 +441,7 @@ def runtime_status():
                 False,
             "automaticModelPromotion":
                 False,
+            "automaticPaperPolicyUpdates": True,
         },
     }
 
@@ -531,7 +534,10 @@ def run_cycle(
         # ----------------------------------------------------
         # STEP 1 — Mature existing forward predictions
         # ----------------------------------------------------
-        matured = mature_outcomes()
+        context = LearningContext()
+        from .market import CycleMarketProvider
+        provider = CycleMarketProvider(provider, context)
+        matured = mature_outcomes(context=context)
 
         result["steps"][
             "matureOutcomes"
@@ -561,6 +567,7 @@ def run_cycle(
             generate_predictions(
                 minimum_score=65,
                 top_n=10,
+                context=context,
             )
         )
 
@@ -605,6 +612,21 @@ def run_cycle(
             },
         )
 
+        from .adaptive_policy import learn_entry_policy
+        from .market_analysis import build_market_analysis
+        from .execution import BUY_SLIPPAGE_BPS, SELL_SLIPPAGE_BPS, FEE_BPS
+        adaptive = learn_entry_policy(
+            latest_predictions(), str(context.market_date.date()),
+            round_trip_cost=(BUY_SLIPPAGE_BPS + SELL_SLIPPAGE_BPS + 2 * FEE_BPS) / 10000,
+        )
+        analysis = build_market_analysis(context, adaptive, provider)
+        activity("MARKET_ANALYSIS", "Settled market analysis and validated adaptive entry policy updated.",
+                 data={"runId": run_id, "analysis": analysis})
+        result["steps"]["marketAnalysis"] = {
+            "asOf": analysis["asOf"], "regime": analysis["regime"],
+            "coverage": analysis["coverage"], "adaptivePolicy": adaptive,
+        }
+
         # ----------------------------------------------------
         # STEP 3 — V1.0 automatic paper execution
         # ----------------------------------------------------
@@ -616,6 +638,7 @@ def run_cycle(
             run_execution_cycle(
                 db,
                 provider,
+                adaptive_policy=adaptive,
             )
         )
 
@@ -638,6 +661,7 @@ def run_cycle(
             data={
                 "runId":
                     run_id,
+                "adaptivePolicyRevision": adaptive["revision"],
                 "filled":
                     len(
                         entry_data[
