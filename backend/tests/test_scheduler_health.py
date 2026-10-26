@@ -181,6 +181,39 @@ def test_disabled_workflow_is_not_misreported_as_missing():
                      REPOSITORY, "main")
 
 
+def test_reactivation_scopes_future_deliveries_without_claiming_recovery():
+    client = FakeGitHub()
+    client.get = lambda path: {"state": "active", "updated_at": "2026-10-26T13:41:49+05:30"}
+    scope = {}
+    rows = health.check(clock(14, 47), ACTIVATED, client, REPOSITORY, "main", scope=scope)
+    assert [row["slot"] for row in rows] == ["2026-10-26 14:20 IST"]
+    assert rows[0]["status"] == "MISSING"  # A registration reset is not proof of delivery.
+    assert scope["activated_at"] == "2026-10-26T13:41:49+05:30"
+    assert "Earlier failed checks remain" in health.summary(rows, scope=scope)
+
+
+def test_invalid_registration_cannot_hide_missing_runs():
+    client = FakeGitHub()
+    client.get = lambda path: {"state": "active", "updated_at": "not-a-time"}
+    with pytest.raises(health.EvidenceError):
+        health.check(clock(9, 47), ACTIVATED, client, REPOSITORY, "main")
+
+
+def test_github_annotation_exposes_diagnostic_without_log_storage(monkeypatch, capsys):
+    monkeypatch.delenv("GITHUB_STEP_SUMMARY", raising=False)
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_REPOSITORY", REPOSITORY)
+    monkeypatch.setenv("DEFAULT_BRANCH", "main")
+    monkeypatch.setenv("GH_TOKEN", "never-print-this")
+    monkeypatch.setattr(health, "activation_time", lambda: ACTIVATED)
+    monkeypatch.setattr(health, "check", lambda *args, **kwargs: [
+        {"status": "MISSING", "slot": "09:20 IST", "detail": "absent\n100%"}])
+    assert health.main(["check"]) == 1
+    output = capsys.readouterr().out
+    assert "::error title=NSE scheduler health::MISSING: 09:20 IST: absent%0A100%25" in output
+    assert "never-print-this" not in output
+
+
 def test_api_check_filters_wrong_branch_and_handles_artifact_failures():
     client = FakeGitHub(runs=[run(head_branch="feature")], artifact=receipt())
     assert health.check(clock(9, 47), ACTIVATED, client, REPOSITORY, "main")[0]["status"] == "MISSING"
@@ -241,7 +274,7 @@ def test_cli_preserves_failure_status_and_writes_summary(monkeypatch, tmp_path, 
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(output))
     monkeypatch.setattr(health, "activation_time", lambda: ACTIVATED)
 
-    def check(*args):
+    def check(*args, **kwargs):
         if error:
             raise error
         return rows

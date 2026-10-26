@@ -690,18 +690,14 @@ def run_runtime_cycle():
 @app.get("/api/runtime/activity")
 def get_runtime_activity():
     from .runtime import (
-        ACTIVITY_PATH,
-        read_jsonl,
+        read_runtime_activity,
     )
 
     return {
         "activity":
             list(
                 reversed(
-                    read_jsonl(
-                        ACTIVITY_PATH,
-                        limit=100,
-                    )
+                    read_runtime_activity(limit=100)
                 )
             )
     }
@@ -710,16 +706,12 @@ def get_runtime_activity():
 @app.get("/api/runtime/equity")
 def get_runtime_equity():
     from .runtime import (
-        EQUITY_PATH,
-        read_jsonl,
+        read_runtime_equity,
     )
 
     return {
         "equity":
-            read_jsonl(
-                EQUITY_PATH,
-                limit=500,
-            )
+            read_runtime_equity(limit=500)
     }
 
 
@@ -728,10 +720,10 @@ def reliability_status(
     db: Session = Depends(get_db),
 ):
     from .reliability import (
-        reliability_report,
+        dashboard_reliability_report,
     )
 
-    return reliability_report(
+    return dashboard_reliability_report(
         db
     )
 

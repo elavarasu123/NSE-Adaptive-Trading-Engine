@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import (
+    date,
     datetime,
     time,
     timedelta,
@@ -719,9 +720,11 @@ def reliability_report(
     db: Session,
     now: datetime | None = None,
 ):
-    market = market_data_status(
-        now
-    )
+    # Execution always validates its actual local market cache.
+    return _integrity_report(db, market_data_status(now))
+
+
+def _integrity_report(db: Session, market):
 
     portfolio = (
         portfolio_integrity(
@@ -783,6 +786,46 @@ def reliability_report(
         "blockers":
             blockers,
     }
+
+
+def dashboard_reliability_report(db: Session, now: datetime | None = None):
+    """Display execution-side market evidence without requiring Render CSVs.
+
+    Portfolio/ledger/checkpoint integrity is still checked against shared state.
+    A missing or old checkpoint never becomes healthy merely because this is
+    the display service. The trading runtime does not use this adapter.
+    """
+    from .dashboard_security import public_dashboard_read_only
+
+    if not (shared_state_enabled() and public_dashboard_read_only()):
+        return reliability_report(db, now)
+
+    saved = load_shared_checkpoint() or {}
+    expected = expected_closed_session(now)
+    market = {
+        "status": "UNAVAILABLE", "blocking": True,
+        "latestSession": None, "expectedSession": str(expected),
+        "sessionsBehind": None,
+    }
+    try:
+        latest = date.fromisoformat(saved.get("marketData", {}).get("latestSession", ""))
+    except (ValueError, TypeError, AttributeError):
+        pass
+    else:
+        behind = (len(trading_sessions(latest + timedelta(days=1), expected))
+                  if latest < expected else 0)
+        status = "INVALID" if latest > expected else "STALE" if behind else "FRESH"
+        market.update(status=status, blocking=status != "FRESH",
+                      latestSession=str(latest), sessionsBehind=behind)
+
+    report = _integrity_report(db, market)
+    report.update(
+        displayOnly=True,
+        evidenceSource="SHARED_CHECKPOINT",
+        checkpointCreatedAt=saved.get("createdAt"),
+        executionSource=saved.get("runtimeSource"),
+    )
+    return report
 
 
 def write_checkpoint(

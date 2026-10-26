@@ -208,10 +208,22 @@ class GitHub:
             raise EvidenceError("Receipt artifact unreadable or unavailable") from None
 
 
-def check(now, activated_at, github, repository, branch):
+def check(now, activated_at, github, repository, branch, scope=None):
     workflow = github.get("/actions/workflows/paper-engine.yml")
     if workflow["state"] != "active":
         raise EvidenceError("Engine workflow is disabled; enable it in GitHub Actions")
+    # Re-enabling starts a new delivery registration. Do not demand retroactive
+    # delivery of slots from before the repair; previous runs retain that audit.
+    if workflow.get("updated_at"):
+        try:
+            registration = timestamp(workflow["updated_at"])
+        except (ValueError, TypeError, AttributeError):
+            raise EvidenceError("Invalid workflow registration timestamp") from None
+        if registration > now + timedelta(minutes=1):
+            raise EvidenceError("Workflow registration timestamp is in the future")
+        activated_at = max(activated_at, registration)
+    if scope is not None:
+        scope["activated_at"] = activated_at.isoformat()
     day = now.astimezone(IST).replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=6)
     query = urllib.parse.urlencode({"event": "schedule", "branch": branch,
                                   "created": ">=" + day.astimezone(timezone.utc).isoformat()})
@@ -228,10 +240,16 @@ def check(now, activated_at, github, repository, branch):
     return assess_slots(now, activated_at, runs, receipts, errors)
 
 
-def summary(rows, error=None):
+def summary(rows, error=None, scope=None):
     lines = ["## NSE scheduler health", "",
              "GitHub delivery/workflow evidence only. Success does not prove that a paper cycle "
              "executed: inspect session-guard and runtime evidence.", ""]
+    if scope and scope.get("activated_at"):
+        lines.extend([
+            "Delivery scope starts at " + timestamp(scope["activated_at"]).astimezone(IST).isoformat()
+            + " (latest cron publication or workflow registration update). "
+            "Earlier failed checks remain in Actions history.", "",
+        ])
     if error:
         lines.append(f"**EVIDENCE_UNAVAILABLE:** {error}")
     elif not rows:
@@ -257,16 +275,24 @@ def main(argv=None):
     if args.command == "receipt":
         args.output.write_text(json.dumps(receipt_document(os.environ, now)), encoding="utf-8")
         return 0
-    rows, error = [], None
+    rows, error, scope = [], None, {}
     try:
         repository = os.environ["GITHUB_REPOSITORY"]
         branch = os.environ["DEFAULT_BRANCH"]
         token = os.environ["GH_TOKEN"]
-        rows = check(now, activation_time(), GitHub(repository, token), repository, branch)
+        rows = check(now, activation_time(), GitHub(repository, token), repository, branch, scope=scope)
     except (EvidenceError, KeyError, ValueError, OSError, subprocess.SubprocessError) as exc:
         error = str(exc) if isinstance(exc, EvidenceError) else "Monitoring prerequisites unavailable"
-    report = summary(rows, error)
+    report = summary(rows, error, scope)
     print(report)
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        failures = ([f"EVIDENCE_UNAVAILABLE: {error}"] if error else [
+            f"{row['status']}: {row['slot']}: {row['detail']}"
+            for row in rows if row["status"] not in GOOD_STATUSES
+        ])
+        for message in failures:
+            escaped = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+            print(f"::error title=NSE scheduler health::{escaped}")
     if os.getenv("GITHUB_STEP_SUMMARY"):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as handle:
             handle.write(report)
