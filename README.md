@@ -64,14 +64,16 @@ evidence instead. Artifacts are retained for seven days.
 
 The watchdog checks the last seven calendar days, excluding configured NSE
 holidays/weekends and slots before the default-branch commit that changed the
-cron. It allows 20 minutes for delivery, distinguishes pending runs from failed
+cron or the workflow's more recent registration update (for example re-enabling).
+Earlier failed checks remain in Actions history. It allows 20 minutes for delivery, distinguishes pending runs from failed
 or over-45-minute runs, and checks receipts so a late earlier trigger cannot
 satisfy the following hour's slot. Only schedule events on the default branch
 count; a successful manual run does not prove scheduler health.
 
 Inspect the watchdog's Actions summary for `MISSING`, `FAILED`, `TIMED_OUT`,
 `DUPLICATE`, or `EVIDENCE_UNAVAILABLE`. These make the watchdog fail and can use
-your existing GitHub Actions failure notifications. If the workflow is disabled,
+your existing GitHub Actions failure notifications. The reason is also emitted
+as a GitHub annotation, so it can be read without downloading the raw log. If the workflow is disabled,
 enable **NSE Paper Engine** in Actions. For unavailable evidence, check token
 permissions, artifact availability and network access. It does not create
 issues or send messages to external services.
@@ -81,6 +83,22 @@ execution: inspect the session-guard result and runtime heartbeat/checkpoint in
 the shared state. GitHub can delay/drop both workflows, so this watchdog is not
 an independent uptime guarantee. Holiday coverage follows the engine's calendar;
 missing holiday years currently fall back to weekdays only.
+
+## Shared dashboard reliability
+
+In shared-DB, public read-only mode, `/api/reliability/status` uses the execution
+checkpoint stored in Neon for market-data evidence. Render deliberately excludes
+the history cache from its Docker image. Freshness is recomputed against the
+currently expected settled NSE session; a missing, stale or future-dated
+checkpoint is blocking. Portfolio, ledger and checkpoint integrity are still
+checked against shared state. The response identifies `evidenceSource`,
+`checkpointCreatedAt` and `executionSource` and marks itself `displayOnly`.
+
+The actual trading runtime still validates its own local market history before
+execution. A fresh data checkpoint does not prove an on-time scheduler heartbeat;
+the watchdog checks delivery separately. `/api/runtime/activity` and
+`/api/runtime/equity` use the same configured backend as `/api/runtime/status`,
+preserving newest-first activity and chronological equity.
 
 ## V0.8 Runtime
 

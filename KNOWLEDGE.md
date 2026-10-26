@@ -55,3 +55,20 @@ polls overlap. Mobile drawers support Escape, focus restoration and keyboard
 containment. No execution, capital, model, database or scheduling policy changes
 are part of this UI fix. Publication to main and a successful Render deployment
 are required before it appears on the live dashboard.
+
+## Shared workflow health maintenance
+
+Render's public read-only reliability view now uses persisted execution-side
+market evidence from Neon, with freshness recomputed against the expected
+settled session. It still checks shared portfolio/ledger/checkpoint integrity.
+Missing, stale and future-dated evidence remains blocking. Actual execution
+preflight still requires the real history cache. Activity/equity API reads now
+respect shared-DB mode rather than silently reading Render-local files.
+
+After a workflow registration reset, watchdog scope starts at the later of the
+cron publication and GitHub's registration update. Historical failed checks
+remain visible in Actions; a re-enable does not prove future delivery. Failures
+also produce readable GitHub annotations. A guarded manual run is distinct from
+schedule-event proof. New lifecycle tests use isolated in-memory SQLite and fake
+prices to verify fills, rejections, idempotency, cost accounting, gap exits and
+portfolio limits without touching the shared account.

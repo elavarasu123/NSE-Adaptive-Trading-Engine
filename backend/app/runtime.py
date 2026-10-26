@@ -385,32 +385,24 @@ def portfolio_snapshot(
     return snapshot
 
 
+def read_runtime_activity(limit=25):
+    """Chronological activity from the configured canonical backend."""
+    if shared_state_enabled():
+        return read_activity(limit=limit)
+    return read_jsonl(ACTIVITY_PATH, limit=limit)
+
+
+def read_runtime_equity(limit=100):
+    """Chronological equity from the configured canonical backend."""
+    if shared_state_enabled():
+        return read_equity(limit=limit)
+    return read_jsonl(EQUITY_PATH, limit=limit)
+
+
 def runtime_status():
     state = load_state()
-
-    if shared_state_enabled():
-        activities = (
-            read_activity(
-                limit=25
-            )
-        )
-
-        equity = (
-            read_equity(
-                limit=100
-            )
-        )
-
-    else:
-        activities = read_jsonl(
-            ACTIVITY_PATH,
-            limit=25,
-        )
-
-        equity = read_jsonl(
-            EQUITY_PATH,
-            limit=100,
-        )
+    activities = read_runtime_activity(limit=25)
+    equity = read_runtime_equity(limit=100)
 
     try:
         forward = learning_status()

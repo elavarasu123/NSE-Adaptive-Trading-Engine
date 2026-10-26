@@ -817,6 +817,17 @@ export default function InteractiveInspector() {
                       "UNKNOWN"
                     }
                   />
+                  <K
+                    a="Market-data evidence"
+                    b={data.reliability?.evidenceSource === "SHARED_CHECKPOINT"
+                      ? "Saved execution checkpoint" : "Local history"}
+                  />
+                  <K
+                    a="Checkpoint recorded"
+                    b={data.reliability?.checkpointCreatedAt
+                      ? new Date(data.reliability.checkpointCreatedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) + " IST"
+                      : "—"}
+                  />
                 </div>
               )}
 
