@@ -42,3 +42,16 @@ Local tests/build and GitHub publication status are reported in the change's
 handoff. The schedules become effective only after merge into the default
 branch. A real schedule-event run and its runtime evidence must be checked
 after rollout; a manual engine run must not be used as substitute proof.
+
+
+## Paper activity display maintenance
+
+A separate dashboard fix exposes Trades & orders, with visible access to recent
+buy/sell fills, automatic order decisions/rejection reasons and open positions.
+The inspector reads `/api/trades` alongside its existing account/order polling.
+These remain GET-only views; empty results and failed requests are distinct.
+Missing prices display a dash rather than zero. The latest request wins if
+polls overlap. Mobile drawers support Escape, focus restoration and keyboard
+containment. No execution, capital, model, database or scheduling policy changes
+are part of this UI fix. Publication to main and a successful Render deployment
+are required before it appears on the live dashboard.

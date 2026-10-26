@@ -618,7 +618,9 @@ function App() {
 
           <button
             className="nav"
-            title="Portfolio"
+            title="Portfolio and trades"
+            aria-label="Portfolio and trades"
+            onClick={() => document.getElementById("paper-trading")?.scrollIntoView({ block: "start" })}
           >
             <WalletCards />
           </button>
@@ -1168,6 +1170,8 @@ function App() {
 
 
 
+        <InteractiveInspector />
+
         <div className="runtime-grid">
           <Card>
             <div className="section-head">
@@ -1486,8 +1490,6 @@ function App() {
           </div>
         </Card>
 
-
-        <InteractiveInspector />
 
         <footer>
           <span>

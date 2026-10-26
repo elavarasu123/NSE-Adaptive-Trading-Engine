@@ -26,6 +26,23 @@ npm install
 npm run dev
 ```
 
+## Paper trades on the dashboard
+
+Open **Trades & orders** below the Paper Account cards, or use the **Portfolio
+and trades** navigation button. Tap **Recent trade fills**, **Order decisions**,
+or **Open positions** to inspect the account.
+
+Trade history uses the existing read-only `/api/trades` endpoint (up to 200
+recent buy/sell fills). Automatic order decisions use `/api/execution/status`
+(up to 100, including rejections). Open positions use `/api/dashboard`.
+Predictions are observations; rejected orders, including PANIC blocks, are not
+trade fills. A zero-fill account can therefore be correct. Loading failures are
+shown as unavailable evidence rather than an empty account; use **Refresh
+activity** to retry. Data refreshes approximately every 30 seconds.
+
+Frontend rendering checks run with `cd frontend && npm test`; the build remains
+`npm run build`. The dashboard only reads account state; it cannot place orders.
+
 ## Scheduler delivery and health
 
 The engine requests GitHub schedule events at **09:20, 10:20, 11:20,

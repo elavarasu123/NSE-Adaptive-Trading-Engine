@@ -407,3 +407,58 @@
     animation: none;
   }
 }
+
+.paper-trading-section {
+  cursor: default;
+  margin-bottom: 14px;
+  scroll-margin-top: 16px;
+}
+
+.paper-trading-section:hover { transform: none; }
+
+.paper-trading-section .v122-title { flex-wrap: wrap; }
+
+.paper-counts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.paper-counts > button, .paper-link {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(96,230,173,.04);
+  color: inherit;
+  padding: 14px;
+  cursor: pointer;
+  min-height: 44px;
+  text-align: left;
+}
+
+.paper-counts span, .paper-counts strong, .paper-counts small { display: block; }
+.paper-counts span, .paper-caption { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.paper-counts strong { color: var(--accent); font-size: 22px; margin: 8px 0; overflow-wrap: anywhere; }
+.paper-counts small { color: var(--muted); font-size: 11px; }
+.paper-records { display: grid; gap: 12px; }
+.paper-record { border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
+.paper-record-title { display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.paper-record time { display: block; font-size: 11px; color: var(--muted); margin-top: 8px; }
+.paper-badge { color: var(--accent); font-size: 11px; background: rgba(96,230,173,.08); border-radius: 6px; padding: 5px 8px; }
+.paper-rejected { color: #ffbc91; background: rgba(255,188,145,.08); }
+.paper-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 16px 0 0; }
+.paper-facts dt { font-size: 11px; color: var(--muted); }
+.paper-facts dd { margin: 5px 0 0; font-size: 13px; overflow-wrap: anywhere; }
+.paper-message { padding: 14px; border: 1px solid var(--line); border-radius: 12px; line-height: 1.7; font-size: 13px; overflow-wrap: anywhere; }
+.paper-message p { color: var(--muted); margin-bottom: 0; }
+.paper-error { color: #ffbc91; }
+.paper-reason { font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.paper-record summary { cursor: pointer; min-height: 44px; display: list-item; padding-top: 12px; color: var(--accent); font-size: 12px; }
+.paper-link { display: inline-block; margin: 10px 0; color: var(--accent); }
+.paper-counts button:focus-visible, .paper-link:focus-visible, .paper-record summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+@media (max-width: 480px) {
+  .paper-counts { grid-template-columns: 1fr; }
+  .paper-counts > button { padding: 12px; }
+  .paper-counts strong { font-size: 20px; }
+}
