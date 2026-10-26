@@ -547,3 +547,14 @@ def save_shared_checkpoint(
 
     finally:
         db.close()
+
+
+def latest_activity_of_type(event_type):
+    """Read one persisted analysis without transferring the whole activity log."""
+    db = SessionLocal()
+    try:
+        row = (db.query(RuntimeActivity).filter(RuntimeActivity.event_type == event_type)
+               .order_by(RuntimeActivity.id.desc()).first())
+        return {"data": row.data, "recordedAt": row.recorded_at} if row else None
+    finally:
+        db.close()

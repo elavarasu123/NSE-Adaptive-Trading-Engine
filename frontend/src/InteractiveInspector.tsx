@@ -680,7 +680,7 @@ export default function InteractiveInspector() {
                 "market" && (
                 <div className="v122-hero">
                   <span>
-                    Current regime
+                    Latest prediction regime
                   </span>
                   <strong>
                     {

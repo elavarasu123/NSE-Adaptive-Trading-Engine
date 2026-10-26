@@ -219,6 +219,7 @@ def _latest_batch():
 def enter_latest_batch(
     db: Session,
     provider,
+    adaptive_policy=None,
 ):
     predictions = (
         _latest_batch()
@@ -355,17 +356,19 @@ def enter_latest_batch(
             prediction["score"]
         )
 
-        if (
-            score
-            < policy.minimum_score
-        ):
+        from .adaptive_policy import entry_threshold
+        # The policy is generated for this exact settled batch. Older/future
+        # revisions cannot silently change a new batch's entry decisions.
+        usable = adaptive_policy if (adaptive_policy or {}).get("asOf") == batch_date else None
+        minimum_score = entry_threshold(usable, policy.regime, policy.minimum_score)
+        if score < minimum_score:
             order = (
                 _record_rejection(
                     db,
                     prediction,
                     (
-                        "BELOW_REGIME_THRESHOLD:"
-                        f"{policy.minimum_score}"
+                        ("BELOW_ADAPTIVE_THRESHOLD:" if minimum_score > policy.minimum_score else "BELOW_REGIME_THRESHOLD:")
+                        + f"{minimum_score}"
                     ),
                 )
             )
@@ -759,6 +762,7 @@ def monitor_all_positions(
 def run_execution_cycle(
     db: Session,
     provider,
+    adaptive_policy=None,
 ):
     exits = (
         monitor_all_positions(
@@ -771,6 +775,7 @@ def run_execution_cycle(
         enter_latest_batch(
             db,
             provider,
+            adaptive_policy=adaptive_policy,
         )
     )
 

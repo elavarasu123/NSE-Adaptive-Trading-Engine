@@ -116,3 +116,29 @@ def test_automatic_entry_obeys_portfolio_position_limit(account, monkeypatch):
     assert account.query(PaperOrder).one().reason.startswith("RISK_GATE:")
     assert account.query(PaperTrade).count() == 0
     assert portfolio.cash == 40000
+
+
+def test_validated_threshold_changes_paper_entries_and_records_rejection(account, monkeypatch):
+    batch(monkeypatch, [prediction(score=78)])
+    policy = {'asOf': '2026-10-23', 'regimes': {'RISK_ON': {'status': 'ACTIVE', 'effectiveThreshold': 80}}}
+    result = execution.enter_latest_batch(account, Provider(), adaptive_policy=policy)
+    assert result['rejected'][0]['reason'] == 'BELOW_ADAPTIVE_THRESHOLD:80.0'
+    assert account.query(PaperTrade).count() == 0
+    assert account.query(Portfolio).one().cash == 100000
+
+
+def test_stale_adaptive_revision_cannot_change_a_new_batch(account, monkeypatch):
+    batch(monkeypatch, [prediction(score=78)])
+    policy = {'asOf': '2026-10-22', 'regimes': {'RISK_ON': {'status': 'ACTIVE', 'effectiveThreshold': 80}}}
+    result = execution.enter_latest_batch(account, Provider(), adaptive_policy=policy)
+    assert len(result['filled']) == 1
+
+
+def test_paper_entry_uses_observed_price_for_gap_and_position_sizing(account, monkeypatch):
+    batch(monkeypatch, [prediction()])
+    provider = Provider()
+    provider.price = 1100  # Previous daily history still closes at 1000.
+    execution.enter_latest_batch(account, provider)
+    order = account.query(PaperOrder).one()
+    assert order.fill_price == pytest.approx(1100 * 1.0005, abs=.01)
+    assert account.query(Position).one().quantity * order.fill_price <= 15000
