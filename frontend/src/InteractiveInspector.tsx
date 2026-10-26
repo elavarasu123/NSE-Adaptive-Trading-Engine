@@ -310,13 +310,13 @@ export default function InteractiveInspector() {
   const schedule =
     data.architecture
       ?.scheduler?.times ?? [
-      "09:15",
-      "10:15",
-      "11:15",
-      "12:15",
-      "13:15",
-      "14:15",
-      "15:15",
+      "09:20",
+      "10:20",
+      "11:20",
+      "12:20",
+      "13:20",
+      "14:20",
+      "15:20",
       "16:05",
     ];
 

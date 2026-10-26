@@ -26,6 +26,45 @@ npm install
 npm run dev
 ```
 
+## Scheduler delivery and health
+
+The engine requests GitHub schedule events at **09:20, 10:20, 11:20,
+12:20, 13:20, 14:20, 15:20 and 16:05 IST**, Monday–Friday. The existing
+NSE session guard still decides whether execution is permitted. Post-close
+history refresh remains at 16:05 IST. Changing cron re-registers the schedule;
+it does not guarantee delivery or fix a confirmed GitHub platform cause.
+
+`NSE Scheduler Watchdog` checks at **09:47–15:47 IST hourly and 16:37 IST**.
+It uses only the built-in GitHub token (`contents: read`, `actions: read`),
+never database credentials. It cannot dispatch, rerun, or execute trading.
+It can also be run manually without triggering the engine.
+
+Each engine run uploads a small `scheduler-receipt-<run>-<attempt>` artifact
+before dependency installation. It contains event/cron, commit, run identity,
+repository/ref and receipt time, never secrets or portfolio contents. Receipt
+collection/upload failures do not stop the engine; the watchdog reports missing
+evidence instead. Artifacts are retained for seven days.
+
+The watchdog checks the last seven calendar days, excluding configured NSE
+holidays/weekends and slots before the default-branch commit that changed the
+cron. It allows 20 minutes for delivery, distinguishes pending runs from failed
+or over-45-minute runs, and checks receipts so a late earlier trigger cannot
+satisfy the following hour's slot. Only schedule events on the default branch
+count; a successful manual run does not prove scheduler health.
+
+Inspect the watchdog's Actions summary for `MISSING`, `FAILED`, `TIMED_OUT`,
+`DUPLICATE`, or `EVIDENCE_UNAVAILABLE`. These make the watchdog fail and can use
+your existing GitHub Actions failure notifications. If the workflow is disabled,
+enable **NSE Paper Engine** in Actions. For unavailable evidence, check token
+permissions, artifact availability and network access. It does not create
+issues or send messages to external services.
+
+A successful workflow receipt is delivery evidence, not proof of engine
+execution: inspect the session-guard result and runtime heartbeat/checkpoint in
+the shared state. GitHub can delay/drop both workflows, so this watchdog is not
+an independent uptime guarantee. Holiday coverage follows the engine's calendar;
+missing holiday years currently fall back to weekdays only.
+
 ## V0.8 Runtime
 
 The V0.8 runtime adds scheduled paper-engine execution and observability.
@@ -44,13 +83,13 @@ Safety properties:
 
 The scheduled workflow currently targets approximately:
 
-- 09:15 IST
-- 10:15 IST
-- 11:15 IST
-- 12:15 IST
-- 13:15 IST
-- 14:15 IST
-- 15:15 IST
+- 09:20 IST
+- 10:20 IST
+- 11:20 IST
+- 12:20 IST
+- 13:20 IST
+- 14:20 IST
+- 15:20 IST
 
 These cycles are research/paper observations, not live trading instructions.
 
@@ -72,13 +111,13 @@ Safety properties:
 
 The scheduled workflow currently targets approximately:
 
-- 09:15 IST
-- 10:15 IST
-- 11:15 IST
-- 12:15 IST
-- 13:15 IST
-- 14:15 IST
-- 15:15 IST
+- 09:20 IST
+- 10:20 IST
+- 11:20 IST
+- 12:20 IST
+- 13:20 IST
+- 14:20 IST
+- 15:20 IST
 
 These cycles are research/paper observations, not live trading instructions.
 
@@ -100,13 +139,13 @@ Safety properties:
 
 The scheduled workflow currently targets approximately:
 
-- 09:15 IST
-- 10:15 IST
-- 11:15 IST
-- 12:15 IST
-- 13:15 IST
-- 14:15 IST
-- 15:15 IST
+- 09:20 IST
+- 10:20 IST
+- 11:20 IST
+- 12:20 IST
+- 13:20 IST
+- 14:20 IST
+- 15:20 IST
 
 These cycles are research/paper observations, not live trading instructions.
 
@@ -128,13 +167,13 @@ Safety properties:
 
 The scheduled workflow currently targets approximately:
 
-- 09:15 IST
-- 10:15 IST
-- 11:15 IST
-- 12:15 IST
-- 13:15 IST
-- 14:15 IST
-- 15:15 IST
+- 09:20 IST
+- 10:20 IST
+- 11:20 IST
+- 12:20 IST
+- 13:20 IST
+- 14:20 IST
+- 15:20 IST
 
 These cycles are research/paper observations, not live trading instructions.
 
@@ -153,7 +192,7 @@ A normal interrupted/failed cycle can enter recovery mode and rebuild a clean ch
 
 The dashboard labels whether the visible runtime state came from a LOCAL process or GITHUB_ACTIONS.
 
-The cloud workflow now performs settled daily-history refresh after the regular NSE session rather than treating the 15:15 observation cycle as end-of-day data.
+The cloud workflow now performs settled daily-history refresh after the regular NSE session rather than treating the 15:20 observation cycle as end-of-day data.
 
 GitHub Actions remains a paper/research orchestrator. It is not a tick-by-tick execution service and is not connected to a live broker.
 

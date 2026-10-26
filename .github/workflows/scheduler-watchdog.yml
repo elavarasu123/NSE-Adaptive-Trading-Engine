@@ -1,0 +1,36 @@
+name: NSE Scheduler Watchdog
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 09:47–15:47 IST, then 16:37 IST after the post-close slot.
+    - cron: "17 4-10 * * 1-5"
+    - cron: "7 11 * * 1-5"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nse-scheduler-watchdog
+  cancel-in-progress: false
+
+jobs:
+  inspect-scheduled-runs:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Needed to identify the default-branch merge that changed the cron.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Inspect delivery and workflow evidence (never execute trading)
+        working-directory: backend
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: python -m app.scheduler_health check

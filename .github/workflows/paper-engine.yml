@@ -16,14 +16,14 @@ on:
         type: boolean
 
   schedule:
-    # Intraday observation cycles.
-    - cron: "45 3 * * 1-5"
-    - cron: "45 4 * * 1-5"
-    - cron: "45 5 * * 1-5"
-    - cron: "45 6 * * 1-5"
-    - cron: "45 7 * * 1-5"
-    - cron: "45 8 * * 1-5"
-    - cron: "45 9 * * 1-5"
+    # 09:20–15:20 IST. Best-effort delivery, monitored by the watchdog.
+    - cron: "50 3 * * 1-5"
+    - cron: "50 4 * * 1-5"
+    - cron: "50 5 * * 1-5"
+    - cron: "50 6 * * 1-5"
+    - cron: "50 7 * * 1-5"
+    - cron: "50 8 * * 1-5"
+    - cron: "50 9 * * 1-5"
 
     # 16:05 IST post-close:
     # refresh settled daily history and
@@ -52,6 +52,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Record scheduler receipt before installing dependencies
+        id: receipt
+        continue-on-error: true
+        working-directory: backend
+        run: python3 -m app.scheduler_health receipt --output "$RUNNER_TEMP/scheduler-receipt.json"
+
+      - name: Preserve scheduler receipt
+        if: ${{ always() && steps.receipt.outcome == 'success' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: scheduler-receipt-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/scheduler-receipt.json
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Python
         uses: actions/setup-python@v5
