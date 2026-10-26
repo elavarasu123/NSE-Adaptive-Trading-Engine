@@ -17,7 +17,7 @@ sys.path.insert(
 
 from app.database import SessionLocal
 from app.bootstrap import ensure_paper_database
-from app.runtime import activity, run_cycle
+from app.runtime import run_cycle
 from app.scheduler_guard import session_guard
 
 
@@ -59,18 +59,8 @@ def main():
         not guard.should_run
         and not force
     ):
-        activity(
-            "SCHEDULE_SKIP",
-            (
-                "Scheduled cycle skipped: "
-                f"{guard.reason}"
-            ),
-            data={
-                **guard.__dict__,
-                "forced": False,
-            },
-        )
-
+        # A skipped request must not invalidate the last execution checkpoint.
+        # Its guard decision is already preserved in the Actions log/receipt.
         print(
             "SKIPPED:",
             guard.reason,
