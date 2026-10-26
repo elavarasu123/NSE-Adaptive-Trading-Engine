@@ -109,5 +109,8 @@ try:
         )
     )
 
+    if not report["allowRuntime"]:
+        raise SystemExit(1)
+
 finally:
     db.close()
