@@ -21,6 +21,7 @@ from .trading import (
     paper_sell,
     monitor_positions,
 )
+from .scheduler_schedule import SCHEDULE_TIMES_IST
 
 
 Base.metadata.create_all(engine)
@@ -833,10 +834,7 @@ def system_architecture():
         "timezone": "Asia/Kolkata",
         "scheduler": {
             "owner": "GITHUB_ACTIONS",
-            "times": [
-                "09:15", "10:15", "11:15", "12:15",
-                "13:15", "14:15", "15:15", "16:05"
-            ],
+            "times": list(SCHEDULE_TIMES_IST),
             "note": (
                 "GitHub Actions is the only execution scheduler. "
                 "NSE session guards can skip invalid sessions."
