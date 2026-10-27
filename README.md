@@ -413,6 +413,9 @@ recorded at runtime start. Unexplained changes under a healthy saved state or
 failed logical/account checks remain blocked for review. Never blindly reset
 cash, delete ledger rows, or re-sign an unexplained change.
 
+Test clients require `pip install -r backend/requirements-dev.txt` (including
+HTTPX); do not rely on packages supplied by an editor/cloud image.
+
 The validation workflow uses an isolated PostgreSQL16 service and temporary
 SQLite state, with no Neon credentials. Run equivalent integration tests locally
 with TEST_POSTGRES_URL pointing only to an explicitly disposable localhost
