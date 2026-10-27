@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 from dataclasses import (
     asdict,
     dataclass,
@@ -12,6 +14,7 @@ import os
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from .transactions import persist, atomic_paper_operation, exclusive_cycle
 
 from .forward_learning import (
     latest_predictions,
@@ -183,7 +186,7 @@ def _record_rejection(
         )
     )
 
-    db.commit()
+    persist(db)
 
     return order
 
@@ -216,6 +219,8 @@ def _latest_batch():
     )
 
 
+@exclusive_cycle
+@atomic_paper_operation
 def enter_latest_batch(
     db: Session,
     provider,
@@ -554,7 +559,7 @@ def enter_latest_batch(
             )
         )
 
-        db.commit()
+        persist(db)
         db.refresh(order)
 
         remaining_slots -= 1
@@ -588,6 +593,8 @@ def enter_latest_batch(
     }
 
 
+@exclusive_cycle
+@atomic_paper_operation
 def monitor_all_positions(
     db: Session,
     provider,
@@ -612,6 +619,8 @@ def monitor_all_positions(
             price = float(
                 quote.price
             )
+            if not math.isfinite(price) or price <= 0:
+                raise ValueError("Invalid position quote")
 
         except Exception as exc:
             events.append(
@@ -737,7 +746,7 @@ def monitor_all_positions(
             )
         )
 
-        db.commit()
+        persist(db)
 
         events.append(
             {
@@ -754,11 +763,13 @@ def monitor_all_positions(
             }
         )
 
-    db.commit()
+    persist(db)
 
     return events
 
 
+@exclusive_cycle
+@atomic_paper_operation
 def run_execution_cycle(
     db: Session,
     provider,
@@ -771,13 +782,13 @@ def run_execution_cycle(
         )
     )
 
-    entries = (
-        enter_latest_batch(
-            db,
-            provider,
-            adaptive_policy=adaptive_policy,
-        )
-    )
+    from .reconciliation import reconcile_account
+    reconciliation = reconcile_account(db)
+    paused = any(event.get("action") == "DATA_ERROR" for event in exits) or reconciliation["blocking"]
+    entries = ({"predictionDate": None, "filled": [], "rejected": [], "existing": [],
+                "pausedReason": "OPEN_POSITION_DATA_UNAVAILABLE" if any(event.get("action") == "DATA_ERROR" for event in exits)
+                else "ACCOUNT_RECONCILIATION_FAILED"}
+               if paused else enter_latest_batch(db, provider, adaptive_policy=adaptive_policy))
 
     return {
         "simulation":
@@ -786,6 +797,7 @@ def run_execution_cycle(
             exits,
         "entries":
             entries,
+        "reconciliation": reconciliation,
     }
 
 

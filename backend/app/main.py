@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Response
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
@@ -55,6 +55,7 @@ def initialize():
         if not db.query(Portfolio).first():
             db.add(
                 Portfolio(
+                    id=1,
                     initial_capital=100000,
                     cash=100000,
                     realized_pnl=0,
@@ -681,10 +682,18 @@ def run_forward_learning():
 
 
 @app.get("/api/runtime/status")
-def get_runtime_status():
+def get_runtime_status(response: Response):
     from .runtime import runtime_status
-
+    response.headers["Cache-Control"] = "no-store"
     return runtime_status()
+
+
+@app.get("/api/operations/health")
+def operations_health(db: Session = Depends(get_db)):
+    from fastapi.responses import JSONResponse
+    from .operational_status import health_report
+    report = health_report(db)
+    return JSONResponse(report, status_code=200 if report["readyForUnattendedExecution"] else 503, headers={"Cache-Control": "no-store"})
 
 
 @app.post("/api/runtime/run")

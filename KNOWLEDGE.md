@@ -86,3 +86,21 @@ bootstrap, coverage and threshold bounds. No accuracy improvement is claimed
 until real forward evidence demonstrates it. Missing/unmatured evidence keeps
 the baseline. Persisted real market analysis replaces production DEMO scanner
 responses and explicitly separates settled daily signals from delayed quotes.
+
+## Operational truth and failure-safe paper execution
+
+New operational status separates overdue execution from fresh market data and a
+healthy saved checkpoint. Exact current schedule proof requires verified original
+GitHub run metadata, matching cron/date and attempt1; manual fallback remains
+unverified for automatic delivery. The observer endpoint /api/operations/health
+returns503 when unattended readiness is not established. Independent external
+alerts remain unconfigured; GitHub's own watchdog is not independent monitoring.
+
+Paper trade/account/order writes are atomic; process-independent locks and
+reconciliation block unsafe overlaps or inconsistent account updates. Missing
+position quotes pause new entries while valid protective checks continue.
+Malformed/duplicate forward identities fail audited migration without deletion.
+No capital reset, live broker, score-model promotion or second execution scheduler
+is introduced. Validation uses disposable PostgreSQL/SQLite, not Neon. Later
+plan stages (incremental refresh, faithful backtester and research comparisons)
+remain separate work; these reliability controls do not prove predictive edge.

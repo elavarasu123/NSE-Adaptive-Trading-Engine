@@ -2,6 +2,7 @@
 from datetime import date
 from types import SimpleNamespace
 import numpy as np
+import pytest
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -11,9 +12,13 @@ from app.models import Portfolio, PaperOrder, PaperTrade, RuntimeActivity
 from app import forward_learning, runtime, reliability, shared_state, market_analysis
 
 
-def test_complete_cycles_persist_real_analysis_and_preserve_account(tmp_path, monkeypatch):
-    engine = create_engine('sqlite:///' + str(tmp_path / 'paper.db'))
-    Base.metadata.create_all(engine)
+@pytest.mark.parametrize("backend", ["sqlite", "postgres"])
+def test_complete_cycles_persist_real_analysis_and_preserve_account(tmp_path, monkeypatch, request, backend):
+    if backend == "postgres":
+        engine, _ = request.getfixturevalue("postgres")
+    else:
+        engine = create_engine('sqlite:///' + str(tmp_path / 'paper.db'))
+        Base.metadata.create_all(engine)
     sessions = sessionmaker(bind=engine)
     monkeypatch.setattr(shared_state, 'SessionLocal', sessions)
     monkeypatch.setenv('SHARED_STATE_BACKEND', 'db')
@@ -53,5 +58,47 @@ def test_complete_cycles_persist_real_analysis_and_preserve_account(tmp_path, mo
         assert report['results'][0]['source'] == 'EXECUTION_DAILY_CACHE'
         assert shared_state.load_runtime_state()['cycles'] == 2
         assert reliability.checkpoint_status()['status'] == 'MATCH'
+        from app import execution
+        original = execution.run_execution_cycle
+        def interrupted(*args, **kwargs):
+            raise RuntimeError("Injected process failure after forward stages")
+        monkeypatch.setattr(execution, "run_execution_cycle", interrupted)
+        with pytest.raises(RuntimeError, match="Injected process failure"):
+            runtime.run_cycle(db)
+        assert shared_state.load_runtime_state()["status"] == "ERROR"
+        monkeypatch.setattr(execution, "run_execution_cycle", original)
+        recovered = runtime.run_cycle(db)
+        assert recovered["preflight"]["checkpoint"]["status"] == "RECOVERY_REQUIRED"
+        assert recovered["status"] == "HEALTHY"
+        assert shared_state.load_runtime_state()["cycles"] == 3
+        assert reliability.checkpoint_status()["status"] == "MATCH"
+        assert db.query(Portfolio).one().cash == 100000
+        assert db.query(PaperOrder).count() == 3
+
+    finally:
+        db.close(); engine.dispose()
+
+
+def test_incomplete_position_marks_preserve_value_and_report_missing_data(tmp_path, monkeypatch):
+    from app.models import Position
+    engine = create_engine('sqlite:///' + str(tmp_path / 'mark.db'))
+    Base.metadata.create_all(engine)
+    sessions = sessionmaker(bind=engine)
+    monkeypatch.setenv('SHARED_STATE_BACKEND', 'db')
+    monkeypatch.setattr(shared_state, 'SessionLocal', sessions)
+    db = sessions()
+    try:
+        db.add(Portfolio(initial_capital=100000, cash=90000, realized_pnl=0))
+        db.add(Position(symbol='STALE', quantity=10, avg_price=1000, current_price=1100,
+                        stop_price=900, target_price=1200, status='OPEN'))
+        db.commit()
+        class NoQuote:
+            def quote(self, symbol):
+                raise RuntimeError('Feed unavailable')
+        snapshot = runtime.portfolio_snapshot(db, NoQuote())
+        assert snapshot['positionsMarked'] == 0
+        assert snapshot['openPositions'] == 1
+        assert snapshot['marketValue'] == 11000
+        assert snapshot['equity'] == 101000
     finally:
         db.close(); engine.dispose()

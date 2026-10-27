@@ -32,6 +32,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: nse-paper-engine
@@ -131,6 +132,7 @@ jobs:
       - name: Scheduled paper cycle
         working-directory: backend
         env:
+          SCHEDULER_EVIDENCE_TOKEN: ${{ github.token }}
           FORCE_RUNTIME: ${{ github.event_name == 'workflow_dispatch' && inputs.force || 'false' }}
         run: |
           python scripts/run_scheduled_runtime.py

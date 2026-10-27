@@ -50,6 +50,12 @@ def shared_state_enabled():
 def append_forward_event(
     event,
 ):
+    kind = event.get("eventType")
+    required = ("predictionId", "modelVersion", "predictionDate", "symbol") if kind == "PREDICTION" else ("predictionId", "horizon")
+    if kind not in {"PREDICTION", "OUTCOME"} or any(not event.get(key) for key in required):
+        raise ValueError("Forward event is missing its logical identity")
+    if kind == "OUTCOME" and event["horizon"] not in {5, 10, 20, 30}:
+        raise ValueError("Unsupported forward outcome horizon")
     payload = dict(event)
 
     payload.setdefault(
