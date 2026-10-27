@@ -688,7 +688,7 @@ def get_runtime_status(response: Response):
     return runtime_status()
 
 
-@app.get("/api/operations/health")
+@app.api_route("/api/operations/health", methods=["GET", "HEAD"])
 def operations_health(db: Session = Depends(get_db)):
     from fastapi.responses import JSONResponse
     from .operational_status import health_report

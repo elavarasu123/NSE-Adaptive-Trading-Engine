@@ -123,3 +123,14 @@ def test_rerun_or_previous_day_origin_cannot_prove_current_scheduled_delivery():
     assert assess_operations(saved, events, datetime(2026, 10, 27, 9, 45, tzinfo=IST))['scheduler']['status'] == 'UNVERIFIED'
     proof['attempt'] = '1'
     assert assess_operations(saved, events, datetime(2026, 10, 27, 9, 45, tzinfo=IST))['scheduler']['status'] == 'UNVERIFIED'
+
+
+def test_head_monitor_has_the_same_readiness_status_without_response_body(monkeypatch):
+    from app.main import app
+    from fastapi.testclient import TestClient
+    import app.operational_status as operations
+    monkeypatch.setattr(operations, 'health_report', lambda db: {'status': 'READY', 'readyForUnattendedExecution': True})
+    with TestClient(app) as client:
+        response = client.head('/api/operations/health')
+        assert response.status_code == 200 and response.content == b''
+        assert response.headers['cache-control'] == 'no-store'

@@ -365,7 +365,9 @@ GitHub run metadata, matching cron/date, a successful completion, and attempt1.
 Re-runs and prior-day jobs do not attest a new scheduled delivery. Failure to
 retrieve optional provenance never stops paper trading, but stays UNVERIFIED.
 
-`GET /api/operations/health` is a public, read-only observer endpoint. It returns
+`GET/HEAD /api/operations/health` is a public, read-only observer endpoint.
+Unknown `/api` paths return JSON404 instead of successful dashboard HTML.
+Verify the deployed JSON response when configuring a monitor. It returns
 200 only when unattended execution readiness is supported by fresh execution,
 data/integrity checks and current scheduled-run evidence; otherwise it returns
 503 with a structured BLOCKED/DEGRADED report. A current manual run can therefore
