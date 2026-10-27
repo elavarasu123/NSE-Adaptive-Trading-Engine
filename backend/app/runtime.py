@@ -5,11 +5,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 import json
+import math
 import os
 import traceback
 import uuid
 
 from sqlalchemy.orm import Session
+from .transactions import exclusive_cycle
 
 from .forward_learning import (
     LearningContext,
@@ -285,9 +287,11 @@ def portfolio_snapshot(
                     "price",
                     None,
                 ),
-                default=current,
+                default=0,
             )
 
+            if not math.isfinite(quote_price) or quote_price <= 0:
+                raise ValueError("Invalid position quote")
             if quote_price > 0:
                 current = quote_price
                 marked += 1
@@ -401,6 +405,49 @@ def read_runtime_equity(limit=100):
     return read_jsonl(EQUITY_PATH, limit=limit)
 
 
+def execution_provenance():
+    """Whitelist provenance; API tokens are never included in saved evidence."""
+    cron = None
+    event_path = os.getenv("GITHUB_EVENT_PATH")
+    if event_path:
+        try:
+            with open(event_path, encoding="utf-8") as handle:
+                cron = json.load(handle).get("schedule")
+        except (OSError, ValueError, AttributeError):
+            pass
+    result = {"event": os.getenv("GITHUB_EVENT_NAME", "LOCAL"),
+              "githubRunId": os.getenv("GITHUB_RUN_ID"), "cron": cron,
+              "commit": os.getenv("GITHUB_SHA"), "attempt": os.getenv("GITHUB_RUN_ATTEMPT"),
+              "scheduleEvidence": "UNVERIFIED"}
+    token, repository = os.getenv("SCHEDULER_EVIDENCE_TOKEN"), os.getenv("GITHUB_REPOSITORY", "")
+    if result["event"] != "schedule" or not token or not (result["githubRunId"] or "").isdigit():
+        return result
+    import re
+    import urllib.request
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
+        return result
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *args, **kwargs):
+            return None
+    request = urllib.request.Request(
+        f"https://api.github.com/repos/{repository}/actions/runs/{result['githubRunId']}",
+        headers={"Authorization": "Bearer " + token, "User-Agent": "nse-run-provenance",
+                 "Accept": "application/vnd.github+json"})
+    try:
+        with urllib.request.build_opener(NoRedirect).open(request, timeout=5) as response:
+            run = json.loads(response.read(512000))
+        if (str(run.get("id")) == result["githubRunId"] and run.get("event") == "schedule"
+                and run.get("head_sha") == result["commit"]
+                and str(run.get("run_attempt")) == result["attempt"]):
+            created = datetime.fromisoformat(run["created_at"].replace("Z", "+00:00"))
+            if created.tzinfo is not None:
+                result.update(scheduleEvidence="VERIFIED", originCreatedAt=created.isoformat())
+    except Exception:
+        # Telemetry failure must not stop paper execution or become proof.
+        pass
+    return result
+
+
 def runtime_status():
     state = load_state()
     activities = read_runtime_activity(limit=25)
@@ -414,7 +461,9 @@ def runtime_status():
             "error": str(exc)
         }
 
+    from .operational_status import assess_operations
     return {
+        "operational": assess_operations(state, activities),
         "runtime":
             state,
         "forwardLearning":
@@ -446,6 +495,7 @@ def runtime_status():
     }
 
 
+@exclusive_cycle
 def run_cycle(
     db: Session,
     *,
@@ -460,6 +510,8 @@ def run_cycle(
     - portfolio capital is never reset
     - no broker orders are possible
     """
+    from .schema_integrity import ensure_event_indexes
+    ensure_event_indexes(db.get_bind())
     from .reliability import (
         reliability_report,
     )
@@ -488,6 +540,7 @@ def run_cycle(
     )
 
     started = utc_now()
+    provenance = execution_provenance()
 
     state = load_state()
 
@@ -514,7 +567,9 @@ def run_cycle(
         "RUNTIME_START",
         "Paper runtime cycle started.",
         data={
-            "runId": run_id
+            "runId": run_id,
+            "provenance": provenance,
+            "recovery": preflight.get("checkpoint", {}).get("status") == "RECOVERY_REQUIRED",
         },
     )
 
@@ -657,11 +712,13 @@ def run_cycle(
                 f"{len(entry_data['filled'])} filled, "
                 f"{len(entry_data['rejected'])} rejected; "
                 f"{sum(1 for x in execution['exits'] if x.get('action') == 'SELL')} exits."
+                + (f" New entries paused: {entry_data['pausedReason']}." if entry_data.get('pausedReason') else "")
             ),
             data={
                 "runId":
                     run_id,
                 "adaptivePolicyRevision": adaptive["revision"],
+                "pausedReason": entry_data.get("pausedReason"),
                 "filled":
                     len(
                         entry_data[
@@ -730,6 +787,8 @@ def run_cycle(
             },
         )
 
+        degraded = bool(entry_data.get("pausedReason")) or snapshot["positionsMarked"] < snapshot["openPositions"]
+        cycle_status = "DEGRADED" if degraded else "HEALTHY"
         completed = utc_now()
 
         state = load_state()
@@ -744,15 +803,15 @@ def run_cycle(
                         "LOCAL",
                     ),
                 "status":
-                    "HEALTHY",
+                    cycle_status,
                 "lastCompletedAt":
                     completed,
                 "lastSuccessfulAt":
-                    completed,
+                    state.get("lastSuccessfulAt") if degraded else completed,
                 "lastRunId":
                     run_id,
                 "lastError":
-                    None,
+                    "Risk-data checks incomplete; new entries paused." if degraded else None,
                 "cycles":
                     int(
                         state.get(
@@ -772,13 +831,15 @@ def run_cycle(
 
         result[
             "status"
-        ] = "HEALTHY"
+        ] = cycle_status
 
         activity(
             "RUNTIME_COMPLETE",
-            "Paper runtime cycle completed.",
+            "Paper runtime cycle completed with incomplete risk data." if degraded else "Paper runtime cycle completed.",
             data={
-                "runId": run_id
+                "runId": run_id,
+                "startedAt": started, "completedAt": completed,
+                "status": cycle_status, "provenance": provenance,
             },
         )
 

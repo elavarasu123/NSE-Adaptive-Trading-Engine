@@ -93,6 +93,9 @@ def main():
             )
         )
 
+        if result.get("status") != "HEALTHY":
+            raise SystemExit("Paper cycle completed with incomplete risk data; inspect its evidence.")
+
     finally:
         db.close()
 

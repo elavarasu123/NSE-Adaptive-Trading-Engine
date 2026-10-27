@@ -352,3 +352,73 @@ gate fails, the baseline threshold is used. With the currently unmatured forward
 ledger, the correct initial status is BASELINE_RETAINED / WAITING_FOR_EVIDENCE.
 The dashboard shows that explicitly rather than inventing a learned improvement.
 GitHub Actions remains the sole execution scheduler and Neon the shared source.
+
+## Operational health and atomic paper execution
+
+`GET /api/runtime/status` now includes `operational`: execution freshness,
+last successful completion, latest slot whose grace expired, next slot,
+schedule provenance and independent-monitor configuration. Stored runtime
+HEALTHY is a historical result; it no longer means a current cycle exists.
+Manual fallback can make execution CURRENT without proving automatic delivery.
+Scheduled proof is limited to the latest due slot and requires verified original
+GitHub run metadata, matching cron/date, a successful completion, and attempt1.
+Re-runs and prior-day jobs do not attest a new scheduled delivery. Failure to
+retrieve optional provenance never stops paper trading, but stays UNVERIFIED.
+
+`GET/HEAD /api/operations/health` is a public, read-only observer endpoint.
+Unknown `/api` paths return JSON404 instead of successful dashboard HTML.
+Verify the deployed JSON response when configuring a monitor. It returns
+200 only when unattended execution readiness is supported by fresh execution,
+data/integrity checks and current scheduled-run evidence; otherwise it returns
+503 with a structured BLOCKED/DEGRADED report. A current manual run can therefore
+coexist with HTTP503 for unverified automation. `/health` remains the web-service
+availability endpoint used by Render; do not substitute operational readiness
+as Render's startup probe. Normal in-progress checkpoint changes are UPDATING
+when other integrity checks pass and the prior due slot has verified success.
+
+The dashboard displays execution, data, integrity, scheduling and alert setup
+separately. Independent alerts remain UNCONFIGURED. To add them, configure an
+observer outside GitHub to check the operations endpoint, choose a notification
+destination and test actual delivery. A five-minute poll adds up to five minutes
+beyond the20-minute schedule grace. A watchdog using the same GitHub scheduling
+service is not an independent observer. No notification is sent by this change.
+
+Paper entry/exit helpers now share atomic transactions with their automatic
+order/journal updates. Failed order persistence rolls back associated cash,
+position and fill changes. A PostgreSQL transaction-scoped advisory lock on a
+dedicated connection protects execution across processes (compatible with Neon
+transaction pooling); losing that connection prevents subsequent Session
+commits. SQLite uses a local process lock for development. These controls
+supplement, rather than replace, the GitHub concurrency group.
+
+Account reconciliation checks cash, recorded fees, trade quantities, open
+positions, realized P&L and automatic-order/fill correspondence. Unexplained
+changes block preflight; no balance is reset or repaired automatically. Open
+positions with missing/invalid quotes retain their prior valuation, pause new
+entries, and allow other valid exit checks. Incomplete risk checks yield
+DEGRADED, preserve the prior last-success timestamp, and make the Actions CLI
+fail visibly after recording the completed cycle/checkpoint.
+
+Logical frozen-prediction and outcome indexes are created for new databases;
+existing databases get an audited, idempotent index migration before runtime.
+Duplicate/incomplete identities require manual review: migration never deletes
+or overwrites evidence. Valid new forward events must include their logical
+identity. Existing order prediction-ID uniqueness remains enforced.
+
+A process failure can leave earlier forward-learning/activity stages committed
+while its atomic trading stage rolled back. The existing RECOVERY_REQUIRED path
+permits retry from ERROR/interrupted RUNNING only when the exclusive runtime
+lock is acquired and data, ledger and account reconciliation pass. Recovery is
+recorded at runtime start. Unexplained changes under a healthy saved state or
+failed logical/account checks remain blocked for review. Never blindly reset
+cash, delete ledger rows, or re-sign an unexplained change.
+
+Test clients require `pip install -r backend/requirements-dev.txt` (including
+HTTPX); do not rely on packages supplied by an editor/cloud image.
+
+The validation workflow uses an isolated PostgreSQL16 service and temporary
+SQLite state, with no Neon credentials. Run equivalent integration tests locally
+with TEST_POSTGRES_URL pointing only to an explicitly disposable localhost
+integrity/test_engine database. Tests create/drop isolated schemas; never supply
+a production database. CI covers atomic entry/exit failure, lock contention and
+loss, logical uniqueness, migration audits, degraded feeds and status semantics.

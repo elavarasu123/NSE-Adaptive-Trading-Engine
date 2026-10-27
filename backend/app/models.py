@@ -6,6 +6,8 @@ from sqlalchemy import (
     DateTime,
     Float,
     Integer,
+    Index,
+    text,
     JSON,
     String,
     Text,
@@ -248,6 +250,15 @@ class PaperOrder(Base):
 
 class ForwardEvent(Base):
     __tablename__ = "forward_events"
+    __table_args__ = (
+        Index('uq_forward_prediction_logical', 'model_version', 'prediction_date', 'symbol',
+              unique=True, postgresql_where=text("event_type = 'PREDICTION'"),
+              sqlite_where=text("event_type = 'PREDICTION'")),
+        Index('uq_forward_outcome_logical', 'prediction_id', 'horizon',
+              unique=True, postgresql_where=text("event_type = 'OUTCOME'"),
+              sqlite_where=text("event_type = 'OUTCOME'")),
+    )
+
 
     id = Column(
         Integer,

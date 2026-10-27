@@ -1,6 +1,7 @@
 import React, {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -33,6 +34,7 @@ import {
 import "./style.css";
 import InteractiveInspector from "./InteractiveInspector";
 import MarketAnalysisCard, { type MarketAnalysis } from "./MarketAnalysis";
+import OperationalStatusCard, { type OperationalStatus } from "./OperationalStatus";
 
 
 type Outcome = {
@@ -108,6 +110,7 @@ type EquityPoint = {
 };
 
 type RuntimeStatus = {
+  operational?: OperationalStatus;
   runtime: {
     version: string;
     status: string;
@@ -347,6 +350,7 @@ function Maturity({
 
 
 function App() {
+  const latestRequest = useRef(0);
   const [analysis, setAnalysis] = useState<MarketAnalysis | null>(null);
   const [
     status,
@@ -396,6 +400,7 @@ function App() {
 
 
   async function load() {
+    const request = ++latestRequest.current;
     setLoading(true);
 
     try {
@@ -437,6 +442,7 @@ function App() {
         getJson<MarketAnalysis>("/api/market/analysis").catch(() => null),
       ]);
 
+      if (request !== latestRequest.current) return;
       setStatus(statusData);
       setAnalysis(analysisData);
 
@@ -458,13 +464,14 @@ function App() {
 
       setError(null);
     } catch (err) {
+      if (request !== latestRequest.current) return;
       setError(
         err instanceof Error
           ? err.message
           : "Unable to load engine.",
       );
     } finally {
-      setLoading(false);
+      if (request === latestRequest.current) setLoading(false);
     }
   }
 
@@ -478,8 +485,10 @@ function App() {
       30000,
     );
 
-    return () =>
+    return () => {
       window.clearInterval(timer);
+      latestRequest.current += 1;
+    };
   }, []);
 
 
@@ -544,7 +553,7 @@ function App() {
 
 
   const runtimeState =
-    runtime?.runtime?.status ??
+    runtime?.operational?.execution.status ??
     "UNKNOWN";
 
   const equityHistory =
@@ -754,6 +763,7 @@ function App() {
         </div>
 
 
+        <OperationalStatusCard operations={runtime?.operational} dataStatus={reliability?.marketData.status} integrityStatus={reliability ? ([reliability.portfolio.status, reliability.ledger.status, reliability.checkpoint.status].every(value => ["OK", "MATCH"].includes(value)) ? "OK" : "BLOCKED") : "UNKNOWN"} />
         <MarketAnalysisCard analysis={analysis} />
 
         <div className="primary-grid">

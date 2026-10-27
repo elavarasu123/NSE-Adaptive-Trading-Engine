@@ -35,6 +35,7 @@ def ensure_paper_database():
         if portfolio is None:
             db.add(
                 Portfolio(
+                    id=1,
                     initial_capital=100000,
                     cash=100000,
                     realized_pnl=0,

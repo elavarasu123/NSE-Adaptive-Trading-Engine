@@ -22,10 +22,13 @@ class Provider:
         return pd.DataFrame({"close": close, "high": close + 10, "low": close - 10, "volume": 1000000})
 
 
-@pytest.fixture
-def account():
-    engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
+@pytest.fixture(params=["sqlite", "postgres"])
+def account(request):
+    if request.param == "postgres":
+        engine, _ = request.getfixturevalue("postgres")
+    else:
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(engine)
     db = sessionmaker(bind=engine)()
     db.add(Portfolio(initial_capital=100000, cash=100000, realized_pnl=0))
     db.commit()
@@ -142,3 +145,84 @@ def test_paper_entry_uses_observed_price_for_gap_and_position_sizing(account, mo
     order = account.query(PaperOrder).one()
     assert order.fill_price == pytest.approx(1100 * 1.0005, abs=.01)
     assert account.query(Position).one().quantity * order.fill_price <= 15000
+
+
+def test_entry_order_failure_rolls_back_cash_position_and_trade(account, monkeypatch):
+    from sqlalchemy import event
+    batch(monkeypatch, [prediction()])
+    def fail_order(db, context, instances):
+        if any(isinstance(row, PaperOrder) and row.status == 'FILLED' for row in db.new):
+            raise RuntimeError('Simulated crash before order persistence')
+    event.listen(account, 'before_flush', fail_order)
+    try:
+        with pytest.raises(RuntimeError, match='Simulated crash'):
+            execution.enter_latest_batch(account, Provider())
+    finally:
+        event.remove(account, 'before_flush', fail_order)
+    assert account.query(Portfolio).one().cash == 100000
+    assert account.query(Position).count() == account.query(PaperTrade).count() == account.query(PaperOrder).count() == 0
+    assert len(execution.enter_latest_batch(account, Provider())['filled']) == 1
+
+
+def test_exit_order_failure_rolls_back_sell_and_restores_open_position(account, monkeypatch):
+    from sqlalchemy import event
+    batch(monkeypatch, [prediction()])
+    provider = Provider()
+    execution.enter_latest_batch(account, provider)
+    order = account.query(PaperOrder).one()
+    before_cash = account.query(Portfolio).one().cash
+    provider.price = order.target_price + 10
+    def fail_closed(db, context, instances):
+        if any(isinstance(row, PaperOrder) and row.status == 'CLOSED' for row in db.dirty):
+            raise RuntimeError('Simulated crash on exit order')
+    event.listen(account, 'before_flush', fail_closed)
+    try:
+        with pytest.raises(RuntimeError, match='Simulated crash'):
+            execution.monitor_all_positions(account, provider)
+    finally:
+        event.remove(account, 'before_flush', fail_closed)
+    assert account.query(Portfolio).one().cash == before_cash
+    assert account.query(Position).one().status == 'OPEN'
+    assert account.query(PaperOrder).one().status == 'FILLED'
+    assert account.query(PaperTrade).count() == 1
+
+
+def test_reconciliation_detects_unexplained_cash_and_missing_order(account, monkeypatch):
+    from app.reconciliation import reconcile_account
+    batch(monkeypatch, [prediction()])
+    execution.enter_latest_batch(account, Provider())
+    assert reconcile_account(account)['status'] == 'OK'
+    account.query(Portfolio).one().cash += 100
+    account.commit()
+    assert reconcile_account(account)['blocking'] is True
+    account.delete(account.query(PaperOrder).one()); account.commit()
+    assert any('buy fills' in issue for issue in reconcile_account(account)['issues'])
+
+
+def test_missing_position_quote_pauses_entries_but_other_exits_continue(account, monkeypatch):
+    batch(monkeypatch, [prediction('UNAVAILABLE'), prediction('VALID')])
+    provider = Provider()
+    execution.enter_latest_batch(account, provider)
+    orders = account.query(PaperOrder).all()
+    batch(monkeypatch, [prediction('NEW')])
+    class PartialFeed(Provider):
+        def quote(self, symbol):
+            if symbol == 'UNAVAILABLE':
+                raise RuntimeError('No quote')
+            return SimpleNamespace(price=next(o.target_price + 10 for o in orders if o.symbol == 'VALID'))
+    result = execution.run_execution_cycle(account, PartialFeed())
+    assert result['entries']['pausedReason'] == 'OPEN_POSITION_DATA_UNAVAILABLE'
+    assert result['entries']['filled'] == []
+    assert any(event.get('action') == 'SELL' for event in result['exits'])
+    assert account.query(PaperOrder).filter_by(symbol='UNAVAILABLE').one().status == 'FILLED'
+    assert account.query(PaperOrder).filter_by(symbol='NEW').count() == 0
+
+
+@pytest.mark.parametrize('cost', [-1, float('inf'), float('nan')])
+def test_invalid_costs_cannot_create_cash_or_fill(account, monkeypatch, cost):
+    batch(monkeypatch, [prediction()])
+    monkeypatch.setattr(execution, 'FEE_BPS', cost)
+    result = execution.enter_latest_batch(account, Provider())
+    assert result['filled'] == []
+    assert account.query(Portfolio).one().cash == 100000
+    assert account.query(PaperTrade).count() == 0

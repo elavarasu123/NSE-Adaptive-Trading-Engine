@@ -9,6 +9,7 @@ from datetime import (
 from pathlib import Path
 from zoneinfo import ZoneInfo
 import hashlib
+import math
 import json
 import os
 
@@ -301,6 +302,14 @@ def market_data_status(
     }
 
 
+def _finite_number(value):
+    try:
+        number = float(value)
+        return number if math.isfinite(number) else None
+    except (TypeError, ValueError):
+        return None
+
+
 def portfolio_integrity(
     db: Session,
 ):
@@ -328,6 +337,7 @@ def portfolio_integrity(
     if (
         portfolio.initial_capital
         is None
+        or not math.isfinite(float(portfolio.initial_capital))
         or float(
             portfolio.initial_capital
         ) <= 0
@@ -339,6 +349,7 @@ def portfolio_integrity(
     if (
         portfolio.cash
         is None
+        or not math.isfinite(float(portfolio.cash))
         or float(
             portfolio.cash
         ) < -0.01
@@ -378,6 +389,7 @@ def portfolio_integrity(
         if (
             position.avg_price
             is None
+            or not math.isfinite(float(position.avg_price))
             or float(
                 position.avg_price
             ) <= 0
@@ -386,6 +398,12 @@ def portfolio_integrity(
                 f"{position.symbol}: "
                 "invalid average price."
             )
+
+    for position in positions:
+        for name in ["current_price", "stop_price", "target_price"]:
+            value = getattr(position, name)
+            if value is None or not math.isfinite(float(value)) or value <= 0:
+                issues.append(f"{position.symbol}: invalid {name}.")
 
     duplicates = sorted(
         {
@@ -403,6 +421,10 @@ def portfolio_integrity(
             )
         )
 
+    from .reconciliation import reconcile_account
+    reconciliation = reconcile_account(db)
+    issues.extend(reconciliation["issues"])
+
     return {
         "status":
             (
@@ -414,15 +436,8 @@ def portfolio_integrity(
             bool(issues),
         "issues":
             issues,
-        "initialCapital":
-            float(
-                portfolio
-                .initial_capital
-            ),
-        "cash":
-            float(
-                portfolio.cash
-            ),
+        "initialCapital": _finite_number(portfolio.initial_capital),
+        "cash": _finite_number(portfolio.cash),
         "openPositions":
             len(positions),
     }

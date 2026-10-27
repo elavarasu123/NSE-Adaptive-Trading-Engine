@@ -3,8 +3,11 @@ from datetime import (
     timezone,
 )
 
+import math
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from .transactions import persist, atomic_paper_operation, exclusive_cycle
 
 from .models import (
     Portfolio,
@@ -28,27 +31,28 @@ def get_portfolio(
 
     if not portfolio:
         portfolio = Portfolio(
+            id=1,
             initial_capital=100000,
             cash=100000,
             realized_pnl=0,
         )
 
         db.add(portfolio)
-        db.commit()
+        persist(db)
         db.refresh(portfolio)
 
     return portfolio
 
 
-def _bps(
-    value,
-):
-    return (
-        float(value)
-        / 10000.0
-    )
+def _bps(value):
+    number = float(value)
+    if not math.isfinite(number) or not 0 <= number < 10000:
+        raise HTTPException(400, "Invalid paper execution cost assumption")
+    return number / 10000.0
 
 
+@exclusive_cycle
+@atomic_paper_operation
 def paper_buy(
     db: Session,
     provider,
@@ -249,12 +253,14 @@ def paper_buy(
         )
     )
 
-    db.commit()
+    persist(db)
     db.refresh(position)
 
     return position
 
 
+@exclusive_cycle
+@atomic_paper_operation
 def paper_sell(
     db: Session,
     provider,
@@ -302,6 +308,9 @@ def paper_sell(
         market_price = float(
             price_override
         )
+
+    if not math.isfinite(market_price) or market_price <= 0:
+        raise HTTPException(400, "Invalid observed exit price")
 
     # SELL slippage is adverse.
     fill_price = round(
@@ -406,7 +415,7 @@ def paper_sell(
         )
     )
 
-    db.commit()
+    persist(db)
 
     return {
         "symbol":
@@ -426,6 +435,8 @@ def paper_sell(
     }
 
 
+@exclusive_cycle
+@atomic_paper_operation
 def monitor_positions(
     db: Session,
     provider,
@@ -534,6 +545,6 @@ def monitor_positions(
                 }
             )
 
-    db.commit()
+    persist(db)
 
     return events

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -71,6 +71,8 @@ def mount_dashboard(
     def production_dashboard_fallback(
         full_path: str,
     ):
+        if full_path == "api" or full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="API route not found")
         requested_file = (
             FRONTEND_DIST
             / full_path
