@@ -34,6 +34,12 @@ missing records and adjustment mismatches stay visible
 in persisted repair evidence and leave cached prices untouched. This supplies
 settled research bars, never live execution quotes.
 
+A different constant adjusted price basis may be reconciled only when all 12
+OHLC values across three overlapping sessions match the same positive factor.
+Only incoming bars are converted; existing cached history is preserved. The
+factor is recorded for audit. Changing/nonconstant factors and ex-date symbols
+remain excluded, and volume is never scaled.
+
 ## Independent observer configuration
 
 Create an HTTPS monitor in a service **outside GitHub Actions**:

@@ -6,6 +6,7 @@ import json
 import urllib.request
 import zipfile
 import pandas as pd
+import numpy as np
 
 from .history_cache import load_history, save_history
 from .history_quality import merge_recent_history, validated_frame
@@ -81,7 +82,7 @@ def corporate_actions(session):
 
 def repair_from_nse(symbols, expected):
     report = {'source': 'NSE_OFFICIAL_CASH_BHAVCOPY', 'status': 'NOT_NEEDED',
-              'attempted': len(symbols), 'recovered': [], 'rejected': []}
+              'attempted': len(symbols), 'recovered': [], 'rejected': [], 'basisFactors': {}}
     if not symbols:
         return report
     sessions = [expected]
@@ -107,6 +108,19 @@ def repair_from_nse(symbols, expected):
         frame = pd.DataFrame([row for _, row in records], index=pd.to_datetime([day for day, _ in records]))
         recent = validated_frame(frame, expected)
         previous = validated_frame(load_history(symbol), expected)
+        # Yahoo adjusted bars and official raw bars may use a different constant
+        # basis. Verify all 12 OHLC values over three sessions, not close alone.
+        # Corporate actions on the appended session were already excluded above.
+        if previous is not None:
+            overlap = previous.index.intersection(recent.index).sort_values()[-3:]
+            if len(overlap) == 3:
+                columns = ['open', 'high', 'low', 'close']
+                prior = previous.loc[overlap, columns].to_numpy(dtype=float)
+                raw = recent.loc[overlap, columns].to_numpy(dtype=float)
+                factor = float(np.median(prior / raw))
+                if np.isfinite(factor) and factor > 0 and np.allclose(prior, raw * factor, rtol=1e-5, atol=1e-6):
+                    recent.loc[:, columns] *= factor
+                    report['basisFactors'][symbol] = factor
         combined = merge_recent_history(previous, recent, expected)
         if combined is None:
             report['rejected'].append({'symbol': symbol, 'reason': 'Adjusted historical OHLC mismatch'})

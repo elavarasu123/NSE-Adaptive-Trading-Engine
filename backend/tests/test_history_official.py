@@ -53,6 +53,25 @@ def test_ex_date_is_rejected_even_when_prior_ohlc_matches(tmp_path, monkeypatch)
     assert cache.load_history('EXDIV').index.max() == pd.Timestamp('2026-10-26')
 
 
+def test_constant_adjustment_factor_preserves_existing_history_and_basis(tmp_path, monkeypatch):
+    monkeypatch.setattr(cache, 'CACHE_DIR', tmp_path)
+    index = pd.bdate_range(end='2026-10-26', periods=400)
+    row = {'open': 100., 'high': 101., 'low': 99., 'close': 100., 'volume': 1000}
+    previous = pd.DataFrame(row, index=index)
+    columns = ['open', 'high', 'low', 'close']
+    previous.loc[:, columns] *= .997
+    cache.save_history('ADJUSTED', previous)
+    monkeypatch.setattr(official, 'download_session', lambda day: {'ADJUSTED': row})
+    monkeypatch.setattr(official, 'corporate_actions', lambda day: set())
+    result = official.repair_from_nse(['ADJUSTED'], date(2026, 10, 27))
+    assert result['recovered'] == ['ADJUSTED']
+    assert result['basisFactors']['ADJUSTED'] == pytest.approx(.997)
+    actual = cache.load_history('ADJUSTED')
+    pd.testing.assert_frame_equal(actual.loc[index], previous, check_freq=False, check_names=False)
+    assert actual.iloc[-1]['close'] == pytest.approx(99.7)
+    assert actual.iloc[-1]['volume'] == 1000
+
+
 def test_unverified_corporate_actions_fail_closed(tmp_path, monkeypatch):
     monkeypatch.setattr(cache, 'CACHE_DIR', tmp_path)
     monkeypatch.setattr(official, 'download_session', lambda day: {})
