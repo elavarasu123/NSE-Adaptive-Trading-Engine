@@ -45,8 +45,11 @@ def test_schedule_utc_conversion_and_workflow_contract():
     root = Path(__file__).resolve().parents[2]
     workflow = (root / ".github/workflows/paper-engine.yml").read_text()
     assert tuple(re.findall(r'- cron: "([^"]+)"', workflow)) == ENGINE_CRONS
-    # Refresh and cache-save must both still recognize the post-close trigger.
-    assert workflow.count("github.event.schedule == '35 10 * * 1-5'") == 2
+    # Post-close forces refresh; any validated refresh is saved before preflight.
+    assert "github.event.schedule == '35 10 * * 1-5'" in workflow
+    assert "python scripts/ensure_market_history.py" in workflow
+    assert "steps.history.outputs.refreshed == 'true'" in workflow
+    assert workflow.index("name: Save refreshed market history") < workflow.index("name: Reliability preflight")
     watchdog = (root / ".github/workflows/scheduler-watchdog.yml").read_text()
     assert 'cron: "17 4-10 * * 1-5"' in watchdog
     assert 'cron: "7 11 * * 1-5"' in watchdog
