@@ -216,6 +216,7 @@ class LearningContext:
         self.as_of = as_of or expected_closed_session()
         self.frames = {}
         self.coverage = {"missing": 0, "insufficient": 0, "unaligned": 0}
+        self.exclusions = []
         self._candidates = None
 
     def frame(self, symbol):
@@ -256,18 +257,22 @@ class LearningContext:
             frame = self.frame(stock.symbol)
             if frame is None:
                 self.coverage["missing"] += 1
+                self.exclusions.append({"symbol": stock.symbol, "reason": "MISSING"})
                 continue
             if len(frame) < 300:
                 self.coverage["insufficient"] += 1
+                self.exclusions.append({"symbol": stock.symbol, "reason": "INSUFFICIENT_HISTORY", "rows": len(frame)})
                 continue
             if self.market_date not in frame.index:
                 self.coverage["unaligned"] += 1
+                self.exclusions.append({"symbol": stock.symbol, "reason": "STALE", "latestSession": str(frame.index[-1].date())})
                 continue
             row = frame.loc[self.market_date]
             score = feature_score(row, self.benchmark_row)
             price = _safe_float(row.get("close"))
             if score is None or not math.isfinite(score) or price is None:
                 self.coverage["insufficient"] += 1
+                self.exclusions.append({"symbol": stock.symbol, "reason": "INVALID_FEATURES"})
                 continue
             candidates.append({"symbol": stock.symbol, "sector": stock.sector,
                                "score": float(score), "entryPrice": price, "regime": self.regime})

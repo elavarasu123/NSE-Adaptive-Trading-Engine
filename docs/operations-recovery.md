@@ -1,0 +1,44 @@
+# Execution recovery and external monitoring
+
+The nominal cycles remain 09:20–15:20 IST hourly and 16:05 IST post-close.
+Additional GitHub Actions schedule deliveries at 09:27 and every 20 minutes from
+09:37 through 16:17 recover the latest slot if no healthy completion covers it.
+Completed slots skip data downloads and execution. The same concurrency group
+serializes all requests, with a second due check before execution. Manual runs
+retain explicit validation behavior. Recovery never replays historical fills or
+forces after-hours execution. A degraded/error cycle remains eligible to retry.
+
+Recovered slots are reported separately from original scheduled deliveries.
+GitHub can delay **all** its schedule events; these recovery triggers cannot
+provide an independent scheduling guarantee. Actions remains the only engine
+execution scheduler. The read-only watchdog never dispatches trading.
+
+The history refresher retries missing/stale symbols in smaller batches, retains
+usable cache files if a response is older or truncated, excludes partial daily
+candles, and writes CSV files atomically. A stock with fewer than 300 settled
+sessions is reported as insufficient history, distinct from stale data. Symbols
+still unavailable after retries remain excluded; data is never invented.
+
+## Independent observer configuration
+
+Create an HTTPS monitor in a service **outside GitHub Actions**:
+
+* URL: `https://nse-adaptive-trading-engine.onrender.com/api/operations/execution-health`
+* Method: GET (HEAD is also supported).
+* Expected HTTP status: 200. HTTP 503 indicates unproven execution/delivery or
+  failed data/account checks. The response includes the specific reason.
+* Suggested check interval: 5 minutes; notify after two consecutive failures.
+* Configure an explicit notification destination and test both failure and
+  recovery delivery before calling alerts verified.
+* Do not use `/health`: that proves the web process responds, not paper execution.
+* Do not use the observer to dispatch/rerun trading or modify shared state.
+
+`/api/operations/health` additionally requires independent monitoring verification
+for unattended readiness. It cannot become READY merely because schedule
+recovery works. Monitoring remains UNCONFIGURED until an actual service/account
+and destination are supplied and integration is verified. No external account
+or alert has been created by this change.
+
+If GitHub still delivers all events late, resolving guaranteed execution timing
+requires changing the GitHub-only scheduling constraint or GitHub-side recovery.
+Neither a green manual run nor a changed status label proves that guarantee.

@@ -19,11 +19,11 @@ import urllib.parse
 import urllib.request
 import zipfile
 
-from .scheduler_schedule import ENGINE_CRONS, IST, RUN_TIMEOUT, due_slots
+from .scheduler_schedule import ENGINE_CRONS, RECOVERY_CRONS, IST, RUN_TIMEOUT, due_slots, latest_slot
 
 
 WORKFLOW = ".github/workflows/paper-engine.yml"
-GOOD_STATUSES = {"SUCCESS", "PENDING"}
+GOOD_STATUSES = {"SUCCESS", "PENDING", "RECOVERY_DELIVERED"}
 
 
 class EvidenceError(Exception):
@@ -63,13 +63,14 @@ def receipt_document(environ, now):
         "repository": environ["GITHUB_REPOSITORY"],
         "ref": environ["GITHUB_REF"],
         "received_at": now.isoformat(),
+        "nominal_slot": latest_slot(now).isoformat() if latest_slot(now) else None,
     }
 
 
 def validate_receipt(receipt, run, repository, branch):
     if not isinstance(receipt, dict) or not (
         receipt.get("event") == "schedule"
-        and receipt.get("cron") in ENGINE_CRONS
+        and receipt.get("cron") in (*ENGINE_CRONS, *RECOVERY_CRONS)
         and receipt.get("run_id") == str(run["id"])
         and receipt.get("run_attempt") == run["run_attempt"]
         and receipt.get("sha") == run["head_sha"]
@@ -134,6 +135,15 @@ def assess_slots(now, activated_at, runs, receipts, errors=None):
                 else "EVIDENCE_UNAVAILABLE",
                 detail=f"Run {run['id']}: {state}; no verified receipt for this slot",
             )
+        if row['status'] == 'MISSING':
+            for run in runs:
+                receipt = receipts.get(run['id'], {})
+                if (receipt.get('cron') in RECOVERY_CRONS
+                        and receipt.get('nominal_slot') == expected.isoformat()
+                        and timestamp(run['created_at']).astimezone(IST).date() == expected.date()
+                        and run_status(run, now) == 'SUCCESS'):
+                    row.update(status='RECOVERY_DELIVERED', detail=f"Recovery workflow {run['id']} succeeded; verify shared runtime evidence for execution")
+                    break
         results.append(row)
     return results
 

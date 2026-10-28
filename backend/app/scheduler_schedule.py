@@ -17,6 +17,20 @@ SCHEDULE_TIMES_IST = tuple(
 )
 DELIVERY_GRACE = timedelta(minutes=20)
 RUN_TIMEOUT = timedelta(minutes=45)
+RECOVERY_CRONS = ("57 3 * * 1-5", "7,27,47 4-10 * * 1-5")
+
+
+def latest_slot(now):
+    local = now.astimezone(IST)
+    if not is_trading_session(local.date()):
+        return None
+    slots = []
+    for clock in SCHEDULE_TIMES_IST:
+        hour, minute = map(int, clock.split(":"))
+        at = local.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if at <= local:
+            slots.append(at)
+    return slots[-1] if slots else None
 
 
 def due_slots(now, activated_at, lookback_days=0):

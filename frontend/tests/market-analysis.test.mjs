@@ -31,6 +31,18 @@ test('stale analysis cannot be presented as current market evidence', () => {
   assert.match(html, /role="alert"/); assert.match(html, /2026-10-26/);
   assert.match(html, /Entry signals are unavailable/);
 });
+test('partial coverage separates stale feeds from limited history and lists exclusions', () => {
+  const html = render({ ...analysis,
+    coverage: { missing: 1, insufficient: 1, unaligned: 1 },
+    dataQuality: { status: 'PARTIAL', exclusions: [
+      { symbol: 'SHORT', reason: 'INSUFFICIENT_HISTORY', rows: 150 },
+      { symbol: 'OLD', reason: 'STALE', latestSession: '2026-10-22' },
+    ] } });
+  assert.match(html, /Market coverage is partial/);
+  assert.match(html, /150 sessions; 300 required/);
+  assert.match(html, /OLD: stale/);
+  assert.match(html, /latest 2026-10-22/);
+});
 test('validated adaptive policy and delayed observation display independently', () => {
   const html = render({ ...analysis, regime: { name: 'RISK_ON' },
     benchmarkQuote: { status: 'AVAILABLE', price: 25100, observedAt: '2026-10-26T08:25:00Z', changeFromSettledClose: .004 },

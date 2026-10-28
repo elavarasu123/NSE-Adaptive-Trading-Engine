@@ -1,4 +1,6 @@
 from pathlib import Path
+import os
+import tempfile
 
 import pandas as pd
 
@@ -35,7 +37,15 @@ def save_history(
 
     output.index.name = "Date"
 
-    output.to_csv(path)
+    # Readers must see either the previous complete CSV or the new complete CSV.
+    descriptor, temporary = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+    try:
+        with os.fdopen(descriptor, "w") as stream:
+            output.to_csv(stream)
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
     return path
 

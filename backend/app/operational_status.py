@@ -1,6 +1,6 @@
 """Freshness of execution is independent from saved data/checkpoint health."""
 from datetime import datetime, timedelta, timezone
-from .scheduler_schedule import IST, ENGINE_CRONS, SCHEDULE_TIMES_IST, DELIVERY_GRACE, RUN_TIMEOUT
+from .scheduler_schedule import IST, ENGINE_CRONS, RECOVERY_CRONS, SCHEDULE_TIMES_IST, DELIVERY_GRACE, RUN_TIMEOUT
 from .sessions import is_trading_session
 
 
@@ -104,6 +104,22 @@ def assess_operations(state, activities=(), now=None):
         scheduler.update(status='SCHEDULE_EVENT_OBSERVED', observedSlot=expected.isoformat(),
                          observedRunId=successful_provenance.get('githubRunId'),
                          detail='The latest due slot has a completed cycle with recorded schedule-event provenance.')
+    try:
+        nominal = _timestamp(successful_provenance.get('nominalSlot'))
+    except (ValueError, TypeError, AttributeError):
+        nominal = None
+    if (scheduler['status'] == 'UNVERIFIED' and nominal and expected and origin_created and success and successful_started
+            and execution['status'] in {'CURRENT', 'DUE', 'RUNNING'}
+            and successful_provenance.get('event') == 'schedule'
+            and successful_provenance.get('scheduleEvidence') == 'VERIFIED'
+            and str(successful_provenance.get('attempt')) == '1'
+            and successful_provenance.get('cron') in (*ENGINE_CRONS, *RECOVERY_CRONS)
+            and origin_created.astimezone(IST).date() == nominal.astimezone(IST).date()
+            and expected <= nominal <= successful_started <= success <= now
+            and origin_created <= successful_started):
+        scheduler.update(status='SCHEDULE_RECOVERY_OBSERVED', observedSlot=nominal.isoformat(),
+                         observedRunId=successful_provenance.get('githubRunId'),
+                         detail='A verified scheduled delivery recovered the latest slot; original trigger punctuality is not guaranteed.')
     return {'checkedAt': now.isoformat(), 'execution': execution, 'scheduler': scheduler,
             'monitoring': {'status': 'UNCONFIGURED',
                            'detail': 'No independent alert destination or delivery check is configured.'}}
@@ -120,9 +136,12 @@ def health_report(db, now=None):
                 and not reliability['portfolio'].get('blocking')
                 and not reliability['ledger'].get('blocking'))
     errors = operations['execution']['status'] not in {'CURRENT', 'DUE', 'RUNNING'} or not (reliability['allowRuntime'] or updating)
-    observed = operations['scheduler']['status'] == 'SCHEDULE_EVENT_OBSERVED'
-    return {**operations, 'status': 'BLOCKED' if errors else 'READY' if observed else 'DEGRADED',
-            'readyForUnattendedExecution': not errors and observed,
+    observed = operations['scheduler']['status'] in {'SCHEDULE_EVENT_OBSERVED', 'SCHEDULE_RECOVERY_OBSERVED'}
+    execution_ready = not errors and observed
+    monitoring_ready = operations['monitoring']['status'] == 'VERIFIED'
+    return {**operations, 'status': 'BLOCKED' if errors else 'READY' if execution_ready and monitoring_ready else 'DEGRADED',
+            'executionReady': execution_ready,
+            'readyForUnattendedExecution': execution_ready and monitoring_ready,
             'data': reliability['marketData'],
             'integrity': {**{key: reliability[key] for key in ['portfolio', 'ledger']},
                           'checkpoint': {'status': 'UPDATING'} if updating else reliability['checkpoint']}}
