@@ -32,11 +32,34 @@ def test_official_fallback_rejects_adjustment_mismatch_and_preserves_data(tmp_pa
     cache.save_history('SPLIT', frame(50.))
     row = {'open': 100., 'high': 101., 'low': 99., 'close': 100., 'volume': 1000}
     monkeypatch.setattr(official, 'download_session', lambda day: {'GOOD': row, 'SPLIT': row})
+    monkeypatch.setattr(official, 'corporate_actions', lambda day: set())
     result = official.repair_from_nse(['GOOD', 'SPLIT'], date(2026, 10, 27))
     assert result['recovered'] == ['GOOD']
     assert result['rejected'][0]['symbol'] == 'SPLIT'
     assert cache.load_history('GOOD').index.max() == pd.Timestamp('2026-10-27')
     assert cache.load_history('SPLIT').index.max() == pd.Timestamp('2026-10-26')
+
+
+def test_ex_date_is_rejected_even_when_prior_ohlc_matches(tmp_path, monkeypatch):
+    monkeypatch.setattr(cache, 'CACHE_DIR', tmp_path)
+    index = pd.bdate_range(end='2026-10-26', periods=400)
+    row = {'open': 100., 'high': 101., 'low': 99., 'close': 100., 'volume': 1000}
+    cache.save_history('EXDIV', pd.DataFrame(row, index=index))
+    monkeypatch.setattr(official, 'download_session', lambda day: {'EXDIV': row})
+    monkeypatch.setattr(official, 'corporate_actions', lambda day: {'EXDIV'})
+    result = official.repair_from_nse(['EXDIV'], date(2026, 10, 27))
+    assert result['recovered'] == []
+    assert 'Corporate action' in result['rejected'][0]['reason']
+    assert cache.load_history('EXDIV').index.max() == pd.Timestamp('2026-10-26')
+
+
+def test_unverified_corporate_actions_fail_closed(tmp_path, monkeypatch):
+    monkeypatch.setattr(cache, 'CACHE_DIR', tmp_path)
+    monkeypatch.setattr(official, 'download_session', lambda day: {})
+    def unavailable(day):
+        raise ValueError('Unavailable actions manifest')
+    monkeypatch.setattr(official, 'corporate_actions', unavailable)
+    assert official.repair_from_nse(['STOCK'], date(2026, 10, 27))['status'] == 'UNAVAILABLE'
 
 
 def test_official_source_unavailability_never_alters_cache(tmp_path, monkeypatch):

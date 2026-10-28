@@ -1,7 +1,8 @@
 """Optional official NSE settled cash data, with price-basis consistency checks."""
 import csv
-from datetime import date
+from datetime import date, datetime
 import io
+import json
 import urllib.request
 import zipfile
 import pandas as pd
@@ -51,6 +52,33 @@ def download_session(session):
     return archive_rows(payload, session)
 
 
+def corporate_actions(session):
+    # Raw bhavcopy bars cannot extend adjusted histories on an unverified ex-date.
+    clock = session.strftime('%d-%m-%Y')
+    url = ('https://www.nseindia.com/api/corporates-corporateActions'
+           f'?index=equities&from_date={clock}&to_date={clock}')
+    request = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json'})
+    with urllib.request.urlopen(request, timeout=15) as response:
+        payload = response.read(5_000_001)
+    if len(payload) > 5_000_000:
+        raise ValueError('Corporate action response exceeds size limit')
+    records = json.loads(payload)
+    if not isinstance(records, list):
+        raise ValueError('Unverified corporate action manifest')
+    affected = set()
+    for row in records:
+        if not isinstance(row, dict) or not row.get('symbol') or not row.get('exDate'):
+            raise ValueError('Incomplete corporate action manifest')
+        try:
+            ex_date = datetime.strptime(row['exDate'], '%d-%b-%Y').date()
+        except ValueError:
+            ex_date = date.fromisoformat(row['exDate'])
+        if ex_date != session:
+            raise ValueError('Corporate action manifest date mismatch')
+        affected.add(row['symbol'].strip())
+    return affected
+
+
 def repair_from_nse(symbols, expected):
     report = {'source': 'NSE_OFFICIAL_CASH_BHAVCOPY', 'status': 'NOT_NEEDED',
               'attempted': len(symbols), 'recovered': [], 'rejected': []}
@@ -61,6 +89,7 @@ def repair_from_nse(symbols, expected):
         sessions.append(previous_trading_session(sessions[-1]))
     try:
         archives = {session: download_session(session) for session in sessions}
+        actions = corporate_actions(expected)
     except Exception as error:
         # Public source failure never bypasses validation or fabricates a bar.
         report.update(status='UNAVAILABLE', reason=type(error).__name__)
@@ -68,6 +97,9 @@ def repair_from_nse(symbols, expected):
             report['httpStatus'] = error.code
         return report
     for symbol in symbols:
+        if symbol in actions:
+            report['rejected'].append({'symbol': symbol, 'reason': 'Corporate action requires full adjusted history'})
+            continue
         records = [(session, archives[session][symbol]) for session in sessions if symbol in archives[session]]
         if len(records) != 4:
             report['rejected'].append({'symbol': symbol, 'reason': 'Missing cash-equity sessions'})
