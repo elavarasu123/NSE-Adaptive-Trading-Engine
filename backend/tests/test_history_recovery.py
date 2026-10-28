@@ -42,3 +42,16 @@ def test_partial_today_does_not_hide_missing_settled_session(recovery, monkeypat
     assert namespace["has_expected_session"]() is False
     frame.loc[pd.Timestamp(expected), "close"] = 150.
     assert namespace["has_expected_session"]() is True
+
+
+def test_execution_checkpoint_reports_latest_settled_bar(monkeypatch):
+    from datetime import datetime
+    import app.reliability as reliability
+    frame = pd.DataFrame({"close": [100., 200.]}, index=pd.to_datetime(["2026-10-27", "2026-10-28"]))
+    monkeypatch.setattr(reliability, "load_history", lambda _: frame)
+    clock = datetime(2026, 10, 28, 12, tzinfo=reliability.IST)
+    report = reliability.market_data_status(clock)
+    assert report["status"] == "FRESH"
+    assert report["latestSession"] == report["expectedSession"] == "2026-10-27"
+    frame = frame.iloc[1:]
+    assert reliability.market_data_status(clock)["blocking"] is True

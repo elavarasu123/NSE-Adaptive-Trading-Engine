@@ -14,4 +14,6 @@ Validated refreshed market files are saved before the execution preflight so an
 unrelated execution failure does not discard recovered data. Fresh caches skip
 the download. Scheduled delivery can still be delayed by GitHub; this change
 recovers stale market data when a run actually starts, rather than guaranteeing
-delivery time. Render needs no deployment for this workflow-only behavior.
+delivery time. Checkpoints record only the latest settled benchmark bar; an
+unfinished current-day candle is excluded from freshness evidence. Render reads
+that corrected shared evidence without requiring a dashboard deployment.

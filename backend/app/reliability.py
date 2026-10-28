@@ -248,6 +248,11 @@ def market_data_status(
         "^NSEI"
     )
 
+    if frame is not None:
+        # Yahoo includes today's unfinished candle during an intraday refresh.
+        # Checkpoint evidence must describe settled data, just like the model.
+        frame = frame.loc[[stamp.date() <= expected for stamp in frame.index]]
+
     if (
         frame is None
         or frame.empty
