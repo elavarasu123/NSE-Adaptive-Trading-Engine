@@ -13,6 +13,15 @@ GitHub can delay **all** its schedule events; these recovery triggers cannot
 provide an independent scheduling guarantee. Actions remains the only engine
 execution scheduler. The read-only watchdog never dispatches trading.
 
+The active engine definition is `.github/workflows/nse-paper-engine.yml`.
+It replaces the earlier `paper-engine.yml` registration after GitHub again
+reported an orphaned queued run with zero jobs and rejected both cancellation
+endpoints with HTTP 409. The same concurrency group and database lock protect
+execution across registrations. Retain the old run as diagnostic evidence;
+disable its old registration once the replacement is active. A replacement
+manual run must be verified independently; file renaming is not proof that
+scheduled delivery is fixed.
+
 The history refresher retries missing/stale symbols in smaller batches, retains
 usable cache files if a response is older or truncated, excludes partial daily
 candles, and writes CSV files atomically. A stock with fewer than 300 settled

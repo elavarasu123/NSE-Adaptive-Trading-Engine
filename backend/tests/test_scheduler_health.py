@@ -44,7 +44,7 @@ def test_schedule_utc_conversion_and_workflow_contract():
         "09:20", "10:20", "11:20", "12:20", "13:20", "14:20", "15:20", "16:05",
     )
     root = Path(__file__).resolve().parents[2]
-    workflow = (root / ".github/workflows/paper-engine.yml").read_text()
+    workflow = (root / ".github/workflows/nse-paper-engine.yml").read_text()
     assert tuple(re.findall(r'- cron: "([^"]+)"', workflow)) == ENGINE_CRONS + RECOVERY_CRONS
     # Post-close forces refresh; any validated refresh is saved before preflight.
     assert "github.event.schedule == '35 10 * * 1-5'" in workflow
@@ -245,7 +245,7 @@ def test_activation_uses_repository_root_and_first_parent(monkeypatch):
     def output(command, **kwargs):
         assert "--first-parent" in command
         assert command[-1] == health.WORKFLOW
-        assert (kwargs["cwd"] / ".github/workflows/paper-engine.yml").exists()
+        assert (kwargs["cwd"] / ".github/workflows/nse-paper-engine.yml").exists()
         return "2026-10-26T03:00:00Z\n"
     monkeypatch.setattr(health.subprocess, "check_output", output)
     assert health.activation_time() == datetime(2026, 10, 26, 3, tzinfo=timezone.utc)

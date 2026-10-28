@@ -22,7 +22,7 @@ import zipfile
 from .scheduler_schedule import ENGINE_CRONS, RECOVERY_CRONS, IST, RUN_TIMEOUT, due_slots, latest_slot
 
 
-WORKFLOW = ".github/workflows/paper-engine.yml"
+WORKFLOW = ".github/workflows/nse-paper-engine.yml"
 GOOD_STATUSES = {"SUCCESS", "PENDING", "RECOVERY_DELIVERED"}
 
 
@@ -219,7 +219,7 @@ class GitHub:
 
 
 def check(now, activated_at, github, repository, branch, scope=None):
-    workflow = github.get("/actions/workflows/paper-engine.yml")
+    workflow = github.get("/actions/workflows/nse-paper-engine.yml")
     if workflow["state"] != "active":
         raise EvidenceError("Engine workflow is disabled; enable it in GitHub Actions")
     # Re-enabling starts a new delivery registration. Do not demand retroactive
@@ -237,7 +237,7 @@ def check(now, activated_at, github, repository, branch, scope=None):
     day = now.astimezone(IST).replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=6)
     query = urllib.parse.urlencode({"event": "schedule", "branch": branch,
                                   "created": ">=" + day.astimezone(timezone.utc).isoformat()})
-    runs = github.pages(f"/actions/workflows/paper-engine.yml/runs?{query}", "workflow_runs")
+    runs = github.pages(f"/actions/workflows/nse-paper-engine.yml/runs?{query}", "workflow_runs")
     runs = [r for r in runs if r.get("event") == "schedule" and r["head_branch"] == branch]
     receipts, errors = {}, {}
     for run in runs:
