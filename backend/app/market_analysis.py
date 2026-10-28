@@ -15,7 +15,7 @@ def refresh_evidence(as_of):
     try:
         report = json.loads((CACHE_DIR / 'refresh_report.json').read_text())
         if report.get('expectedSession') == as_of:
-            return {key: report.get(key) for key in ['counts', 'recentRepair', 'downloadFailures']}
+            return {key: report.get(key) for key in ['counts', 'recentRepair', 'officialRepair', 'downloadFailures']}
     except (OSError, ValueError, TypeError):
         pass
     return None

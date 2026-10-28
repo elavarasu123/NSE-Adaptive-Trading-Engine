@@ -137,7 +137,13 @@ def refresh(symbols, period="2y", chunk=40, repair_only=False):
                 failures.pop(symbol, None)
             else:
                 failures[symbol] = "Recent range lacks the settled session or adjusted overlap does not match"
+    from app.history_official import repair_from_nse
+    remaining = [symbol for symbol in stale if symbol != '^NSEI' and inspect_symbol(symbol, expected)['status'] == 'STALE']
+    official = repair_from_nse(remaining, expected)
+    for symbol in official['recovered']:
+        failures.pop(symbol, None)
     report = history_quality(symbols, expected)
+    report["officialRepair"] = official
     report["recentRepair"] = {"attempted": len(stale), "recovered": len(repaired)}
     report["downloadFailures"] = failures
     (CACHE_DIR / "refresh_report.json").write_text(json.dumps(report, indent=2))

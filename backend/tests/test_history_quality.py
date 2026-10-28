@@ -17,6 +17,8 @@ def pipeline(tmp_path, monkeypatch):
     monkeypatch.setattr(cache, "CACHE_DIR", tmp_path)
     monkeypatch.setattr(reliability, "expected_closed_session", lambda: pd.Timestamp("2026-10-27").date())
     monkeypatch.setattr("time.sleep", lambda *_: None)
+    import app.history_official as official
+    monkeypatch.setattr(official, 'repair_from_nse', lambda symbols, expected: {'recovered': [], 'status': 'TEST_UNAVAILABLE'})
     path = Path(__file__).resolve().parents[1] / "scripts/cache_history.py"
     return runpy.run_path(str(path))["refresh"]
 
