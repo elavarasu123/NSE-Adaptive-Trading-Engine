@@ -24,6 +24,16 @@ bars are appended only if adjusted OHLC matches the existing cache across at
 least three overlapping sessions. Split/restatement mismatches are rejected;
 the model's historical price basis is never silently mixed.
 
+If Yahoo remains stale, an optional official NSE cash bhavcopy fallback checks
+the expected session plus three preceding NSE sessions. Only EQ-series records
+with all four sessions and matching historical OHLC may extend an existing
+cache. Files use the official archive schema, exact session validation, and size
+limits. A verified NSE corporate-action manifest is mandatory; ex-date symbols
+are excluded until a full adjusted history is available. Source failures,
+missing records and adjustment mismatches stay visible
+in persisted repair evidence and leave cached prices untouched. This supplies
+settled research bars, never live execution quotes.
+
 ## Independent observer configuration
 
 Create an HTTPS monitor in a service **outside GitHub Actions**:
