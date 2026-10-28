@@ -63,6 +63,15 @@ def test_unsettled_rows_never_saved_as_validated_history(pipeline, monkeypatch):
     assert cache.load_history("^NSEI").index.max() == pd.Timestamp("2026-10-27")
 
 
+def test_new_listing_with_fewer_than_100_sessions_is_insufficient_not_missing(pipeline, monkeypatch):
+    import yfinance
+    cache.save_history("^NSEI", frame())
+    monkeypatch.setattr(yfinance, "download", lambda **_: frame(rows=25))
+    report = pipeline(["NEW"], repair_only=True)
+    assert report["counts"] == {"INSUFFICIENT": 1, "READY": 1}
+    assert len(cache.load_history("NEW")) == 25
+
+
 def test_atomic_write_failure_preserves_original(pipeline, monkeypatch):
     cache.save_history("OLD", frame())
     def failed(*args, **kwargs):
