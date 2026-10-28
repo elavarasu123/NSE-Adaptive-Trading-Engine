@@ -19,6 +19,11 @@ candles, and writes CSV files atomically. A stock with fewer than 300 settled
 sessions is reported as insufficient history, distinct from stale data. Symbols
 still unavailable after retries remain excluded; data is never invented.
 
+If a long-range response is stale, a recent-range request is also tried. Recent
+bars are appended only if adjusted OHLC matches the existing cache across at
+least three overlapping sessions. Split/restatement mismatches are rejected;
+the model's historical price basis is never silently mixed.
+
 ## Independent observer configuration
 
 Create an HTTPS monitor in a service **outside GitHub Actions**:

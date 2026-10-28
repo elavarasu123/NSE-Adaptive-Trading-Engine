@@ -72,6 +72,23 @@ def test_new_listing_with_fewer_than_100_sessions_is_insufficient_not_missing(pi
     assert len(cache.load_history("NEW")) == 25
 
 
+def test_short_range_repairs_stale_long_range_only_with_matching_overlap(pipeline, monkeypatch):
+    import yfinance
+    cache.save_history("^NSEI", frame())
+    cache.save_history("OLD", frame("2026-10-26"))
+    monkeypatch.setattr(yfinance, "download", lambda **kwargs:
+                        frame(rows=20) if kwargs['period'] == '1mo' else frame('2026-10-26'))
+    report = pipeline(["OLD"], repair_only=True)
+    assert report['recentRepair'] == {'attempted': 1, 'recovered': 1}
+    assert cache.load_history('OLD').index.max() == pd.Timestamp('2026-10-27')
+
+
+def test_adjusted_price_disagreement_cannot_be_spliced(pipeline):
+    previous = frame('2026-10-26')
+    recent = frame(rows=20, price=50.)
+    assert quality.merge_recent_history(previous, recent, pd.Timestamp('2026-10-27').date()) is None
+
+
 def test_atomic_write_failure_preserves_original(pipeline, monkeypatch):
     cache.save_history("OLD", frame())
     def failed(*args, **kwargs):

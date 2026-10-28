@@ -2,9 +2,43 @@
 from collections import Counter
 import math
 import pandas as pd
+import numpy as np
 from .history_cache import load_history
 from .reliability import expected_closed_session
 from .universe import load_universe
+
+
+def validated_frame(frame, expected):
+    if frame is None:
+        return None
+    frame = frame.copy()
+    index = pd.to_datetime(frame.index)
+    if index.tz is not None:
+        index = index.tz_convert("Asia/Kolkata").tz_localize(None)
+    frame.index = index.normalize()
+    frame = frame.loc[~frame.index.duplicated(keep="last")].sort_index()
+    columns = ["open", "high", "low", "close"]
+    for column in columns:
+        frame[column] = pd.to_numeric(frame[column], errors="coerce")
+    valid = np.isfinite(frame[columns]).all(axis=1) & (frame[columns] > 0).all(axis=1)
+    valid &= frame["high"] >= frame[["open", "close", "low"]].max(axis=1)
+    valid &= frame["low"] <= frame[["open", "close", "high"]].min(axis=1)
+    return frame.loc[valid & (frame.index <= pd.Timestamp(expected))]
+
+
+def merge_recent_history(previous, recent, expected):
+    """Append recent daily bars only when adjusted OHLC agrees on overlap."""
+    if previous is None or recent is None or recent.empty or pd.Timestamp(expected) not in recent.index:
+        return None
+    overlap = previous.index.intersection(recent.index).sort_values()
+    if len(overlap) < 3:
+        return None
+    overlap = overlap[-3:]
+    columns = ["open", "high", "low", "close"]
+    if not np.allclose(previous.loc[overlap, columns].astype(float), recent.loc[overlap, columns].astype(float),
+                       rtol=1e-5, atol=1e-6, equal_nan=False):
+        return None  # Splits/restatements require a consistent full-history download.
+    return pd.concat([previous, recent.loc[recent.index > previous.index.max()]]).sort_index()
 
 
 def inspect_symbol(symbol, expected):

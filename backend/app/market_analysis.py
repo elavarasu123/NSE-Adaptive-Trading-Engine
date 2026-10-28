@@ -9,6 +9,18 @@ from .adaptive_policy import BASE_THRESHOLDS, entry_threshold
 from .shared_state import shared_state_enabled, latest_activity_of_type
 
 
+def refresh_evidence(as_of):
+    import json
+    from .history_cache import CACHE_DIR
+    try:
+        report = json.loads((CACHE_DIR / 'refresh_report.json').read_text())
+        if report.get('expectedSession') == as_of:
+            return {key: report.get(key) for key in ['counts', 'recentRepair', 'downloadFailures']}
+    except (OSError, ValueError, TypeError):
+        pass
+    return None
+
+
 def build_market_analysis(context, adaptive, provider=None):
     candidates = context.candidates()
     row = context.benchmark_row
@@ -49,6 +61,7 @@ def build_market_analysis(context, adaptive, provider=None):
             'universeSize': len(context.universe), 'successful': len(candidates),
             'failed': sum(context.coverage.values()), 'coverage': dict(context.coverage),
             'dataQuality': {'status': 'PARTIAL' if context.coverage.get('missing', 0) or context.coverage.get('unaligned', 0) else 'COMPLETE',
+                            'refreshEvidence': refresh_evidence(str(context.market_date.date())),
                             'exclusions': getattr(context, 'exclusions', [])},
             'regime': {'name': regime, 'buyThreshold': threshold, 'baselineThreshold': BASE_THRESHOLDS[regime],
                        'entriesAllowed': regime != 'PANIC', 'reasons': reasons},

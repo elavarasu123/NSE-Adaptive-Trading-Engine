@@ -68,11 +68,10 @@ def normalize_frame(
 
 
 def refresh(symbols, period="2y", chunk=40, repair_only=False):
-    from app.history_quality import inspect_symbol, history_quality
-    from app.history_cache import CACHE_DIR
+    from app.history_quality import inspect_symbol, history_quality, validated_frame, merge_recent_history
+    from app.history_cache import CACHE_DIR, load_history
     from app.reliability import expected_closed_session
     import json
-    import numpy as np
     expected = expected_closed_session()
     symbols = list(dict.fromkeys([*symbols, "^NSEI"]))
     failures = {}
@@ -104,19 +103,7 @@ def refresh(symbols, period="2y", chunk=40, repair_only=False):
                 if frame is None:
                     failures[symbol] = "Missing OHLC response"
                     continue
-                # Normalize before validation; keep partial candles out of saved evidence.
-                index = pd.to_datetime(frame.index)
-                if index.tz is not None:
-                    index = index.tz_convert("Asia/Kolkata").tz_localize(None)
-                frame.index = index.normalize()
-                frame = frame.loc[~frame.index.duplicated(keep="last")].sort_index()
-                for column in ["open", "high", "low", "close"]:
-                    frame[column] = pd.to_numeric(frame[column], errors="coerce")
-                valid = np.isfinite(frame[["open", "high", "low", "close"]]).all(axis=1)
-                valid &= (frame[["open", "high", "low", "close"]] > 0).all(axis=1)
-                valid &= frame["high"] >= frame[["open", "close", "low"]].max(axis=1)
-                valid &= frame["low"] <= frame[["open", "close", "high"]].min(axis=1)
-                frame = frame.loc[valid & (frame.index <= pd.Timestamp(expected))]
+                frame = validated_frame(frame, expected)
                 old = inspect_symbol(symbol, expected)
                 # An incomplete response must not replace a newer or longer usable cache.
                 if (frame.empty or len(frame) < min(300, old["rows"])
@@ -128,7 +115,30 @@ def refresh(symbols, period="2y", chunk=40, repair_only=False):
                 failures.pop(symbol, None)
             time.sleep(0.5)
         targets = pending()
+    # A short-range Yahoo request can expose recent bars absent from its long
+    # range response. Never splice differently adjusted price histories.
+    stale = [symbol for symbol in targets if inspect_symbol(symbol, expected)["status"] == "STALE"]
+    repaired = []
+    for start in range(0, len(stale), 10):
+        batch = stale[start:start + 10]
+        tickers = [symbol if symbol == "^NSEI" else symbol + ".NS" for symbol in batch]
+        try:
+            data = yf.download(tickers=tickers, period="1mo", interval="1d", auto_adjust=True,
+                               progress=False, threads=4, timeout=15, group_by="column")
+        except Exception:
+            continue
+        for symbol, ticker in zip(batch, tickers):
+            recent = validated_frame(normalize_frame(data, ticker), expected)
+            previous = validated_frame(load_history(symbol), expected)
+            combined = merge_recent_history(previous, recent, expected)
+            if combined is not None:
+                save_history(symbol, combined)
+                repaired.append(symbol)
+                failures.pop(symbol, None)
+            else:
+                failures[symbol] = "Recent range lacks the settled session or adjusted overlap does not match"
     report = history_quality(symbols, expected)
+    report["recentRepair"] = {"attempted": len(stale), "recovered": len(repaired)}
     report["downloadFailures"] = failures
     (CACHE_DIR / "refresh_report.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
