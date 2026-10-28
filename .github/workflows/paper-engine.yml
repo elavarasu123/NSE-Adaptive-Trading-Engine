@@ -116,13 +116,26 @@ jobs:
           restore-keys: |
             market-history-${{ github.ref_name }}-
 
-      - name: Refresh settled market history
-        if: ${{ (github.event_name == 'schedule' && github.event.schedule == '35 10 * * 1-5') || (github.event_name == 'workflow_dispatch' && inputs.refresh_history) }}
+      - name: Ensure settled market history is current
+        id: history
         working-directory: backend
+        env:
+          REFRESH_HISTORY: ${{ (github.event_name == 'schedule' && github.event.schedule == '35 10 * * 1-5') || (github.event_name == 'workflow_dispatch' && inputs.refresh_history) }}
         run: |
-          python scripts/cache_history.py \
-            --period 2y \
-            --chunk 50
+          if [ "$REFRESH_HISTORY" = "true" ]; then
+            python scripts/ensure_market_history.py --force
+          else
+            python scripts/ensure_market_history.py
+          fi
+
+      # Market files are independent of the capital ledger. Preserve a validated
+      # refresh even if an unrelated execution integrity check subsequently fails.
+      - name: Save refreshed market history
+        if: ${{ steps.history.outputs.refreshed == 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: backend/data/history
+          key: market-history-${{ github.ref_name }}-${{ github.run_id }}
 
       - name: Reliability preflight
         working-directory: backend
@@ -151,13 +164,6 @@ jobs:
           echo "===== SHARED DATABASE STATUS ====="
 
           python scripts/shared_db_status.py
-
-      - name: Save refreshed market history
-        if: ${{ success() && ((github.event_name == 'schedule' && github.event.schedule == '35 10 * * 1-5') || (github.event_name == 'workflow_dispatch' && inputs.refresh_history)) }}
-        uses: actions/cache/save@v4
-        with:
-          path: backend/data/history
-          key: market-history-${{ github.ref_name }}-${{ github.run_id }}
 
       - name: Upload runtime evidence
         if: always()
