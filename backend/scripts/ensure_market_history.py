@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT))
 
 from app.history_cache import load_history
 from app.reliability import expected_closed_session
+from app.history_quality import history_quality
 
 
 def has_expected_session():
@@ -31,14 +32,18 @@ def ensure_history(force=False):
         fresh = has_expected_session()
     except (ValueError, KeyError, OSError):
         fresh = False
-    if fresh and not force:
+    repair = history_quality()["status"] == "PARTIAL"
+    if fresh and not force and not repair:
         print("Settled market cache is current; no download required.")
         return False
     print("Refreshing missing/stale market history before reliability preflight.", flush=True)
     # One bounded attempt. Failure never bypasses the preflight or touches capital.
+    command = [sys.executable, str(ROOT / "scripts/cache_history.py"),
+               "--period", "2y", "--chunk", "50"]
+    if fresh and not force:
+        command.append("--repair-only")
     subprocess.run(
-        [sys.executable, str(ROOT / "scripts/cache_history.py"),
-         "--period", "2y", "--chunk", "50"],
+        command,
         check=True, timeout=1200,
     )
     if not has_expected_session():

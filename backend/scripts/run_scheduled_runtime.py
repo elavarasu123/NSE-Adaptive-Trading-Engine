@@ -68,6 +68,14 @@ def main():
 
         return
 
+    if os.getenv("GITHUB_EVENT_NAME") == "schedule" and not force:
+        from app.scheduled_recovery import execution_due
+        from app.runtime import load_state
+        due, reason = execution_due(load_state())
+        if not due:
+            print("SKIPPED:", reason)
+            return
+
     bootstrap = ensure_paper_database()
 
     print()

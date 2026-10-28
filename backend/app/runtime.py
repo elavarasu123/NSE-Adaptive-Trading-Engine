@@ -419,6 +419,10 @@ def execution_provenance():
               "githubRunId": os.getenv("GITHUB_RUN_ID"), "cron": cron,
               "commit": os.getenv("GITHUB_SHA"), "attempt": os.getenv("GITHUB_RUN_ATTEMPT"),
               "scheduleEvidence": "UNVERIFIED"}
+    if result["event"] == "schedule":
+        from .scheduler_schedule import latest_slot
+        slot = latest_slot(datetime.now(timezone.utc))
+        result["nominalSlot"] = slot.isoformat() if slot else None
     token, repository = os.getenv("SCHEDULER_EVIDENCE_TOKEN"), os.getenv("GITHUB_REPOSITORY", "")
     if result["event"] != "schedule" or not token or not (result["githubRunId"] or "").isdigit():
         return result

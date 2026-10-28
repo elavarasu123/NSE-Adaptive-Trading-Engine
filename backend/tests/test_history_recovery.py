@@ -5,9 +5,11 @@ import pytest
 
 
 @pytest.fixture
-def recovery():
+def recovery(monkeypatch):
     path = Path(__file__).resolve().parents[1] / "scripts/ensure_market_history.py"
-    return runpy.run_path(str(path))["ensure_history"]
+    function = runpy.run_path(str(path))["ensure_history"]
+    monkeypatch.setitem(function.__globals__, "history_quality", lambda: {"status": "COMPLETE"})
+    return function
 
 
 def test_current_history_does_not_download(recovery, monkeypatch):
@@ -31,6 +33,15 @@ def test_failed_refresh_remains_blocked(recovery, monkeypatch):
     monkeypatch.setattr("subprocess.run", lambda *a, **k: None)
     with pytest.raises(RuntimeError, match="expected settled"):
         recovery()
+
+
+def test_fresh_benchmark_still_repairs_stale_stocks(recovery, monkeypatch):
+    monkeypatch.setitem(recovery.__globals__, "has_expected_session", lambda: True)
+    monkeypatch.setitem(recovery.__globals__, "history_quality", lambda: {"status": "PARTIAL"})
+    calls = []
+    monkeypatch.setattr("subprocess.run", lambda command, **kwargs: calls.append(command))
+    assert recovery() is True
+    assert "--repair-only" in calls[0]
 
 
 def test_partial_today_does_not_hide_missing_settled_session(recovery, monkeypatch):

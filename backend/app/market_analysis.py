@@ -48,6 +48,8 @@ def build_market_analysis(context, adaptive, provider=None):
             'dataLive': False, 'modelVersion': 'champion-v0.2-frozen', 'benchmark': '^NSEI',
             'universeSize': len(context.universe), 'successful': len(candidates),
             'failed': sum(context.coverage.values()), 'coverage': dict(context.coverage),
+            'dataQuality': {'status': 'PARTIAL' if context.coverage.get('missing', 0) or context.coverage.get('unaligned', 0) else 'COMPLETE',
+                            'exclusions': getattr(context, 'exclusions', [])},
             'regime': {'name': regime, 'buyThreshold': threshold, 'baselineThreshold': BASE_THRESHOLDS[regime],
                        'entriesAllowed': regime != 'PANIC', 'reasons': reasons},
             'indicators': {key: round(float(row[key]), 6) for key in

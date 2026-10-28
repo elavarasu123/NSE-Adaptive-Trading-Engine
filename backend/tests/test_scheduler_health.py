@@ -39,12 +39,13 @@ def receipt(**overrides):
 
 
 def test_schedule_utc_conversion_and_workflow_contract():
+    from app.scheduler_schedule import RECOVERY_CRONS
     assert SCHEDULE_TIMES_IST == (
         "09:20", "10:20", "11:20", "12:20", "13:20", "14:20", "15:20", "16:05",
     )
     root = Path(__file__).resolve().parents[2]
     workflow = (root / ".github/workflows/paper-engine.yml").read_text()
-    assert tuple(re.findall(r'- cron: "([^"]+)"', workflow)) == ENGINE_CRONS
+    assert tuple(re.findall(r'- cron: "([^"]+)"', workflow)) == ENGINE_CRONS + RECOVERY_CRONS
     # Post-close forces refresh; any validated refresh is saved before preflight.
     assert "github.event.schedule == '35 10 * * 1-5'" in workflow
     assert "python scripts/ensure_market_history.py" in workflow
@@ -56,6 +57,15 @@ def test_schedule_utc_conversion_and_workflow_contract():
     assert "actions: read" in watchdog
     assert "DATABASE_URL" not in watchdog
     assert "run_scheduled_runtime" not in watchdog
+
+
+def test_watchdog_identifies_recovery_delivery_without_claiming_original_delivery():
+    from app.scheduler_schedule import RECOVERY_CRONS
+    recovered = run(created_at=clock(9, 27).isoformat())
+    proof = receipt(cron=RECOVERY_CRONS[0], nominal_slot=clock(9, 20).isoformat())
+    rows = health.assess_slots(clock(9, 45), ACTIVATED, [recovered], {123: proof})
+    assert rows[0]['status'] == 'RECOVERY_DELIVERED'
+    assert 'verify shared runtime' in rows[0]['detail']
 
 
 def test_delivery_grace_and_activation_cutoff():

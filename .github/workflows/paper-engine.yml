@@ -30,6 +30,11 @@ on:
     # create the final daily observation batch.
     - cron: "35 10 * * 1-5"
 
+    # GitHub-only recovery deliveries. They skip without touching state when
+    # the latest nominal slot already completed or the market window is closed.
+    - cron: "57 3 * * 1-5"
+    - cron: "7,27,47 4-10 * * 1-5"
+
 permissions:
   contents: read
   actions: read
@@ -90,7 +95,13 @@ jobs:
             exit 1
           fi
 
+      - name: Select latest due paper slot
+        id: due
+        working-directory: backend
+        run: python -m app.scheduled_recovery
+
       - name: Restore persistent paper state
+        if: steps.due.outputs.should_run == 'true'
         uses: actions/cache/restore@v4
         with:
           path: |
@@ -103,12 +114,14 @@ jobs:
             paper-state-${{ github.ref_name }}-
 
       - name: Migrate legacy state to shared database
+        if: steps.due.outputs.should_run == 'true'
         working-directory: backend
         run: |
           python scripts/migrate_legacy_to_shared_db.py
           python scripts/shared_db_status.py
 
       - name: Restore latest market history
+        if: steps.due.outputs.should_run == 'true'
         uses: actions/cache/restore@v4
         with:
           path: backend/data/history
@@ -117,6 +130,7 @@ jobs:
             market-history-${{ github.ref_name }}-
 
       - name: Ensure settled market history is current
+        if: steps.due.outputs.should_run == 'true'
         id: history
         working-directory: backend
         env:
@@ -138,11 +152,13 @@ jobs:
           key: market-history-${{ github.ref_name }}-${{ github.run_id }}
 
       - name: Reliability preflight
+        if: steps.due.outputs.should_run == 'true'
         working-directory: backend
         run: |
           python scripts/reliability_status.py
 
       - name: Scheduled paper cycle
+        if: steps.due.outputs.should_run == 'true'
         working-directory: backend
         env:
           SCHEDULER_EVIDENCE_TOKEN: ${{ github.token }}

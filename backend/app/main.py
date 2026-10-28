@@ -696,6 +696,16 @@ def operations_health(db: Session = Depends(get_db)):
     return JSONResponse(report, status_code=200 if report["readyForUnattendedExecution"] else 503, headers={"Cache-Control": "no-store"})
 
 
+@app.api_route("/api/operations/execution-health", methods=["GET", "HEAD"])
+def execution_health(db: Session = Depends(get_db)):
+    """Observer target independent of whether that observer is connected yet."""
+    from fastapi.responses import JSONResponse
+    from .operational_status import health_report
+    report = health_report(db)
+    return JSONResponse(report, status_code=200 if report["executionReady"] else 503,
+                        headers={"Cache-Control": "no-store"})
+
+
 @app.post("/api/runtime/run")
 def run_runtime_cycle():
     from .database import SessionLocal

@@ -109,7 +109,8 @@ def test_normal_running_cycle_does_not_fail_observer_for_expected_checkpoint_upd
     monkeypatch.setattr(reliability, 'dashboard_reliability_report', lambda db, now: report)
     checked = datetime(2026, 10, 27, 10, 22, tzinfo=IST)
     result = health_report(None, checked)
-    assert result['readyForUnattendedExecution'] is True
+    assert result['executionReady'] is True
+    assert result['readyForUnattendedExecution'] is False  # independent alerts are still unconfigured
     assert result['integrity']['checkpoint']['status'] == 'UPDATING'
     report['portfolio']['blocking'] = True
     assert health_report(None, checked)['readyForUnattendedExecution'] is False
@@ -134,3 +135,14 @@ def test_head_monitor_has_the_same_readiness_status_without_response_body(monkey
         response = client.head('/api/operations/health')
         assert response.status_code == 200 and response.content == b''
         assert response.headers['cache-control'] == 'no-store'
+
+
+def test_execution_monitor_can_check_delivery_without_claiming_alerts_configured(monkeypatch):
+    from app.main import app
+    from fastapi.testclient import TestClient
+    import app.operational_status as operations
+    monkeypatch.setattr(operations, 'health_report', lambda db: {
+        'executionReady': True, 'readyForUnattendedExecution': False})
+    with TestClient(app) as client:
+        assert client.get('/api/operations/execution-health').status_code == 200
+        assert client.get('/api/operations/health').status_code == 503
