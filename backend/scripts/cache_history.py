@@ -119,7 +119,7 @@ def refresh(symbols, period="2y", chunk=40, repair_only=False):
                 frame = frame.loc[valid & (frame.index <= pd.Timestamp(expected))]
                 old = inspect_symbol(symbol, expected)
                 # An incomplete response must not replace a newer or longer usable cache.
-                if (len(frame) < 100 or len(frame) < min(300, old["rows"])
+                if (frame.empty or len(frame) < min(300, old["rows"])
                         or (old["latestSession"] and not frame.empty
                             and str(frame.index[-1].date()) < old["latestSession"])):
                     failures[symbol] = "Incomplete response; previous cache retained"
