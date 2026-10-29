@@ -19,7 +19,7 @@ import urllib.parse
 import urllib.request
 import zipfile
 
-from .scheduler_schedule import ENGINE_CRONS, RECOVERY_CRONS, IST, RUN_TIMEOUT, due_slots, latest_slot
+from .scheduler_schedule import ENGINE_CRONS, RECOVERY_CRONS, IST, RUN_TIMEOUT, DELIVERY_GRACE, due_slots, latest_slot
 
 
 WORKFLOW = ".github/workflows/nse-paper-engine.yml"
@@ -125,6 +125,9 @@ def assess_slots(now, activated_at, runs, receipts, errors=None):
             run = max(matches, key=lambda r: (r["created_at"], r["id"]))
             row.update(status=run_status(run, now),
                        detail=f"Run {run['id']}, attempt {run['run_attempt']}")
+            received = timestamp(receipts[run['id']]['received_at'])
+            if row['status'] in GOOD_STATUSES and max(timestamp(run['created_at']), received) > expected + DELIVERY_GRACE:
+                row.update(status='LATE_DELIVERY', detail=f"Run {run['id']} arrived after delivery grace; workflow success does not prove timely execution")
             if len(matches) > 1:
                 row.update(status="DUPLICATE", detail="Multiple scheduled runs claim this slot")
         elif uncertain:
@@ -141,11 +144,68 @@ def assess_slots(now, activated_at, runs, receipts, errors=None):
                 if (receipt.get('cron') in RECOVERY_CRONS
                         and receipt.get('nominal_slot') == expected.isoformat()
                         and timestamp(run['created_at']).astimezone(IST).date() == expected.date()
+                        and timestamp(run['created_at']) <= expected + DELIVERY_GRACE
+                        and timestamp(receipt['received_at']) <= expected + DELIVERY_GRACE
                         and run_status(run, now) == 'SUCCESS'):
                     row.update(status='RECOVERY_DELIVERED', detail=f"Recovery workflow {run['id']} succeeded; verify shared runtime evidence for execution")
                     break
         results.append(row)
     return results
+
+
+def assess_runtime(document, now):
+    """An old HEALTHY checkpoint cannot satisfy current execution freshness."""
+    try:
+        checked = timestamp(document['checkedAt'])
+        if not -30 <= (now - checked).total_seconds() <= 120:
+            raise ValueError('Old or future response')
+        execution, data, integrity = document['execution'], document['data'], document['integrity']
+        status = execution['status']
+        if status not in {'CURRENT', 'DUE', 'RUNNING'}:
+            return {'status': 'BLOCKED', 'detail': f"Execution {status}; last success {execution.get('lastSuccessfulAt')}"}
+        success, expected = timestamp(execution['lastSuccessfulAt']), timestamp(execution['expectedCycleAt'])
+        datetime.strptime(data['latestSession'], '%Y-%m-%d')
+        datetime.strptime(data['expectedSession'], '%Y-%m-%d')
+        if success > now or expected > now:
+            raise ValueError('Future execution evidence')
+        if ((status == 'CURRENT' and success < expected)
+                or (status == 'DUE' and now > expected + DELIVERY_GRACE)):
+            return {'status': 'BLOCKED', 'detail': 'Execution timestamps do not cover the expected slot'}
+        checkpoint = integrity['checkpoint']['status']
+        checkpoint_ok = ((checkpoint == 'MATCH' and integrity['checkpoint'].get('blocking') is False)
+                         or (status == 'RUNNING' and checkpoint in {'UPDATING', 'MISMATCH', 'RECOVERY_REQUIRED'}))
+        if (data['status'] != 'FRESH' or data.get('blocking') is not False
+                or not data.get('latestSession') or data.get('latestSession') != data.get('expectedSession')
+                or integrity['portfolio']['status'] != 'OK' or integrity['ledger']['status'] != 'OK'
+                or integrity['portfolio'].get('blocking') is not False or integrity['ledger'].get('blocking') is not False
+                or not checkpoint_ok):
+            return {'status': 'BLOCKED', 'detail': 'Live data or portfolio/ledger/checkpoint checks are not healthy'}
+        return {'status': 'HEALTHY', 'detail': f"Execution {status}; settled data {data.get('latestSession')}; last success {execution.get('lastSuccessfulAt')}. Independent alerts and schedule provenance are separate checks."}
+    except (ValueError, TypeError, KeyError, AttributeError):
+        return {'status': 'EVIDENCE_UNAVAILABLE', 'detail': 'Live runtime evidence is malformed, cached or incomplete'}
+
+
+def inspect_runtime(url):
+    parsed = urllib.parse.urlsplit(url)
+    if (parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password
+            or parsed.query or parsed.fragment or parsed.path != '/api/operations/health'):
+        return {'status': 'EVIDENCE_UNAVAILABLE', 'detail': 'Invalid HTTPS operational health URL'}
+    try:
+        request = urllib.request.Request(url, headers={'Accept': 'application/json', 'Cache-Control': 'no-cache',
+                                                      'User-Agent': 'nse-read-only-watchdog'})
+        try:
+            response = urllib.request.urlopen(request, timeout=30)
+        except urllib.error.HTTPError as error:
+            if error.code != 503:
+                raise
+            response = error  # DEGRADED may mean alerts unconfigured; inspect each check.
+        with response:
+            payload = response.read(512001)
+        if len(payload) > 512000:
+            raise ValueError('Oversized health response')
+        return assess_runtime(json.loads(payload), datetime.now(timezone.utc))
+    except Exception:
+        return {'status': 'EVIDENCE_UNAVAILABLE', 'detail': 'Live runtime health endpoint unavailable or invalid'}
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -279,7 +339,8 @@ def main(argv=None):
     sub = parser.add_subparsers(dest="command", required=True)
     receipt_parser = sub.add_parser("receipt")
     receipt_parser.add_argument("--output", type=Path, required=True)
-    sub.add_parser("check")
+    check_parser = sub.add_parser("check")
+    check_parser.add_argument('--runtime-url', help='Read-only operational health endpoint; never dispatches trading')
     args = parser.parse_args(argv)
     now = datetime.now(timezone.utc)
     if args.command == "receipt":
@@ -294,19 +355,25 @@ def main(argv=None):
     except (EvidenceError, KeyError, ValueError, OSError, subprocess.SubprocessError) as exc:
         error = str(exc) if isinstance(exc, EvidenceError) else "Monitoring prerequisites unavailable"
     report = summary(rows, error, scope)
+    runtime = inspect_runtime(args.runtime_url) if args.runtime_url else None
+    if runtime:
+        report += f"\n## Live execution and account health\n\n**{runtime['status']}**: {runtime['detail']}\n"
     print(report)
     if os.getenv("GITHUB_ACTIONS") == "true":
         failures = ([f"EVIDENCE_UNAVAILABLE: {error}"] if error else [
             f"{row['status']}: {row['slot']}: {row['detail']}"
             for row in rows if row["status"] not in GOOD_STATUSES
         ])
+        if runtime and runtime['status'] != 'HEALTHY':
+            failures.append(f"LIVE_RUNTIME_{runtime['status']}: {runtime['detail']}")
         for message in failures:
             escaped = message.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
             print(f"::error title=NSE scheduler health::{escaped}")
     if os.getenv("GITHUB_STEP_SUMMARY"):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as handle:
             handle.write(report)
-    return int(bool(error) or any(row["status"] not in GOOD_STATUSES for row in rows))
+    return int(bool(error) or any(row["status"] not in GOOD_STATUSES for row in rows)
+               or bool(runtime and runtime['status'] != 'HEALTHY'))
 
 
 if __name__ == "__main__":

@@ -1,5 +1,13 @@
 # Execution recovery and external monitoring
 
+The read-only GitHub watchdog checks two independent things: verified delivery
+within the 20-minute grace (including runner receipt time), and current live
+execution/data/account health. Successful workflows delivered hours late are
+reported as `LATE_DELIVERY`, and a current checkpoint cannot mask an overdue
+runtime. A manual recovery can restore live health while historical late
+deliveries remain visible failures. The watchdog fetches the public operational
+health endpoint without credentials and never dispatches trading or reads Neon.
+
 The nominal cycles remain 09:20–15:20 IST hourly and 16:05 IST post-close.
 Additional GitHub Actions schedule deliveries at 09:27 and every 20 minutes from
 09:37 through 16:17 recover the latest slot if no healthy completion covers it.

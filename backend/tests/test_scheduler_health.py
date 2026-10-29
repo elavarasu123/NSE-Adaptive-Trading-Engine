@@ -57,6 +57,7 @@ def test_schedule_utc_conversion_and_workflow_contract():
     assert "actions: read" in watchdog
     assert "DATABASE_URL" not in watchdog
     assert "run_scheduled_runtime" not in watchdog
+    assert '--runtime-url https://nse-adaptive-trading-engine.onrender.com/api/operations/health' in watchdog
 
 
 def test_watchdog_identifies_recovery_delivery_without_claiming_original_delivery():
@@ -94,7 +95,95 @@ def test_scheduled_receipt_proves_delivery_not_trading_execution():
 def test_late_previous_cron_cannot_satisfy_next_slot():
     late = run(created_at="2026-10-26T04:55:00Z")
     rows = health.assess_slots(clock(10, 47), ACTIVATED, [late], {123: receipt()})
-    assert [r["status"] for r in rows] == ["SUCCESS", "MISSING"]
+    assert [r["status"] for r in rows] == ["LATE_DELIVERY", "MISSING"]
+
+
+def test_even_successful_after_hours_delivery_is_not_healthy():
+    late = run(created_at=clock(21, 10).isoformat(), run_started_at=clock(21, 11).isoformat())
+    rows = health.assess_slots(clock(21, 30), ACTIVATED, [late], {123: receipt()})
+    assert rows[0]['status'] == 'LATE_DELIVERY'
+
+
+def runtime_health(**changes):
+    report = {'checkedAt': clock(9, 47).isoformat(),
+              'execution': {'status': 'CURRENT', 'lastSuccessfulAt': clock(9, 25).isoformat(), 'expectedCycleAt': clock(9, 20).isoformat()},
+              'data': {'status': 'FRESH', 'blocking': False, 'latestSession': '2026-10-23', 'expectedSession': '2026-10-23'},
+              'integrity': {'portfolio': {'status': 'OK', 'blocking': False}, 'ledger': {'status': 'OK', 'blocking': False}, 'checkpoint': {'status': 'MATCH', 'blocking': False}},
+              'monitoring': {'status': 'UNCONFIGURED'}, 'readyForUnattendedExecution': False}
+    report.update(changes)
+    return report
+
+
+def test_saved_healthy_delivery_cannot_mask_overdue_live_execution():
+    report = runtime_health(execution={'status': 'OVERDUE', 'recordedStatus': 'HEALTHY'})
+    assert health.assess_runtime(report, clock(9, 47))['status'] == 'BLOCKED'
+    assert health.assess_runtime(runtime_health(), clock(9, 47))['status'] == 'HEALTHY'
+
+
+@pytest.mark.parametrize('changes', [
+    {'checkedAt': clock(8, 0).isoformat()}, {'checkedAt': clock(10, 0).isoformat()},
+    {'execution': None}, {'integrity': {}}, {},
+])
+def test_missing_or_cached_health_cannot_pass(changes):
+    report = runtime_health(**changes) if changes else {}
+    assert health.assess_runtime(report, clock(9, 47))['status'] == 'EVIDENCE_UNAVAILABLE'
+
+
+def test_live_account_or_data_failure_remains_blocking():
+    report = runtime_health(data={'status': 'STALE', 'blocking': True, 'latestSession': '2026-10-22', 'expectedSession': '2026-10-23'})
+    assert health.assess_runtime(report, clock(9, 47))['status'] == 'BLOCKED'
+    report = runtime_health()
+    report['integrity']['ledger']['status'] = 'BROKEN'
+    assert health.assess_runtime(report, clock(9, 47))['status'] == 'BLOCKED'
+
+
+def test_late_runner_admission_is_not_timely_even_when_run_created_on_time():
+    rows = health.assess_slots(clock(10, 0), ACTIVATED, [run()],
+                              {123: receipt(received_at=clock(9, 50).isoformat())})
+    assert rows[0]['status'] == 'LATE_DELIVERY'
+
+
+def test_inconsistent_current_timestamp_is_blocked():
+    report = runtime_health()
+    report['execution']['lastSuccessfulAt'] = clock(8, 0).isoformat()
+    assert health.assess_runtime(report, clock(9, 47))['status'] == 'BLOCKED'
+
+
+def test_http_503_for_unconfigured_alerts_still_checks_execution(monkeypatch):
+    def open_request(request, timeout):
+        raise urllib.error.HTTPError(request.full_url, 503, 'Degraded', {},
+                                     io.BytesIO(json.dumps(runtime_health()).encode()))
+    monkeypatch.setattr(health.urllib.request, 'urlopen', open_request)
+    assessor = health.assess_runtime
+    monkeypatch.setattr(health, 'assess_runtime', lambda document, now: assessor(document, clock(9, 47)))
+    assert health.inspect_runtime('https://example.com/api/operations/health')['status'] == 'HEALTHY'
+
+
+def test_live_runtime_check_does_not_forward_github_credentials(monkeypatch):
+    monkeypatch.setenv('GH_TOKEN', 'never-forward-me')
+    def open_request(request, timeout):
+        assert not request.has_header('Authorization')
+        assert timeout == 30
+        return io.BytesIO(json.dumps(runtime_health()).encode())
+    monkeypatch.setattr(health.urllib.request, 'urlopen', open_request)
+    monkeypatch.setattr(health, 'assess_runtime', lambda document, now: {'status': 'HEALTHY', 'detail': 'checked'})
+    assert health.inspect_runtime('https://example.com/api/operations/health')['status'] == 'HEALTHY'
+    assert health.inspect_runtime('https://user:secret@example.com/api/operations/health')['status'] == 'EVIDENCE_UNAVAILABLE'
+
+
+def test_cli_fails_for_stale_runtime_even_with_successful_delivery(monkeypatch, capsys):
+    monkeypatch.setenv('GITHUB_REPOSITORY', REPOSITORY)
+    monkeypatch.setenv('DEFAULT_BRANCH', 'main')
+    monkeypatch.setenv('GH_TOKEN', 'never-print-this')
+    monkeypatch.setenv('GITHUB_ACTIONS', 'true')
+    monkeypatch.delenv('GITHUB_STEP_SUMMARY', raising=False)
+    monkeypatch.setattr(health, 'activation_time', lambda: ACTIVATED)
+    monkeypatch.setattr(health, 'check', lambda *a, **k: [{'status': 'SUCCESS', 'slot': 'test', 'detail': 'delivered'}])
+    monkeypatch.setattr(health, 'inspect_runtime', lambda url: {'status': 'BLOCKED', 'detail': 'Execution OVERDUE'})
+    assert health.main(['check', '--runtime-url', 'https://example.com/api/operations/health']) == 1
+    output = capsys.readouterr().out
+    assert 'LIVE_RUNTIME_BLOCKED' in output
+    assert 'never-print-this' not in output
 
 
 @pytest.mark.parametrize("changes, expected", [
