@@ -163,12 +163,26 @@ def test_live_runtime_check_does_not_forward_github_credentials(monkeypatch):
     monkeypatch.setenv('GH_TOKEN', 'never-forward-me')
     def open_request(request, timeout):
         assert not request.has_header('Authorization')
-        assert timeout == 30
+        assert timeout == 20
         return io.BytesIO(json.dumps(runtime_health()).encode())
     monkeypatch.setattr(health.urllib.request, 'urlopen', open_request)
     monkeypatch.setattr(health, 'assess_runtime', lambda document, now: {'status': 'HEALTHY', 'detail': 'checked'})
     assert health.inspect_runtime('https://example.com/api/operations/health')['status'] == 'HEALTHY'
     assert health.inspect_runtime('https://user:secret@example.com/api/operations/health')['status'] == 'EVIDENCE_UNAVAILABLE'
+
+
+def test_sleeping_web_process_has_one_bounded_transport_retry(monkeypatch):
+    calls = []
+    def open_request(request, timeout):
+        calls.append(timeout)
+        if len(calls) == 1:
+            raise TimeoutError('cold start')
+        return io.BytesIO(json.dumps(runtime_health()).encode())
+    monkeypatch.setattr(health.urllib.request, 'urlopen', open_request)
+    assessor = health.assess_runtime
+    monkeypatch.setattr(health, 'assess_runtime', lambda document, now: assessor(document, clock(9, 47)))
+    assert health.inspect_runtime('https://example.com/api/operations/health')['status'] == 'HEALTHY'
+    assert calls == [20, 20]
 
 
 def test_cli_fails_for_stale_runtime_even_with_successful_delivery(monkeypatch, capsys):

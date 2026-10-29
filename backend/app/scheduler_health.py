@@ -190,22 +190,31 @@ def inspect_runtime(url):
     if (parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password
             or parsed.query or parsed.fragment or parsed.path != '/api/operations/health'):
         return {'status': 'EVIDENCE_UNAVAILABLE', 'detail': 'Invalid HTTPS operational health URL'}
-    try:
-        request = urllib.request.Request(url, headers={'Accept': 'application/json', 'Cache-Control': 'no-cache',
-                                                      'User-Agent': 'nse-read-only-watchdog'})
+    for attempt in range(2):
         try:
-            response = urllib.request.urlopen(request, timeout=30)
-        except urllib.error.HTTPError as error:
-            if error.code != 503:
-                raise
-            response = error  # DEGRADED may mean alerts unconfigured; inspect each check.
-        with response:
-            payload = response.read(512001)
-        if len(payload) > 512000:
-            raise ValueError('Oversized health response')
-        return assess_runtime(json.loads(payload), datetime.now(timezone.utc))
-    except Exception:
-        return {'status': 'EVIDENCE_UNAVAILABLE', 'detail': 'Live runtime health endpoint unavailable or invalid'}
+            request = urllib.request.Request(url, headers={'Accept': 'application/json', 'Cache-Control': 'no-cache',
+                                                          'User-Agent': 'nse-read-only-watchdog'})
+            try:
+                response = urllib.request.urlopen(request, timeout=20)
+            except urllib.error.HTTPError as error:
+                if error.code != 503:
+                    raise
+                response = error  # DEGRADED may mean alerts unconfigured; inspect each check.
+            with response:
+                payload = response.read(512001)
+            if len(payload) > 512000:
+                raise ValueError('Oversized health response')
+            return assess_runtime(json.loads(payload), datetime.now(timezone.utc))
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            # A sleeping Render web process may need the first request to wake.
+            # Retry transport/5xx failures once; never retry away a real blocker.
+            if attempt == 0 and not (isinstance(error, urllib.error.HTTPError) and error.code < 500):
+                continue
+        except Exception:
+            pass
+        break
+    return {'status': 'EVIDENCE_UNAVAILABLE', 'detail': 'Live runtime health endpoint unavailable or invalid'}
+
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
