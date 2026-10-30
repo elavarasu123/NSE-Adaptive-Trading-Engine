@@ -1,0 +1,29 @@
+# PROPOSAL ONLY. This is not the root Blueprint and is not auto-applied.
+# Review hosting charges and approve the GitHub-only policy change before use.
+services:
+  - type: cron
+    name: nse-scheduled-paper-worker
+    runtime: python
+    rootDir: backend
+    schedule: "*/5 3-10 * * 1-5"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m app.paper_worker
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.15"
+      - key: WORKER_EXECUTION_ENABLED
+        value: "false"
+      - key: SHARED_STATE_BACKEND
+        value: db
+      - key: RUNTIME_SOURCE
+        value: SCHEDULED_PAPER_WORKER
+      - key: PUBLIC_DASHBOARD_READ_ONLY
+        value: "false"
+      - key: MARKET_PROVIDER
+        value: yahoo
+      - key: FORCE_RUNTIME
+        value: "false"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: DATABASE_URL
+        sync: false
